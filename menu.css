@@ -1,108 +1,174 @@
-/* === Grundstruktur für Top-Menü === */
-.menu-bar {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  background: var(--menu-bg, var(--background-color, #1a1a1a));
-  color: var(--menu-text, var(--text-color, #eee));
+/* menu.css — Topbar + Dropdowns (theme-safe, kein Layout-/Farbwechsel)
+   - Verwendet nur vorhandene CSS-Variablen (Farbentscheidungen bleiben in main.css)
+   - Dropdowns öffnen rechts, liegen immer über dem Inhalt (hoher z-index)
+   - Keine Änderung an der Topbar-Position oder Struktur
+   - Sichtbarkeit über aria-hidden, responsive Verhalten berücksichtigt
+*/
+
+/* ------------------ Variablen / Fallbacks ------------------ */
+:root {
+  --topbar-h: var(--topbar-h, 56px);
+  --menu-bg: var(--menu-bg, rgba(18,18,22,0.9));
+  --menu-bg-alt: var(--menu-bg-alt, rgba(26,26,30,0.96));
+  --menu-text: var(--menu-text, inherit);
+  --menu-muted: color-mix(in srgb, var(--menu-text) 65%, transparent 35%);
+  --menu-accent: var(--menu-accent, #8e78ff);
+  --dropdown-bg: var(--popup-bg, var(--menu-bg-alt));
+  --dropdown-radius: 10px;
+  --dropdown-shadow: 0 14px 40px rgba(0,0,0,0.45);
+  --transition-fast: 160ms ease;
+}
+
+/* ------------------ Topbar (keine Strukturänderung!) ------------------ */
+.cm-topbar,
+#site-topbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 50px;
-  z-index: 1000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  backdrop-filter: blur(6px);
+  z-index: 1200; /* Leiste bleibt über Standard-Inhalten */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-.menu-bar button {
-  background: none;
-  border: none;
-  color: inherit;
-  font: inherit;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-.menu-bar button:hover,
-.menu-bar button:focus {
-  background: rgba(255,255,255,0.1);
-}
-
-/* === Drop-Down Grundlayout === */
-.dropdown {
-  position: relative;
-}
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;                       /* rechtsbündig öffnen */
-  min-width: 220px;
-  background: var(--dropdown-bg, var(--background-alt, #2a2a2a));
-  color: var(--dropdown-text, var(--text-color, #fff));
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  border-radius: 6px;
-  z-index: 2000;
-  overflow: hidden;
-}
-.dropdown.open .dropdown-menu {
-  display: block;
-  animation: dropdownFade 0.15s ease-out;
-}
-
-@keyframes dropdownFade {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* === Drop-Down Inhalt === */
-.dropdown-menu h4 {
-  margin: 0;
-  padding: 0.7rem 1rem;
-  font-size: 0.9rem;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.05);
-}
-.dropdown-menu button,
-.dropdown-menu a {
-  display: block;
+/* innere container (falls verwendet) */
+.cm-topbar-inner {
   width: 100%;
-  text-align: left;
-  padding: 0.6rem 1rem;
-  background: none;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+/* Links / Buttons in der Leiste — Farben unverändert (ziehen aus main.css) */
+.cm-home,
+.cm-btn {
+  color: var(--menu-text);
+  background: transparent;
   border: none;
-  color: inherit;
+  padding: 8px 10px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background var(--transition-fast), transform var(--transition-fast), color var(--transition-fast);
+}
+.cm-home:hover,
+.cm-btn:hover { background: rgba(255,255,255,0.03); color: var(--menu-text); transform: translateY(-1px); }
+.cm-page-title { color: var(--menu-muted); font-weight:600; font-size:0.95rem; }
+
+/* ------------------ Dropdown Grundregeln ------------------ */
+/* Die JS-Logik benutzt aria-hidden, wir folgen dem: hidden -> display:none; false -> visible */
+.cm-dropdown,
+.cm-popover,
+.cm-toc-dropdown { 
+  position: fixed;               /* fixed damit stacking contexts außen vor bleiben */
+  display: none;                 /* default: versteckt */
+  background: var(--dropdown-bg);
+  color: var(--menu-text);
+  border-radius: var(--dropdown-radius);
+  box-shadow: var(--dropdown-shadow);
+  border: 1px solid rgba(255,255,255,0.04);
+  min-width: 200px;
+  max-width: 420px;
+  overflow: hidden;
+  z-index: 99999;                /* sehr hoch; passt über alles */
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* sichtbar wenn JS aria-hidden="false" setzt */
+.cm-dropdown[aria-hidden="false"],
+.cm-popover[aria-hidden="false"],
+.cm-toc-dropdown[aria-hidden="false"] {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Einfache Innere-Container */
+.cm-dropdown .cm-dropdown-inner,
+.cm-popover .cm-dropdown-inner,
+.cm-toc-dropdown .cm-dropdown-inner {
+  padding: 8px 0;
+  color: var(--menu-text);
+}
+
+/* Close button (sichtbar, dezent) */
+.cm-dropdown-close,
+.cm-popover-close {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  background: transparent;
+  border: none;
+  color: var(--menu-muted);
+  cursor: pointer;
+  font-size: 1.05rem;
+  padding: 4px;
+}
+
+/* Elemente in Dropdown */
+.cm-popbtn, .cm-dropdown a, .cm-dropdown button {
+  display:block;
+  width:100%;
+  text-align:left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--menu-text);
   text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
 }
-.dropdown-menu button:hover,
-.dropdown-menu a:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-/* === Inhaltsverzeichnis-Liste === */
-.section-list {
-  max-height: 200px;
-  overflow-y: auto;
-}
-.section-list::-webkit-scrollbar {
-  width: 6px;
-}
-.section-list::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.3);
-  border-radius: 3px;
+.cm-popbtn:hover, .cm-dropdown a:hover, .cm-dropdown button:hover {
+  background: rgba(255,255,255,0.03);
 }
 
-/* === Kleinere Bildschirme === */
-@media (max-width: 700px) {
-  .menu-bar {
-    flex-wrap: wrap;
-    height: auto;
-  }
-  .dropdown-menu {
-    right: 10px;
-    min-width: 180px;
+/* Inhaltsverzeichnis spezifisch */
+.cm-toc-inner, .cm-toc-inner a { color: var(--menu-text); }
+.cm-toc-inner a.active { font-weight:700; color: var(--menu-accent); }
+
+/* responsive: schränke Breite auf kleinen Bildschirmen */
+@media (max-width: 780px) {
+  .cm-dropdown, .cm-popover, .cm-toc-dropdown {
+    left: 8px !important;
+    right: 8px !important;
+    width: calc(100% - 16px);
+    min-width: unset;
+    max-width: none;
+    top: calc(var(--topbar-h) + 8px) !important; /* immer unter der Topbar */
   }
 }
+
+/* ------------------ Positionierung: rechtsbündig Öffnen ------------------ */
+/* JS setzt inline style top/right; dieses CSS gibt die optische Basis.
+   Hier nichts erzwingen, damit JS volle Kontrolle hat, aber wir definieren sinnvolle defaults */
+.cm-dropdown { right: 8px; top: calc(var(--topbar-h) + 8px); }
+
+/* ------------------ Accessibility / focus ------------------ */
+.cm-popbtn:focus, .cm-dropdown-close:focus, .cm-btn:focus, .cm-home:focus {
+  outline: 2px solid color-mix(in srgb, var(--menu-accent) 55%, transparent 45%);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ------------------ Minimal scrollbar styling im Dropdown ------------------ */
+.cm-dropdown::-webkit-scrollbar, .cm-toc-inner::-webkit-scrollbar { width: 8px; }
+.cm-dropdown::-webkit-scrollbar-thumb, .cm-toc-inner::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 6px; }
+
+/* ------------------ Hinweise ------------------
+   - Dieses CSS ändert NICHT die Struktur der Topbar oder die Farbentscheidungen.
+   - Farben werden ausschließlich aus CSS-Variablen bezogen; passe sie in main.css an.
+   - Falls ein Dropdown trotzdem seltsam aussieht, lade bitte einen Screenshot oder
+     nenne mir die genaue Stelle (z.B. "Account-Dropdown: Text links verschoben"), dann passe ich punktgenau an.
+*/
