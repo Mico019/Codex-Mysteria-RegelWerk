@@ -1,0 +1,70 @@
+/* home.css — spezifische Styles für home.html; nutzt die Variablen aus style.css */
+
+.home-container{max-width:1100px;padding:28px}
+.welcome-card{
+  background:var(--surface);
+  padding:22px;
+  border-radius:14px;
+  box-shadow: 0 10px 40px rgba(2,6,23,0.6);
+  color:var(--muted);
+}
+.welcome-card h2{margin-top:0;color:var(--accent-2);font-size:20px}
+.lead{font-size:15px;margin-top:8px;color:var(--muted)}
+.meta{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+.meta div{font-size:14px;color:var(--muted)}
+
+.cta-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  margin-top:18px;
+}
+.card{
+  padding:14px;
+  border-radius:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border:1px solid rgba(255,255,255,0.03);
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:600;
+  color:var(--muted);
+}
+.link-card{cursor:pointer;text-decoration:none; color:inherit}
+.card:hover{transform:translateY(-4px); transition:transform 180ms ease}
+
+/* top menu / user block */
+.top-menu{display:flex;align-items:center;gap:12px;justify-content:space-between;width:100%;max-width:1100px;padding:12px 20px}
+.menu-placeholder{display:flex;align-items:center;gap:10px}
+.user-block{display:flex;align-items:center;gap:10px}
+.user-name{font-weight:700;color:var(--accent-2)}
+.user-role{font-size:12px;color:var(--muted);display:block}
+
+/* visibility helpers — werden gesteuert durch body.role-... Klassen */
+.role-player .admin-only,
+.role-player .dm-only,
+.role-dm .admin-only {
+  display:none !important;
+}
+
+/* Modal (Menu Guide) */
+.modal{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(2,6,23,0.45);backdrop-filter:blur(4px);
+  opacity:0;visibility:hidden;transition:opacity 160ms ease;
+  z-index:1200;
+}
+.modal[aria-hidden="false"]{opacity:1;visibility:visible}
+.modal-panel{
+  width:min(680px,94%);background:var(--surface);padding:20px;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,0.6);
+}
+.modal-close{position:absolute;right:18px;top:14px;background:transparent;border:none;color:var(--muted);font-size:26px;cursor:pointer}
+.modal-body{margin-top:6px;color:var(--muted)}
+.modal-actions{display:flex;justify-content:flex-end;margin-top:14px}
+
+/* responsive */
+@media (max-width:720px){
+  .meta{flex-direction:column;gap:6px}
+  .top-menu{flex-direction:column;align-items:flex-start;gap:8px}
+}
