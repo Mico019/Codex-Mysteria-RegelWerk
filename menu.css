@@ -172,3 +172,47 @@
    - Falls ein Dropdown trotzdem seltsam aussieht, lade bitte einen Screenshot oder
      nenne mir die genaue Stelle (z.B. "Account-Dropdown: Text links verschoben"), dann passe ich punktgenau an.
 */
+/* --- Horizontale Topbar-Ausrichtung (alle Buttons nebeneinander) --- */
+
+/* Container für Hauptmenüeinträge */
+.cm-topbar-inner {
+  display: flex;
+  flex-direction: row;          /* nebeneinander statt Spalte */
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+/* Bereich mit den Menüpunkten */
+.cm-menu-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Jeder Menübutton gleich groß und gleich ausgerichtet */
+.cm-btn,
+.cm-home,
+.cm-popbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+
+/* Optional: auf schmalen Screens horizontal scrollen statt umbrechen */
+@media (max-width: 700px) {
+  .cm-menu-section {
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox: keine hässliche Scrollbar */
+  }
+  .cm-menu-section::-webkit-scrollbar {
+    display: none; /* Chrome: keine Scrollbar sichtbar */
+  }
+}
