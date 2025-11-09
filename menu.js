@@ -357,62 +357,53 @@
     if (adminCtrl) adminCtrl.style.display = (realSessionRole() === 'admin') ? '' : 'none';
   }
 
-    /* --------- Init wiring (buttons -> dropdowns) --------- */
+  /* --------- Init wiring (buttons -> dropdowns) --------- */
   function initDropdowns() {
     // ensure containers exist (reuse ids used in your HTML)
-    const toc = ensureDropdown('toc-list');
+    const toc = ensureDropdown('toc-list'); // your HTML may already have it; ensureDropdown will return existing
     const accountDrop = document.getElementById('account-popover') || ensureDropdown('account-popover');
     const adminDrop = document.getElementById('admin-popover') || ensureDropdown('admin-popover');
     const guideDrop = ensureDropdown('dropdown-guide');
     const settingsDrop = ensureDropdown('dropdown-settings');
 
-    // build content (nur befüllen, nicht öffnen!)
-    buildTOC();
+    // build content
+    buildTOC();                 // fills toc-list
     buildAccountDropdown(accountDrop);
     buildAdminDropdown(adminDrop);
     buildGuideDropdown(guideDrop);
     buildSettingsDropdown(settingsDrop);
 
-    // **ALLE Dropdowns initial sicher geschlossen**
-    [toc, accountDrop, adminDrop, guideDrop, settingsDrop].forEach(d => hideDropdown(d));
+    // wire toggles (buttons should have aria-controls pointing to container id)
+    const btnTOC = document.getElementById('toc-toggle');
+    if (btnTOC) { btnTOC.setAttribute('aria-controls','toc-list'); on(btnTOC, 'click', () => { showDropdown(toc, btnTOC); }); }
 
-    // wire toggles
-    const bindToggle = (btnId, dropEl) => {
-      const btn = document.getElementById(btnId);
-      if (!btn || !dropEl) return;
-      btn.setAttribute('aria-controls', dropEl.id);
-      on(btn, 'click', (ev) => {
-        ev.stopPropagation();
-        const isOpen = dropEl.getAttribute('aria-hidden') === 'false';
-        closeAllDropdowns();
-        if (!isOpen) showDropdown(dropEl, btn);
-      });
-    };
+    const btnAccount = document.getElementById('account-toggle');
+    if (btnAccount) { btnAccount.setAttribute('aria-controls', accountDrop.id); on(btnAccount, 'click', () => { showDropdown(accountDrop, btnAccount); }); }
 
-    bindToggle('toc-toggle', toc);
-    bindToggle('account-toggle', accountDrop);
-    bindToggle('admin-view-btn', adminDrop);
-    bindToggle('menu-guide-btn', guideDrop);
-    bindToggle('settings-btn', settingsDrop);
+    const btnAdmin = document.getElementById('admin-view-btn');
+    if (btnAdmin) { btnAdmin.setAttribute('aria-controls', adminDrop.id); on(btnAdmin, 'click', () => { showDropdown(adminDrop, btnAdmin); }); }
 
-    // Add close buttons if missing
-    ['dropdown-guide','dropdown-settings','account-popover','admin-popover','toc-list'].forEach(id => {
+    const btnGuide = document.getElementById('menu-guide-btn');
+    if (btnGuide) { btnGuide.setAttribute('aria-controls', guideDrop.id); on(btnGuide, 'click', () => { showDropdown(guideDrop, btnGuide); }); }
+
+    const btnSettings = document.getElementById('settings-btn');
+    if (btnSettings) { btnSettings.setAttribute('aria-controls', settingsDrop.id); on(btnSettings, 'click', () => { showDropdown(settingsDrop, btnSettings); }); }
+
+    // add close buttons inside each created dropdown for direct click (if not already)
+    ['dropdown-guide','dropdown-settings','account-popover','admin-popover','toc-list','dropdown-settings'].forEach(id => {
       const d = document.getElementById(id);
       if (!d) return;
       if (!d.querySelector('.cm-dropdown-close')) {
         const btn = document.createElement('button');
         btn.className = 'cm-dropdown-close';
         btn.textContent = '×';
-        Object.assign(btn.style, {
-          position: 'absolute',
-          top: '6px',
-          right: '8px',
-          background: 'transparent',
-          border: 'none',
-          color: 'inherit',
-          cursor: 'pointer',
-          fontSize: '1.1rem'
-        });
+        btn.style.position = 'absolute';
+        btn.style.top = '6px';
+        btn.style.right = '8px';
+        btn.style.background = 'transparent';
+        btn.style.border = 'none';
+        btn.style.color = 'inherit';
+        btn.style.cursor = 'pointer';
         btn.addEventListener('click', () => hideDropdown(d));
         d.style.position = d.style.position || 'fixed';
         d.style.zIndex = d.style.zIndex || '99999';
@@ -420,44 +411,34 @@
       }
     });
 
+    // refresh UI initially
     refreshHomeAndAccount();
   }
 
   /* --------- Bootstrapping (DOM ready) --------- */
   function bootstrap() {
+    // wait DOM ready
     const start = () => {
       const topbar = document.getElementById('site-topbar') || document.getElementById('main-header');
       if (!topbar) return false;
       initDropdowns();
-
       // reposition open dropdowns on resize/scroll
-      const repositionOpen = () => {
-        Array.from(document.querySelectorAll('.cm-dropdown')).forEach(d => {
-          if (d.getAttribute('aria-hidden') === 'false') {
-            const toggle = document.querySelector(`[aria-controls="${d.id}"]`);
-            if (toggle) showDropdown(d, toggle);
-          }
-        });
-      };
-      window.addEventListener('resize', repositionOpen);
-      window.addEventListener('scroll', repositionOpen, true);
-
-      // update when impersonation changes (cross-tab)
-      window.addEventListener('storage', (ev) => {
-        if (ev.key === IMPERSONATE_KEY || ev.key === SESSION_KEY) {
-          refreshHomeAndAccount();
-          buildTOC();
-        }
-      });
-      window.addEventListener('codex:impersonation-changed', () => {
-        refreshHomeAndAccount();
-        buildTOC();
-      });
-
+      window.addEventListener('resize', () => { Array.from(document.querySelectorAll('.cm-dropdown')).forEach(d => { if (d.getAttribute('aria-hidden') === 'false') { const toggle = document.querySelector(`[aria-controls="${d.id}"]`); if (toggle) showDropdown(d, toggle); } }); });
+      window.addEventListener('scroll', () => { Array.from(document.querySelectorAll('.cm-dropdown')).forEach(d => { if (d.getAttribute('aria-hidden') === 'false') { const toggle = document.querySelector(`[aria-controls="${d.id}"]`); if (toggle) showDropdown(d, toggle); } }); }, true);
+      // update when impersonation changes (other tab)
+      window.addEventListener('storage', (ev) => { if (ev.key === IMPERSONATE_KEY || ev.key === SESSION_KEY) { refreshHomeAndAccount(); buildTOC(); }});
+      window.addEventListener('codex:impersonation-changed', () => { refreshHomeAndAccount(); buildTOC(); });
       return true;
     };
-
-    if (document.readyState === 'loading')
-      document.addEventListener('DOMContentLoaded', () => { if (!start()) setTimeout(start, 200); });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { if (!start()) setTimeout(start, 200); });
     else if (!start()) setTimeout(start, 200);
   }
+
+  // expose small helpers
+  window.CodexMysteria = window.CodexMysteria || {};
+  window.CodexMysteria.clearImpersonation = clearImpersonation;
+  window.CodexMysteria.setImpersonation = setImpersonation;
+  window.CodexMysteria.menuRefresh = () => { refreshHomeAndAccount(); buildTOC(); };
+
+  bootstrap();
+})();
