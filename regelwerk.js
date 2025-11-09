@@ -1,11 +1,12 @@
-/* regelwerk.js — Kapitel-Liste + Suche + Detail-Toggle
-   - benutzt vorhandene Kapitel-Daten (unten)
-   - rendert Karten, Detail-Toggle zeigt Unterkapitel & Links
-   - Suche zeigt Vorschläge; Klick springt zum Kapitel
-   - Keine globalen Stilveränderungen
+/* regelwerk.js
+   - Rendert Kapitelliste
+   - Details / Aufklappen (ein offen => andere schließen)
+   - Suche mit Vorschlägen + keyboard navigation
+   - Nutzt nur Elemente im Regelwerk-Container (keine globalen Style-Änderungen)
 */
 
 document.addEventListener('DOMContentLoaded', () => {
+  /* ---------------- Daten (einfach editierbar) ---------------- */
   const chapters = [
     {
       id: 'einleitung',
@@ -17,14 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
     {
       id: 'kampfregeln',
       title: "Kampfregeln",
-      desc: "Wie Kämpfe ablaufen: Initiative, Angriffe, Schaden, Spezialregeln.",
+      desc: "Wie Kämpfe ablaufen: Initiative, Angriffe, Schaden, Sonderregeln.",
       subs: ["Initiative", "Angriff & Verteidigung", "Schaden & Zustände", "Deckung"],
       link: "kampfregeln.html"
     },
     {
       id: 'magie',
       title: "Magie & Zauberei",
-      desc: "Regeln zur Magie, Zauberlisten und Magiesystem.",
+      desc: "Regeln zur Magie, Zauberlisten und das Magiesystem.",
       subs: ["Zauberklassen", "Rituale", "Schule der Magie"],
       link: "magie.html"
     },
@@ -44,127 +45,199 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
-  const container = document.getElementById('chapter-list');
-  const searchInput = document.getElementById('rule-search');
-  const suggestions = document.getElementById('search-suggestions');
+  /* ---------------- Elemente ---------------- */
+  const listEl = document.getElementById('chapter-list');
+  const searchInput = document.getElementById('regelwerk-search');
+  const sugBox = document.getElementById('regelwerk-suggestions');
 
-  // Render-Funktion: Karten mit Detail-Toggle
-  function renderChapters(list) {
-    container.innerHTML = '';
-    list.forEach((ch, i) => {
-      const card = document.createElement('article');
-      card.className = 'chapter-card';
-      card.dataset.chapterId = ch.id;
+  /* ---------------- Utilities ---------------- */
+  const escHtml = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const slug = s => String(s).toLowerCase().replace(/\s+/g,'-').replace(/[^\w\-]/g,'');
 
-      card.innerHTML = `
-        <div class="chapter-header">
-          <div class="chapter-title"><a href="${ch.link}">${escapeHtml(ch.title)}</a></div>
-          <div class="chapter-actions">
-            <button class="detail-toggle" data-idx="${i}" aria-expanded="false">Details ▾</button>
-            <a class="open-chapter" href="${ch.link}">Öffnen</a>
-          </div>
-        </div>
-        <div class="chapter-desc">${escapeHtml(ch.desc)}</div>
-        <div class="chapter-details" id="details-${i}" aria-hidden="true">
-          <div class="chapter-details-intro" style="margin-bottom:8px;">Unterkapitel:</div>
-          <ul>
-            ${ch.subs.map(s => `<li><a href="${ch.link}#${slug(s)}">${escapeHtml(s)}</a></li>`).join('')}
-          </ul>
-          <div style="margin-top:10px;"><a href="${ch.link}">Zum Kapitel (ganze Seite)</a></div>
-        </div>
+  /* ---------------- Rendering ---------------- */
+  function renderChapters() {
+    listEl.innerHTML = '';
+    chapters.forEach(ch => {
+      // Build details-like structure: details semantics but styled as .chapter card
+      const details = document.createElement('details');
+      details.className = 'chapter';
+      details.id = `chapter-${ch.id}`;
+      details.setAttribute('data-chapter', ch.id);
+
+      const summary = document.createElement('summary');
+      summary.innerHTML = escHtml(ch.title);
+      summary.tabIndex = 0; // make focusable
+
+      const content = document.createElement('div');
+      content.className = 'chapter-content';
+      content.innerHTML = `
+        <p class="chapter-desc">${escHtml(ch.desc)}</p>
+        <ul class="subsection-list">
+          ${ch.subs.map(s => `<li><a href="${ch.link}#${slug(s)}">${escHtml(s)}</a></li>`).join('')}
+        </ul>
+        <div style="margin-top:10px;"><a href="${ch.link}" class="open-chapter">Kapitel öffnen</a></div>
       `;
 
-      // detail button: toggle
-      const btn = card.querySelector('.detail-toggle');
-      const details = card.querySelector('.chapter-details');
-      btn.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        const open = details.getAttribute('aria-hidden') === 'false';
-        if (open) {
-          details.setAttribute('aria-hidden','true');
-          btn.setAttribute('aria-expanded','false');
-          btn.textContent = 'Details ▾';
-        } else {
-          details.setAttribute('aria-hidden','false');
-          btn.setAttribute('aria-expanded','true');
-          btn.textContent = 'Details ▴';
+      // when opening a chapter, close others (keeps UI tidy)
+      details.addEventListener('toggle', () => {
+        if (details.open) {
+          // close all other details
+          document.querySelectorAll('.chapter').forEach(d => { if (d !== details) d.open = false; });
+          // ensure details content is visible (scroll if necessary)
+          setTimeout(() => {
+            details.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 120);
         }
       });
 
-      // optional: card click (nicht auf Buttons/links) navigiert
-      card.addEventListener('click', (ev) => {
-        const isAction = ev.target.closest('.detail-toggle') || ev.target.closest('.open-chapter') || ev.target.closest('a');
-        if (!isAction) window.location.href = ch.link;
-      });
+      // allow clicking the summary to toggle (native), nothing more needed
+      details.appendChild(summary);
+      details.appendChild(content);
 
-      container.appendChild(card);
+      listEl.appendChild(details);
     });
   }
 
-  // Utility
-  function slug(s) { return String(s).toLowerCase().replace(/\s+/g,'-').replace(/[^\w\-]/g,''); }
-  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-  // Suche / Vorschläge (einfach, case-insensitive)
-  function gatherSearchItems() {
-    // returns list of {label, chapterLink}
-    const items = [];
+  /* ---------------- Search index ---------------- */
+  const searchIndex = [];
+  (function buildIndex() {
     chapters.forEach(ch => {
-      items.push({ label: ch.title, link: ch.link });
-      ch.subs.forEach(sub => items.push({ label: `${ch.title} › ${sub}`, link: `${ch.link}#${slug(sub)}` }));
+      searchIndex.push({ label: ch.title, link: ch.link, chapterId: ch.id, type: 'chapter' });
+      ch.subs.forEach(sub => searchIndex.push({ label: `${ch.title} › ${sub}`, link: `${ch.link}#${slug(sub)}`, chapterId: ch.id, type: 'sub' }));
     });
-    return items;
-  }
-  const allItems = gatherSearchItems();
+  })();
 
-  function updateSuggestions(value) {
-    const q = (value || '').trim().toLowerCase();
-    if (!q) { suggestions.style.display = 'none'; suggestions.innerHTML = ''; return; }
-
-    // simple substring match; keep order: exact title matches first
-    const matches = allItems
-      .map(it => ({ it, score: scoreQuery(it.label.toLowerCase(), q) }))
-      .filter(x => x.score > 0)
-      .sort((a,b) => b.score - a.score)   // higher score first
-      .map(x => x.it);
-
-    if (!matches.length) { suggestions.style.display = 'none'; suggestions.innerHTML = ''; return; }
-
-    suggestions.innerHTML = matches.slice(0,10).map(m => `<li data-link="${m.link}">${escapeHtml(m.label)}</li>`).join('');
-    suggestions.style.display = 'block';
-  }
-
-  // Scoring: simple fuzzy-ish scoring: exact startsWith > contains > parts match
-  function scoreQuery(text, q) {
+  /* ---------------- Scoring (fuzzy-ish) ---------------- */
+  function score(text, q) {
+    text = text.toLowerCase();
+    q = q.toLowerCase();
     if (text === q) return 100;
     if (text.startsWith(q)) return 80;
-    if (text.includes(q)) return 40 + (q.split(' ').length);
-    // partial token match
-    const qTokens = q.split(/\s+/).filter(Boolean);
+    if (text.includes(q)) return 50;
+    // token matches
+    const tokens = q.split(/\s+/).filter(Boolean);
     let hits = 0;
-    qTokens.forEach(t => { if (text.includes(t)) hits++; });
-    return hits ? 10 * hits : 0;
+    tokens.forEach(t => { if (text.includes(t)) hits++; });
+    return hits ? hits * 10 : 0;
   }
 
-  // suggestion click (delegation)
-  suggestions.addEventListener('click', (ev) => {
+  /* ---------------- Suggestions UI ---------------- */
+  let activeIndex = -1;
+  function showSuggestions(list) {
+    if (!list || !list.length) { sugBox.style.display = 'none'; sugBox.innerHTML = ''; return; }
+    sugBox.innerHTML = list.map((it, i) => `<li role="option" data-index="${i}" data-link="${escHtml(it.link)}">${escHtml(it.label)}</li>`).join('');
+    sugBox.style.display = 'block';
+    activeIndex = -1;
+  }
+
+  function hideSuggestions() {
+    sugBox.style.display = 'none';
+    sugBox.innerHTML = '';
+    activeIndex = -1;
+  }
+
+  // keyboard navigation within suggestions
+  function focusSuggestion(idx) {
+    const items = Array.from(sugBox.querySelectorAll('li'));
+    items.forEach(it => it.classList.remove('active'));
+    if (idx >= 0 && idx < items.length) {
+      items[idx].classList.add('active');
+      items[idx].scrollIntoView({ block: 'nearest' });
+      activeIndex = idx;
+    } else activeIndex = -1;
+  }
+
+  /* ---------------- Query / debounce ---------------- */
+  let debounceTimer = null;
+  function onQuery(q) {
+    if (!q || !q.trim()) { hideSuggestions(); return; }
+    const scores = searchIndex.map(it => ({ it, score: score(it.label, q) })).filter(x => x.score > 0);
+    if (!scores.length) { hideSuggestions(); return; }
+    scores.sort((a,b) => b.score - a.score);
+    const matches = scores.slice(0, 12).map(s => s.it);
+    showSuggestions(matches);
+  }
+  function debounceQuery(q) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => onQuery(q), 120);
+  }
+
+  /* ---------------- Events ---------------- */
+  searchInput.addEventListener('input', e => {
+    debounceQuery(e.target.value);
+  });
+
+  // keyboard: arrow up/down + Enter + Esc
+  searchInput.addEventListener('keydown', (e) => {
+    const isVisible = sugBox.style.display === 'block';
+    if (!isVisible) return;
+    const items = Array.from(sugBox.querySelectorAll('li'));
+    if (!items.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const next = (activeIndex + 1) % items.length;
+      focusSuggestion(next);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prev = activeIndex <= 0 ? items.length - 1 : activeIndex - 1;
+      focusSuggestion(prev);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const idx = activeIndex >= 0 ? activeIndex : 0;
+      const li = items[idx];
+      if (li) navigateSuggestion(li);
+    } else if (e.key === 'Escape') {
+      hideSuggestions();
+    }
+  });
+
+  // click on suggestion
+  sugBox.addEventListener('click', (ev) => {
     const li = ev.target.closest('li');
     if (!li) return;
+    navigateSuggestion(li);
+  });
+
+  function navigateSuggestion(li) {
     const link = li.dataset.link;
-    if (link) window.location.href = link;
-  });
+    if (!link) { hideSuggestions(); return; }
+    // if the link points to a chapter-sub anchor on same page, open that chapter first then navigate
+    const urlParts = link.split('#');
+    const page = urlParts[0];
+    const anchor = urlParts[1] || null;
 
-  // input events
-  searchInput.addEventListener('input', (e) => updateSuggestions(e.target.value));
-  searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { suggestions.style.display = 'none'; }
-  });
+    // find if chapter exists in our chapters list for the target page
+    const ch = chapters.find(c => c.link === page || link.startsWith(c.link));
+    if (ch) {
+      // open the chapter details
+      const details = document.getElementById(`chapter-${ch.id}`);
+      if (details) {
+        details.open = true;
+        // if specified anchor, scroll to the anchor after a short delay
+        setTimeout(() => {
+          if (anchor) {
+            // look for anchor in document; if not present (because chapter page different), navigate
+            const target = document.querySelector(`#${anchor}`) || document.querySelector(`a[name="${anchor}"]`);
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            else window.location.href = link;
+          } else {
+            details.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 150);
+        hideSuggestions();
+        searchInput.blur();
+        return;
+      }
+    }
+    // fallback: navigate to link
+    window.location.href = link;
+  }
 
-  // click outside suggestions: hide
+  // clicks outside search area hide suggestions
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-container')) suggestions.style.display = 'none';
+    if (!e.target.closest('.regelwerk-search')) hideSuggestions();
   });
 
-  // initial render
-  renderChapters(chapters);
+  /* ---------------- Initial render ---------------- */
+  renderChapters();
 });
