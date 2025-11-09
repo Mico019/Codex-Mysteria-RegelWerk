@@ -1,183 +1,96 @@
-/* menu.css — dezente Top-Leiste, unaufdringlich, orientiert sich am Seiten-Hintergrund */
-
-/* Farben und Variablen: nutzt vorhandene CSS-Variablen aus style.css, Fallbacks */
-:root{
-  --cm-bg: rgba(255,255,255,0.02);
-  --cm-fg: #e8eef8;
-  --cm-border: rgba(255,255,255,0.04);
-  --cm-accent: rgba(122,95,255,0.95);
-  --cm-radius: 10px;
-  --cm-height: 56px;
-  --cm-transition: 180ms ease;
-  --cm-muted: rgba(232,238,248,0.75);
-}
-
-/* Falls global theme-variablen vorhanden sind, benutze sie (sanfte Übernahme) */
-:root[data-theme="light"]{
-  --cm-bg: rgba(0,0,0,0.03);
-  --cm-fg: #0b1220;
-  --cm-border: rgba(0,0,0,0.06);
-  --cm-accent: rgba(60,60,200,0.95);
-}
-
-:root[data-theme="fantasy"]{
-  --cm-bg: rgba(20,6,30,0.55);
-  --cm-fg: #f2eaff;
-  --cm-border: rgba(120,60,150,0.12);
-  --cm-accent: rgba(192,120,255,0.95);
-}
-
-/* Topbar Grund */
-.cm-topbar {
+/* Oberes Menü fixiert */
+#topMenu {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  height: var(--cm-height);
-  display: flex;
-  align-items: center;
-  z-index: 1200;
-  backdrop-filter: blur(6px);
-  background: linear-gradient(180deg, var(--cm-bg), rgba(0,0,0,0.02));
-  border-bottom: 1px solid var(--cm-border);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-}
-
-/* Innenlayout */
-.cm-topbar-inner {
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
+  background: rgba(25, 25, 35, 0.9);
+  backdrop-filter: blur(6px);
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.menu-container {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
-  gap: 12px;
-}
-
-/* Links/Mitte/Rechts */
-.cm-left, .cm-center, .cm-right {
-  display: flex;
   align-items: center;
-  gap: 12px;
+  padding: 8px 20px;
 }
 
-.cm-left { flex: 0 0 auto; }
-.cm-center { flex: 1 1 auto; justify-content: center; text-align: center; }
-.cm-right { flex: 0 0 auto; }
-
-/* Home Button (unaufdringlich) */
-.cm-home {
-  color: var(--cm-fg);
-  text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: background var(--cm-transition), color var(--cm-transition);
-}
-.cm-home:hover {
-  background: rgba(0,0,0,0.06);
-}
-
-/* Page title (zentriert, dezent) */
-.cm-page-title {
-  font-weight: 600;
-  color: var(--cm-muted);
-  font-size: 0.98rem;
-}
-
-/* Buttons / Controls */
-.cm-btn {
+.menu-container button {
   background: transparent;
   border: none;
-  color: var(--cm-fg);
-  padding: 8px 10px;
-  border-radius: 8px;
+  color: inherit;
+  font-size: 1rem;
+  margin: 0 8px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background var(--cm-transition), color var(--cm-transition);
-}
-.cm-btn:hover {
-  background: rgba(0,0,0,0.06);
+  transition: color 0.3s, transform 0.2s;
 }
 
-/* Controls group spacing */
-.cm-control {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
+.menu-container button:hover {
+  color: #ffd700;
+  transform: scale(1.1);
 }
 
-/* Popover (TOC, Account, Admin) */
-.cm-popover,
-.cm-toc-dropdown {
-  position: absolute;
-  top: calc(var(--cm-height) + 8px);
-  right: 0;
-  min-width: 220px;
-  max-width: 420px;
-  background: inherit;
-  backdrop-filter: blur(6px);
-  border: 1px solid var(--cm-border);
-  padding: 10px;
-  border-radius: var(--cm-radius);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+/* Popup Fenster */
+.popup {
   display: none;
-  color: var(--cm-fg);
-  z-index: 9999;
-}
-.cm-popover[aria-hidden="false"],
-.cm-toc-dropdown[aria-hidden="false"] {
-  display: block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(35, 35, 50, 0.95);
+  border: 2px solid #888;
+  border-radius: 8px;
+  padding: 20px;
+  z-index: 2000;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
-/* Popover content elements */
-.cm-popover button,
-.cm-popover a {
-  width: 100%;
-  text-align: left;
-  background: none;
+.popup-content {
+  color: #f0f0f0;
+  text-align: center;
+}
+
+.close-popup {
+  margin-top: 15px;
+  background: #555;
   border: none;
-  padding: 8px 6px;
-  border-radius: 6px;
-  color: var(--cm-fg);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.close-popup:hover {
+  background: #777;
+}
+
+/* Einstellungen Buttons */
+.theme-btn {
+  background: #444;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  margin: 5px;
+  border-radius: 4px;
   cursor: pointer;
 }
-.cm-popover button:hover,
-.cm-popover a:hover {
-  background: rgba(0,0,0,0.05);
+
+.theme-btn:hover {
+  background: #666;
 }
 
-/* TOC list styling (simple) */
-.cm-toc-dropdown a {
-  display: block;
-  padding: 6px 6px;
-  color: var(--cm-fg);
-  text-decoration: none;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  font-size: 0.95rem;
-}
-.cm-toc-dropdown a:hover { background: rgba(0,0,0,0.04); }
-
-/* Account popover inner layout */
-.account-control #account-username {
-  margin-right: 6px;
-  color: var(--cm-fg);
-  font-weight: 600;
+/* Admin-spezifisch */
+.admin-only {
+  display: none;
 }
 
-/* Admin control is hidden by default; menu.js will show it */
-.admin-control { display: none; }
-
-/* Small screens: compress, keep topbar only */
-@media (max-width: 720px) {
-  .cm-page-title { display: none; }
-  .cm-toc-dropdown { right: 8px; left: 8px; }
-  .cm-topbar-inner { padding: 0 10px; }
+/* Sichtbarkeit wenn Admin */
+body.admin .admin-only {
+  display: inline-block;
 }
-
-/* Keep the topbar non-intrusive — content should start below it.
-   If your pages still have old headers, you can hide them once menu is active. */
-body { padding-top: var(--cm-height); }
