@@ -1,31 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Regelwerk – Codex Mystica</title>
-  <link rel="stylesheet" href="main.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Regelwerk — Codex Mysteria</title>
+
+  <!-- globale Theme + Menü + regelwerk-spezifisches CSS -->
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="menu.css">
   <link rel="stylesheet" href="regelwerk.css">
-  <script src="script.js" defer></script>
+
+  <!-- Menü-Script (falls bereits vorhanden) -->
   <script src="menu.js" defer></script>
+
+  <!-- Regelwerk-Logik -->
   <script src="regelwerk.js" defer></script>
 </head>
 <body>
-  <header id="main-header"></header>
+  <!-- Header / Topbar: dein Menü-Snippet (menu.js erwartet site-topbar / main-header) -->
+  <!-- Falls du die Menü-HTML als eigenständige Datei einbindest, bleibt dieser Bereich leer oder wird durch server-/template-includes gefüllt -->
+  <div id="site-topbar" aria-hidden="false"></div>
 
-  <main id="regelwerk-content">
-    <h1 class="page-title">Das große Regelwerk</h1>
-    <p class="page-desc">Hier findest du alle Kapitel des Spiels, unterteilt in Themenbereiche. Nutze die Suchleiste, um bestimmte Regeln oder Unterkapitel schnell zu finden.</p>
+  <main class="container" role="main">
+    <div class="regelwerk-wrap">
 
-    <div class="search-container">
-      <input type="text" id="rule-search" placeholder="🔍 Nach einem Kapitel oder Unterkapitel suchen...">
-      <ul id="search-suggestions" class="suggestions"></ul>
+      <header class="regelwerk-header">
+        <h1>Codex Mysteria — Regelwerk</h1>
+        <p>Das Inhaltsverzeichnis des Regelwerks. Suche oben oder öffne ein Kapitel für Details und Unterkapitel.</p>
+      </header>
+
+      <div class="regelwerk-search">
+        <input id="regelwerk-search" type="search" placeholder="Kapitel oder Unterkapitel suchen…" aria-label="Regelwerk suchen" autocomplete="off">
+        <ul id="regelwerk-suggestions" class="suggestions" role="listbox" aria-label="Suchvorschläge"></ul>
+      </div>
+
+      <section class="chapter-list" id="chapter-list" aria-live="polite">
+        <!-- Kapitel werden per JS gerendert -->
+      </section>
+
+      <footer class="regelwerk-footer">
+        © Codex Mysteria — Regelwerk
+      </footer>
     </div>
-
-    <section id="chapter-list">
-      <!-- Kapitel werden per JS hier eingefügt -->
-    </section>
   </main>
 </body>
 </html>
