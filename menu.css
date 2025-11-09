@@ -125,7 +125,7 @@
   box-shadow: 0 8px 32px rgba(0,0,0,0.25);
   display: none;
   color: var(--cm-fg);
-  z-index: 1300;
+  z-index: 9999;
 }
 .cm-popover[aria-hidden="false"],
 .cm-toc-dropdown[aria-hidden="false"] {
