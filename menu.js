@@ -1,614 +1,523 @@
-/*
-  menu.js — Überarbeitete Menü-Engine (neu & gefixt)
-  - Entfernt automatisch Regelwerk/Charaktere/Monster aus Haupt-Nav (konfigurierbar)
-  - TOC / Scroll-Spy (aus h2/h3 oder [data-section])
-  - Popup-Guide (aus data-desc oder intern generiert)
-  - Settings-Modal (Theme: dark/light/fantasy) + Account-Modal
-  - Admin-Dropdown & "View as" (Impersonation; UI-only)
-  - Mobile Off-canvas Panel
-  - Account Popover (Account-Info, Einstellungen, Logout)
-  - Robust, kommentiert; lädt menu.html per fetch (wie zuvor)
+/* menu.js
+   Lightweight menu controller for the single-line topbar (menu.html).
+   Implements:
+    - Home button (role-aware)
+    - Guide popup (explains each topbar control)
+    - TOC dropdown (builds from main h2/h3 or [data-section])
+    - Settings modal (Theme selection: dark/light/fantasy)
+    - Account popover: Account info modal + logout
+    - Admin view switch (Impersonation stored in localStorage, UI-only)
+   Notes:
+    - Requires menu.html structure (IDs: home-btn, page-desc-btn/menu-guide-btn,
+      toc-toggle, toc-list, settings-btn, account-toggle, account-popover, admin-view-btn, admin-popover)
+    - Uses window.CodexMysteria.getSession(), applyTheme(), logout(), and keys if available.
 */
 
 (function () {
-  const MENU_SRC = 'menu.html';
+  'use strict';
+
+  // ---- Config / keys ----
   const IMPERSONATE_KEY = 'codexmysteria_impersonate';
   const DEFAULT_TOC_ROOT = 'main';
+  const THEME_KEY = (window.CodexMysteria && window.CodexMysteria.THEME_KEY) || 'codexmysteria_theme';
+  const ACCOUNTS_KEY = (window.CodexMysteria && window.CodexMysteria.ACCOUNTS_KEY) || 'codexmysteria_accounts';
+  const SESSION_KEY = (window.CodexMysteria && window.CodexMysteria.SESSION_KEY) || 'codexmysteria_session';
 
-  /* ---------- Utility ---------- */
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => Array.from((r || document).querySelectorAll(s));
+  // ---- tiny helpers ----
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const wait = ms => new Promise(r => setTimeout(r, ms));
 
-  /* ---------- Helpers for session/role ---------- */
-  function getSessionSafe(){
+  function safeGetSession() {
     try { return window.CodexMysteria && typeof window.CodexMysteria.getSession === 'function' ? window.CodexMysteria.getSession() : null; }
-    catch(e){ console.warn('getSessionSafe error', e); return null; }
+    catch (e) { console.warn('menu.js: safeGetSession error', e); return null; }
   }
 
-  function getEffectiveRole(){
-    const imp = localStorage.getItem(IMPERSONATE_KEY);
+  function getImpersonation() {
+    return localStorage.getItem(IMPERSONATE_KEY) || null;
+  }
+  function setImpersonation(role) {
+    if (!role) localStorage.removeItem(IMPERSONATE_KEY);
+    else localStorage.setItem(IMPERSONATE_KEY, role);
+    window.dispatchEvent(new CustomEvent('codex:impersonation-changed', { detail: { role } }));
+  }
+  function clearImpersonation() { setImpersonation(null); }
+
+  function effectiveRole() {
+    const imp = getImpersonation();
     if (imp) return imp;
-    const s = getSessionSafe();
+    const s = safeGetSession();
     return s ? (s.role || 'guest') : 'guest';
   }
 
-  function setImpersonation(role){
-    if (!role) localStorage.removeItem(IMPERSONATE_KEY);
-    else localStorage.setItem(IMPERSONATE_KEY, role);
-    window.dispatchEvent(new CustomEvent('codex:impersonation-changed', {detail:{role}}));
+  function roleToHomeHref(role) {
+    role = (role || '').toLowerCase();
+    if (role === 'admin') return 'home_admin.html';
+    if (role === 'dm') return 'home_dm.html';
+    return 'home.html';
   }
 
-  function clearImpersonation(){ setImpersonation(null); }
-
-  /* ---------- Basic Modal builder ---------- */
-  function buildModal(id, title, bodyHtml){
+  // Simple modal builder (small, accessible)
+  function buildModal(id, title, bodyHtml) {
     let m = document.getElementById(id);
     if (m) return m;
     m = document.createElement('div');
     m.id = id;
     m.className = 'cm-modal';
-    m.setAttribute('aria-hidden','true');
+    m.setAttribute('aria-hidden', 'true');
     m.innerHTML = `
-      <div class="cm-modal-backdrop"></div>
-      <div class="cm-modal-panel card">
+      <div class="cm-modal-backdrop" data-role="backdrop"></div>
+      <div class="cm-modal-panel card" role="dialog" aria-modal="true" aria-labelledby="${id}-title">
         <button class="cm-modal-close" aria-label="Schließen">×</button>
-        <h3 class="cm-modal-title">${escapeHtml(title)}</h3>
+        <h3 id="${id}-title" class="cm-modal-title">${escapeHtml(title)}</h3>
         <div class="cm-modal-body">${bodyHtml}</div>
         <div class="cm-modal-actions"></div>
       </div>
     `;
     document.body.appendChild(m);
-    // close events
-    m.querySelector('.cm-modal-close').addEventListener('click', ()=> hideModal(id));
-    m.querySelector('.cm-modal-backdrop').addEventListener('click', ()=> hideModal(id));
+    // close handlers
+    m.querySelector('.cm-modal-close').addEventListener('click', () => hideModal(id));
+    m.querySelector('[data-role="backdrop"]').addEventListener('click', () => hideModal(id));
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && m.getAttribute('aria-hidden') === 'false') hideModal(id); });
     return m;
   }
+  function showModal(id) { const m = document.getElementById(id); if (!m) return; m.setAttribute('aria-hidden', 'false'); const focusEl = m.querySelector('button, [href], input, select, textarea') || m; focusEl.focus(); }
+  function hideModal(id) { const m = document.getElementById(id); if (!m) return; m.setAttribute('aria-hidden', 'true'); }
 
-  function showModal(id){ const m = document.getElementById(id); if (!m) return; m.setAttribute('aria-hidden','false'); }
-  function hideModal(id){ const m = document.getElementById(id); if (!m) return; m.setAttribute('aria-hidden','true'); }
+  // Password hash helper using SHA-256 (same approach as script.js)
+  async function hashPassword(password) {
+    const enc = new TextEncoder();
+    const buf = enc.encode(password || '');
+    const hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
 
-  /* ---------- Settings modal (Theme) ---------- */
-  function initSettingsModalOnce(){
-    if (document.getElementById('cm-settings')) return;
+  // ---- UI elements (expected to exist in menu.html) ----
+  const elHome = () => $('#home-btn');
+  const elTOCToggle = () => $('#toc-toggle');
+  const elTOCList = () => $('#toc-list');
+  const elGuideBtn = () => $('#menu-guide-btn');
+  const elSettingsBtn = () => $('#settings-btn');
+  const elAccountToggle = () => $('#account-toggle');
+  const elAccountPopover = () => $('#account-popover');
+  const elAccountUsername = () => $('#account-username');
+  const elAdminBtn = () => $('#admin-view-btn');
+  const elAdminPopover = () => $('#admin-popover');
+  const elCurrentPageTitle = () => $('#current-page-title');
+
+  // ---- Populate Home button href + username + admin visibility ----
+  function updateHomeAndAccount() {
+    const role = effectiveRole();
+    const href = roleToHomeHref(role);
+    const home = elHome();
+    if (home) {
+      home.setAttribute('href', href);
+      // also ensure it doesn't open in new window etc
+      home.addEventListener('click', (e) => {
+        // normal navigation; nothing special
+      });
+    }
+    // update username
+    const sess = safeGetSession();
+    const unameEl = elAccountUsername();
+    if (unameEl) {
+      unameEl.textContent = sess ? (sess.username || '—') : '—';
+    }
+    // show admin control if effectiveRole is admin
+    const adminCtrl = document.querySelector('.admin-control');
+    if (adminCtrl) adminCtrl.style.display = (effectiveRole() === 'admin') ? '' : 'none';
+  }
+
+  // ---- Build TOC list from main h2/h3 or [data-section] ----
+  function buildTOC(rootSelector = DEFAULT_TOC_ROOT) {
+    const toc = elTOCList();
+    if (!toc) return;
+    toc.innerHTML = ''; // clear
+    const root = document.querySelector(rootSelector) || document.body;
+    // prefer data-section
+    let sections = Array.from(root.querySelectorAll('[data-section]'));
+    if (!sections.length) sections = Array.from(root.querySelectorAll('h2, h3'));
+    if (!sections.length) {
+      const no = document.createElement('div');
+      no.className = 'hint';
+      no.textContent = 'Keine Abschnitte gefunden.';
+      toc.appendChild(no);
+      return;
+    }
+    sections.forEach((el, i) => {
+      if (!el.id) {
+        // create safe id
+        const base = (el.textContent || 'section').trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '');
+        el.id = `cm-sec-${i}-${base}`;
+      }
+      const a = document.createElement('a');
+      a.href = `#${el.id}`;
+      a.textContent = el.textContent.trim();
+      a.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        document.getElementById(el.id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // close toc dropdown
+        closeTOC();
+      });
+      toc.appendChild(a);
+    });
+
+    // IntersectionObserver to update center title / highlight active TOC entry
+    const links = Array.from(toc.querySelectorAll('a'));
+    if ('IntersectionObserver' in window) {
+      const opts = { root: null, rootMargin: '0px 0px -60% 0px', threshold: 0.15 };
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          if (en.isIntersecting) {
+            const id = en.target.id;
+            const link = toc.querySelector(`a[href="#${id}"]`);
+            if (!link) return;
+            links.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            // update center title
+            const titleEl = elCurrentPageTitle();
+            if (titleEl) titleEl.textContent = en.target.textContent.trim();
+          }
+        });
+      }, opts);
+      // observe each section
+      sections.forEach(s => obs.observe(s));
+    } else {
+      // fallback: set page title to document.title
+      const titleEl = elCurrentPageTitle();
+      if (titleEl) titleEl.textContent = document.title || '';
+    }
+  }
+
+  // ---- TOC open/close helpers ----
+  function toggleTOC() {
+    const btn = elTOCToggle();
+    const toc = elTOCList();
+    if (!btn || !toc) return;
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', (!open).toString());
+    toc.setAttribute('aria-hidden', open ? 'true' : 'false');
+  }
+  function closeTOC() {
+    const btn = elTOCToggle();
+    const toc = elTOCList();
+    if (!btn || !toc) return;
+    btn.setAttribute('aria-expanded', 'false');
+    toc.setAttribute('aria-hidden', 'true');
+  }
+
+  // ---- Guide modal (explains topbar controls) ----
+  function openGuide() {
+    // try to collect data-desc attributes in page if any
+    const descItems = {};
+    // predefined basic entries
+    descItems['Start'] = 'Leitet zur Startseite, passend zu deinem Accounttyp (Admin / DM / Spieler).';
+    descItems['Inhaltsverzeichnis'] = 'Öffnet die Übersicht der Abschnitte dieser Seite (TOC), damit du direkt springen kannst.';
+    descItems['Guide'] = 'Öffnet diese Kurzanleitung. CTRL-/CMD-Klick auf diesen Button kann erweitert sein.';
+    descItems['Einstellungen'] = 'Öffnet die Einstellungen (z. B. Farbschema: Dark / Light / Fantasy).';
+    descItems['Account'] = 'Account-Informationen anzeigen oder abmelden.';
+    descItems['Admin'] = 'Nur für Admins: hier kannst du die Sicht eines anderen Accounttyps simulieren (View-as).';
+
+    // also gather any page-provided data-desc attributes for additional context
+    $$('[data-desc]').forEach(el => {
+      const k = (el.dataset.descKey || el.id || el.tagName).toString().slice(0, 40);
+      descItems[k] = el.dataset.desc;
+    });
+
+    // build modal content
+    let html = '<div class="cm-guide-list">';
+    for (const k in descItems) {
+      html += `<div class="cm-guide-item"><strong>${escapeHtml(k)}</strong><div class="cm-guide-desc">${escapeHtml(descItems[k])}</div></div>`;
+    }
+    html += '</div>';
+    const modal = buildModal('cm-guide-modal', 'Kurzanleitung', html);
+    const actions = modal.querySelector('.cm-modal-actions');
+    actions.innerHTML = '';
+    const ok = document.createElement('button'); ok.className = 'primary'; ok.textContent = 'OK';
+    ok.addEventListener('click', () => hideModal('cm-guide-modal'));
+    actions.appendChild(ok);
+    showModal('cm-guide-modal');
+  }
+
+  // ---- Settings modal (Theme) ----
+  function openSettings() {
     const body = `
-      <p class="hint">Wähle ein Erscheinungsbild:</p>
-      <div class="cm-theme-options">
+      <p class="hint">Wähle ein Farbschema:</p>
+      <div class="cm-settings-options">
         <label><input type="radio" name="cm-theme" value="dark"> Dark</label><br>
         <label><input type="radio" name="cm-theme" value="light"> Light</label><br>
         <label><input type="radio" name="cm-theme" value="fantasy"> Fantasy</label>
       </div>
     `;
-    const m = buildModal('cm-settings','Einstellungen', body);
-    const actions = m.querySelector('.cm-modal-actions');
-    const btnApply = document.createElement('button'); btnApply.className='primary'; btnApply.textContent='Übernehmen';
-    const btnCancel = document.createElement('button'); btnCancel.className='ghost'; btnCancel.textContent='Abbrechen';
-    actions.appendChild(btnCancel); actions.appendChild(btnApply);
+    const modal = buildModal('cm-settings-modal', 'Einstellungen', body);
+    const actions = modal.querySelector('.cm-modal-actions');
+    actions.innerHTML = '';
+    const cancel = document.createElement('button'); cancel.className = 'ghost'; cancel.textContent = 'Abbrechen';
+    const apply = document.createElement('button'); apply.className = 'primary'; apply.textContent = 'Anwenden';
+    actions.appendChild(cancel);
+    actions.appendChild(apply);
 
-    // set current theme radio
-    const themeKey = window.CodexMysteria && window.CodexMysteria.THEME_KEY ? window.CodexMysteria.THEME_KEY : 'codexmysteria_theme';
-    const cur = localStorage.getItem(themeKey) || document.documentElement.getAttribute('data-theme') || 'dark';
-    const radios = m.querySelectorAll('input[name="cm-theme"]');
-    radios.forEach(r => { if (r.value === cur) r.checked = true; });
+    // set current selection
+    const current = localStorage.getItem(THEME_KEY) || document.documentElement.getAttribute('data-theme') || 'dark';
+    modal.querySelectorAll('input[name="cm-theme"]').forEach(r => { if (r.value === current) r.checked = true; });
 
-    btnApply.addEventListener('click', () => {
-      const sel = m.querySelector('input[name="cm-theme"]:checked');
+    cancel.addEventListener('click', () => hideModal('cm-settings-modal'));
+    apply.addEventListener('click', () => {
+      const sel = modal.querySelector('input[name="cm-theme"]:checked');
       const theme = sel ? sel.value : 'dark';
-      if (window.CodexMysteria && typeof window.CodexMysteria.applyTheme === 'function'){
+      if (window.CodexMysteria && typeof window.CodexMysteria.applyTheme === 'function') {
         window.CodexMysteria.applyTheme(theme);
       } else {
-        const key = (window.CodexMysteria && window.CodexMysteria.THEME_KEY) || themeKey;
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem(key, theme);
+        localStorage.setItem(THEME_KEY, theme);
       }
-      hideModal('cm-settings');
+      hideModal('cm-settings-modal');
     });
-    btnCancel.addEventListener('click', ()=> hideModal('cm-settings'));
+
+    showModal('cm-settings-modal');
   }
 
-  /* ---------- Account modal (view/update) ---------- */
-  function initAccountModalOnce(){
-    if (document.getElementById('cm-account')) return;
+  // ---- Account info modal (view + change password + show role) ----
+  function openAccountInfo() {
+    const sess = safeGetSession();
+    const role = effectiveRole();
     const body = `
       <div>
-        <label>Benutzername<br><input id="cm-acc-username" type="text"></label>
+        <label>Benutzername<br><input id="cm-account-name" type="text" value="${escapeHtml(sess ? (sess.username || '') : '')}"></label>
       </div>
       <div style="margin-top:8px;">
-        <label>Neues Passwort<br><input id="cm-acc-password" type="password" placeholder="Leer lassen = unverändert"></label>
+        <label>Neues Passwort (leer = unverändert)<br><input id="cm-account-pass" type="password"></label>
       </div>
-      <div style="margin-top:8px;color:var(--muted)"><span id="cm-acc-role">Rolle: —</span></div>
+      <div style="margin-top:8px;color:var(--cm-muted)">Rolle: <strong id="cm-account-role">${escapeHtml(role)}</strong></div>
     `;
-    const m = buildModal('cm-account','Account-Informationen', body);
-    const actions = m.querySelector('.cm-modal-actions');
-    const save = document.createElement('button'); save.className='primary'; save.textContent='Speichern';
-    const close = document.createElement('button'); close.className='ghost'; close.textContent='Schließen';
-    actions.appendChild(close); actions.appendChild(save);
+    const modal = buildModal('cm-account-modal', 'Account-Informationen', body);
+    const actions = modal.querySelector('.cm-modal-actions');
+    actions.innerHTML = '';
+    const cancel = document.createElement('button'); cancel.className = 'ghost'; cancel.textContent = 'Abbrechen';
+    const save = document.createElement('button'); save.className = 'primary'; save.textContent = 'Speichern';
+    actions.appendChild(cancel); actions.appendChild(save);
 
-    close.addEventListener('click', ()=> hideModal('cm-account'));
+    cancel.addEventListener('click', () => hideModal('cm-account-modal'));
     save.addEventListener('click', async () => {
-      const newName = document.getElementById('cm-acc-username').value.trim();
-      const newPass = document.getElementById('cm-acc-password').value;
-      const sess = getSessionSafe();
-      if (!sess) { alert('Kein aktives Konto'); return; }
-      // load accounts array from localStorage (script.js uses ACCOUNTS_KEY)
-      const accKey = window.CodexMysteria && window.CodexMysteria.ACCOUNTS_KEY ? window.CodexMysteria.ACCOUNTS_KEY : 'codexmysteria_accounts';
+      const newName = document.getElementById('cm-account-name').value.trim();
+      const newPass = document.getElementById('cm-account-pass').value;
+      const s = safeGetSession();
+      if (!s) { alert('Kein aktives Konto.'); hideModal('cm-account-modal'); return; }
+
+      // update accounts in localStorage if available (script.js stores accounts in ACCOUNTS_KEY)
       let accounts = [];
-      try { accounts = JSON.parse(localStorage.getItem(accKey) || '[]'); } catch(e){ accounts = []; }
-      const idx = accounts.findIndex(a => a.username.toLowerCase() === sess.username.toLowerCase());
-      if (idx === -1) { alert('Account nicht gefunden.'); hideModal('cm-account'); return; }
-      if (newName && newName.toLowerCase() !== accounts[idx].username.toLowerCase()){
-        const dup = accounts.some((a,i)=> i!==idx && a.username.toLowerCase() === newName.toLowerCase());
-        if (dup){ alert('Benutzername bereits vergeben.'); return; }
+      try { accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]'); } catch (e) { accounts = []; }
+      const idx = accounts.findIndex(a => a.username && a.username.toLowerCase() === s.username.toLowerCase());
+      if (idx === -1) {
+        // fallback: nothing to update except session rename
+        if (newName) {
+          try {
+            const sessRaw = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+            sessRaw.username = newName;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(sessRaw));
+          } catch (e) { console.warn(e); }
+        }
+        hideModal('cm-account-modal');
+        updateHomeAndAccount();
+        return;
+      }
+
+      if (newName && newName.toLowerCase() !== accounts[idx].username.toLowerCase()) {
+        // check duplicates
+        const dup = accounts.some((a,i) => i !== idx && a.username.toLowerCase() === newName.toLowerCase());
+        if (dup) { alert('Benutzername bereits vergeben.'); return; }
         accounts[idx].username = newName;
       }
-      if (newPass){
-        // same hash as script.js — SHA-256
+      if (newPass) {
         try {
-          const enc = new TextEncoder();
-          const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(newPass));
-          const hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
-          accounts[idx].passwordHash = hash;
-        } catch(e){ console.error(e); alert('Fehler beim Speichern des Passworts'); return; }
+          const h = await hashPassword(newPass);
+          accounts[idx].passwordHash = h;
+        } catch (e) { console.error(e); alert('Fehler beim Speichern des Passworts'); return; }
       }
-      localStorage.setItem(accKey, JSON.stringify(accounts));
-      // update session username if changed
-      if (newName){
-        const sessKey = window.CodexMysteria && window.CodexMysteria.SESSION_KEY ? window.CodexMysteria.SESSION_KEY : 'codexmysteria_session';
-        try {
-          const sRaw = JSON.parse(localStorage.getItem(sessKey) || '{}');
-          sRaw.username = newName;
-          localStorage.setItem(sessKey, JSON.stringify(sRaw));
-        } catch(e){}
-      }
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+      // update session if name changed
+      try {
+        const sessRaw = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+        if (newName) sessRaw.username = newName;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(sessRaw));
+      } catch (e) { /* ignore */ }
       alert('Account aktualisiert.');
-      hideModal('cm-account');
-      populateAccountArea(); // refresh
+      hideModal('cm-account-modal');
+      updateHomeAndAccount();
+    });
+
+    showModal('cm-account-modal');
+  }
+
+  // ---- Logout handler ----
+  function doLogout() {
+    if (window.CodexMysteria && typeof window.CodexMysteria.logout === 'function') {
+      window.CodexMysteria.logout();
+    } else {
+      localStorage.removeItem(SESSION_KEY);
+    }
+    clearImpersonation();
+    // redirect to login
+    window.location.href = 'index.html';
+  }
+
+  // ---- Admin view switch handlers (UI-only impersonation) ----
+  function openAdminView() {
+    // toggle popover
+    const pop = elAdminPopover();
+    if (!pop) return;
+    const isOpen = pop.getAttribute('aria-hidden') === 'false';
+    pop.setAttribute('aria-hidden', (!isOpen).toString());
+  }
+  function setupAdminActions() {
+    const pop = elAdminPopover();
+    if (!pop) return;
+    pop.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const action = btn.getAttribute('data-action');
+        if (action === 'view-as-admin') { setImpersonation('admin'); }
+        else if (action === 'view-as-dm') { setImpersonation('dm'); }
+        else if (action === 'view-as-player') { setImpersonation('player'); }
+        else if (action === 'view-as-guest') { setImpersonation('guest'); }
+        // after setting impersonation, update UI
+        updateHomeAndAccount();
+        // close popover
+        pop.setAttribute('aria-hidden', 'true');
+      });
     });
   }
 
-  /* ---------- Populate account area & admin visibility ---------- */
-  function populateAccountArea(){
-    const sess = getSessionSafe();
-    const role = getEffectiveRole();
-    const unameSpan = $('#account-username') || qsOrNull('#account-area #account-username');
-    const popU = $('#popover-username');
-    const popR = $('#popover-role');
-    if (unameSpan) unameSpan.textContent = sess ? (sess.username || '—') : '—';
-    if (popU) popU.textContent = sess ? (sess.username || '—') : '—';
-    if (popR) popR.textContent = role;
-
-    // show/hide admin areas
-    $$('.admin-area, .admin-only').forEach(el => {
-      el.style.display = (role === 'admin') ? '' : 'none';
-    });
-  }
-
-  /* ---------- Account popover toggle ---------- */
-  function initAccountPopover(){
-    const toggle = $('#account-toggle');
-    const pop = $('#account-popover');
+  // ---- wire account popover toggle and actions ----
+  function setupAccountPopover() {
+    const toggle = elAccountToggle();
+    const pop = elAccountPopover();
     if (!toggle || !pop) return;
     toggle.addEventListener('click', (e) => {
-      const open = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', (!open).toString());
-      pop.setAttribute('aria-hidden', open ? 'true' : 'false');
+      const opened = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', (!opened).toString());
+      pop.setAttribute('aria-hidden', opened ? 'true' : 'false');
     });
     // actions inside popover
-    $$('#account-popover [data-action]').forEach(btn => {
-      btn.addEventListener('click', (ev) => {
+    pop.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
         const a = btn.getAttribute('data-action');
-        if (a === 'account-info'){
-          initAccountModalOnce();
-          const sess = getSessionSafe();
-          document.getElementById('cm-acc-username').value = sess ? sess.username : '';
-          document.getElementById('cm-acc-role').textContent = `Rolle: ${getEffectiveRole()}`;
-          showModal('cm-account');
-        } else if (a === 'settings'){
-          initSettingsModalOnce();
-          showModal('cm-settings');
-        } else if (a === 'logout'){
-          if (window.CodexMysteria && typeof window.CodexMysteria.logout === 'function'){
-            window.CodexMysteria.logout();
-          } else {
-            // fallback
-            localStorage.removeItem(window.CodexMysteria && window.CodexMysteria.SESSION_KEY ? window.CodexMysteria.SESSION_KEY : 'codexmysteria_session');
-          }
-          clearImpersonation();
-          window.location.href = 'index.html';
-        }
+        if (a === 'account-info') openAccountInfo();
+        else if (a === 'logout') doLogout();
+        // close after action
+        pop.setAttribute('aria-hidden', 'true');
+        elAccountToggle().setAttribute('aria-expanded', 'false');
       });
     });
     // close on outside click
     document.addEventListener('click', (ev) => {
-      if (!toggle.contains(ev.target) && !pop.contains(ev.target)){
-        toggle.setAttribute('aria-expanded','false');
-        pop.setAttribute('aria-hidden','true');
+      const tog = elAccountToggle();
+      const p = elAccountPopover();
+      if (!tog || !p) return;
+      if (!tog.contains(ev.target) && !p.contains(ev.target)) {
+        p.setAttribute('aria-hidden', 'true');
+        tog.setAttribute('aria-expanded', 'false');
       }
     });
   }
 
-  /* ---------- Admin popover (View As) ---------- */
-  function initAdminPopover(){
-    const btn = $('#admin-toggle');
-    const pop = $('#admin-popover');
-    if (!btn || !pop) return;
-    btn.addEventListener('click', ()=>{
-      const open = pop.getAttribute('aria-hidden') === 'false';
-      pop.setAttribute('aria-hidden', (!open).toString());
-    });
-    // links inside
-    pop.querySelectorAll('a[data-action]').forEach(a => {
-      a.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        const action = a.getAttribute('data-action');
-        if (action === 'view-as-dm'){ setImpersonation('dm'); rebuildRoleUI(); }
-        else if (action === 'view-as-player'){ setImpersonation('player'); rebuildRoleUI(); }
-        else if (action === 'view-as-guest'){ setImpersonation('guest'); rebuildRoleUI(); }
+  // ---- small init function to wire everything ----
+  function initMenuTopbar() {
+    // update links/user/admin visibility
+    updateHomeAndAccount();
+
+    // build TOC now
+    buildTOC(DEFAULT_TOC_ROOT);
+
+    // wire TOC toggle
+    const tocBtn = elTOCToggle();
+    if (tocBtn) {
+      tocBtn.addEventListener('click', (e) => {
+        const open = tocBtn.getAttribute('aria-expanded') === 'true';
+        tocBtn.setAttribute('aria-expanded', (!open).toString());
+        const toc = elTOCList();
+        if (toc) toc.setAttribute('aria-hidden', open ? 'true' : 'false');
       });
-    });
-    // close on outside
-    document.addEventListener('click', (ev) => {
-      if (!btn.contains(ev.target) && !pop.contains(ev.target)){
-        pop.setAttribute('aria-hidden','true');
-      }
-    });
-    // listen impersonation changes
-    window.addEventListener('codex:impersonation-changed', ()=> {
-      populateAccountArea();
-      rebuildRoleUI();
-    });
-  }
-
-  /* ---------- Mobile panel ---------- */
-  function initMobilePanel(){
-    const hamburger = $('#menu-toggle');
-    const panel = $('#mobile-panel');
-    const mobileList = $('#mobile-menu-list');
-    const close = $('#mobile-close');
-    if (!hamburger || !panel || !mobileList) return;
-    hamburger.addEventListener('click', ()=>{
-      panel.setAttribute('aria-hidden','false');
-      // copy menu items if empty
-      if (!mobileList.children.length){
-        const main = $('#main-menu-list');
-        if (main) mobileList.innerHTML = main.innerHTML;
-        // attach click handlers to close panel on click
-        mobileList.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> panel.setAttribute('aria-hidden','true')));
-      }
-    });
-    close.addEventListener('click', ()=> panel.setAttribute('aria-hidden','true'));
-    document.addEventListener('keydown', (ev)=> { if (ev.key === 'Escape') panel.setAttribute('aria-hidden','true'); });
-  }
-
-  /* ---------- Remove unwanted menu entries & build guide map ---------- */
-  function sanitizeMenuAndBuildGuide(){
-    // Remove specific pages from main navigation if they exist
-    const forbiddenPages = ['regelwerk','charaktere','monster']; // lower-case keys to remove
-    const mainList = $('#main-menu-list');
-    if (!mainList) return;
-
-    // Build a help-map for popup guide: use existing data-desc or fallback descriptions
-    const helpMap = {};
-
-    // Iterate anchors
-    mainList.querySelectorAll('a[role="menuitem"]').forEach(a => {
-      const pageKey = (a.dataset.page || '').toLowerCase();
-      let remove = false;
-      if (pageKey && forbiddenPages.includes(pageKey)) remove = true;
-      const href = (a.getAttribute('href') || '').split('/').pop().toLowerCase();
-      if (href) {
-        forbiddenPages.forEach(f => { if (href.includes(f)) remove = true; });
-      }
-      if (remove){
-        a.parentElement && a.parentElement.remove();
-        return;
-      }
-      // create help map entry
-      const key = pageKey || (href || a.textContent.trim().toLowerCase());
-      const desc = a.getAttribute('data-desc') || generateDescFromText(a.textContent.trim());
-      helpMap[key] = desc;
-    });
-
-    // also include account and admin entries for help
-    helpMap['account'] = 'Öffnet deine Account-Informationen, Einstellungen und die Abmelden-Funktion.';
-    helpMap['settings'] = 'Einstellungen: hier stellst du Theme und Anzeigeoptionen ein.';
-    helpMap['admin'] = 'Admin-Tools: Nutzerverwaltung, Logs und Ansichtssimulationen.';
-
-    // return map
-    return helpMap;
-  }
-
-  function generateDescFromText(text){
-    // very small fallback generator
-    const t = text.toLowerCase();
-    if (t.includes('start')||t.includes('home')) return 'Geht zur Startseite deines Dashboards.';
-    if (t.includes('regel') || t.includes('regeln')) return 'Öffnet das Regelwerk (Kapitelübersicht).';
-    if (t.includes('charakter')) return 'Verwaltung deiner Charaktere und Bögen.';
-    if (t.includes('monster')) return 'Das Monsterhandbuch (Bestiarium).';
-    if (t.includes('notiz')) return 'Notizen und Kampagnennotizen.';
-    if (t.includes('kampagnen')||t.includes('kampagne')) return 'Verwaltung deiner Kampagnen & Abenteuer.';
-    return 'Öffnet diese Funktion.';
-  }
-
-  /* ---------- Popup Guide (listet Menüknöpfe & Beschreibungen) ---------- */
-  function showPopupGuide(helpMap){
-    // helpMap: key->desc
-    let html = '<div class="cm-guide-list">';
-    for (const k in helpMap){
-      html += `<div class="cm-guide-item"><strong>${escapeHtml(k)}</strong><div class="cm-guide-desc">${escapeHtml(helpMap[k])}</div></div>`;
     }
-    html += '</div>';
-    const modal = buildModal('cm-guide','Kurzanleitung / Menü-Hilfe', html);
-    const actions = modal.querySelector('.cm-modal-actions');
-    actions.innerHTML = '';
-    const ok = document.createElement('button'); ok.className = 'primary'; ok.textContent='OK';
-    actions.appendChild(ok);
-    ok.addEventListener('click', ()=> hideModal('cm-guide'));
-    showModal('cm-guide');
-  }
 
-  /* ---------- Active menu item highlight (by path or data-page) ---------- */
-  function updateActiveMenuItem(){
-    const links = $$('#main-menu-list a[role="menuitem"]');
-    const path = (location.pathname.split('/').pop() || '').toLowerCase();
-    links.forEach(a => {
-      const dp = (a.dataset.page || '').toLowerCase();
-      const href = (a.getAttribute('href') || '').split('/').pop().toLowerCase();
-      if (dp && path.includes(dp)) { a.classList.add('active'); $('#current-page-name') && ($('#current-page-name').textContent = a.textContent.trim()); }
-      else if (href && href === path) { a.classList.add('active'); $('#current-page-name') && ($('#current-page-name').textContent = a.textContent.trim()); }
-      else a.classList.remove('active');
-    });
-  }
+    // guide button
+    const guide = elGuideBtn();
+    if (guide) on(guide, 'click', () => openGuide());
 
-  /* ---------- Build TOC & ScrollSpy ---------- */
-  let tocObserver = null;
-  function buildTOC(rootSelector = DEFAULT_TOC_ROOT){
-    const toc = $('#toc-list');
-    if (!toc) return;
-    toc.innerHTML = '';
-    const root = document.querySelector(rootSelector) || document.body;
-    // prefer data-section
-    let sections = Array.from(root.querySelectorAll('[data-section]'));
-    if (!sections.length) sections = Array.from(root.querySelectorAll('h2, h3'));
-    if (!sections.length){
-      toc.innerHTML = '<div class="hint">Keine Abschnitte zum Navigieren gefunden.</div>';
-      return;
+    // settings
+    const settings = elSettingsBtn();
+    if (settings) on(settings, 'click', () => openSettings());
+
+    // account popover actions
+    setupAccountPopover();
+
+    // admin actions
+    const adminBtn = elAdminBtn();
+    if (adminBtn) {
+      on(adminBtn, 'click', () => openAdminView());
+      setupAdminActions();
     }
-    sections.forEach((el, idx) => {
-      if (!el.id) el.id = 'cm-sec-' + idx + '-' + (el.textContent || 's').trim().toLowerCase().replace(/\s+/g,'-').replace(/[^\w\-]/g,'');
-      const a = document.createElement('a'); a.href = '#' + el.id; a.textContent = el.textContent.trim();
-      a.addEventListener('click', (ev) => { ev.preventDefault(); document.getElementById(el.id).scrollIntoView({behavior:'smooth', block:'start'}); });
-      toc.appendChild(a);
+
+    // keep UI in sync if session / impersonation changes in other tabs
+    window.addEventListener('storage', (ev) => {
+      if (ev.key === SESSION_KEY || ev.key === IMPERSONATE_KEY) {
+        updateHomeAndAccount();
+        buildTOC(DEFAULT_TOC_ROOT);
+      }
     });
-    // IntersectionObserver
-    if (tocObserver) tocObserver.disconnect();
-    const opts = { root: null, rootMargin: '0px 0px -60% 0px', threshold: 0.15 };
-    tocObserver = new IntersectionObserver((entries) => {
-      entries.forEach(en => {
-        const id = en.target.id;
-        const link = toc.querySelector(`a[href="#${id}"]`);
-        if (!link) return;
-        if (en.isIntersecting) {
-          toc.querySelectorAll('a').forEach(x => x.classList.remove('active'));
-          link.classList.add('active');
-          // also update page-indicator
-          const nameEl = $('#current-page-name');
-          if (nameEl) nameEl.textContent = link.textContent;
+
+    // also listen to custom impersonation event
+    window.addEventListener('codex:impersonation-changed', () => {
+      updateHomeAndAccount();
+      buildTOC(DEFAULT_TOC_ROOT);
+    });
+
+    // set current page title initially (if there is a #page-meta or document.title)
+    const meta = document.getElementById('page-meta');
+    const titleEl = elCurrentPageTitle();
+    if (titleEl) {
+      if (meta && meta.dataset && meta.dataset.pageDescriptionTitle) titleEl.textContent = meta.dataset.pageDescriptionTitle;
+      else titleEl.textContent = document.title || '';
+    }
+  }
+
+  // ---- bootstrap: wait until DOM is ready and topbar exists ----
+  function bootstrapWhenReady() {
+    // we expect menu.html already injected (via loader)
+    const attemptInit = () => {
+      const topbar = document.getElementById('site-topbar');
+      if (!topbar) return false;
+      // wire everything
+      try {
+        initMenuTopbar();
+        return true;
+      } catch (e) {
+        console.error('menu.js init error', e);
+        return false;
+      }
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        if (!attemptInit()) {
+          // try again a bit later (if menu injected async)
+          setTimeout(() => attemptInit(), 200);
         }
       });
-    }, opts);
-    sections.forEach(s => tocObserver.observe(s));
-  }
-
-  /* ---------- Rebuild UI for roles (admin inherits DM/player) ---------- */
-  function rebuildRoleUI(){
-    populateAccountArea();
-    updateActiveMenuItem();
-    // data-role="player,dm" etc.
-    const role = getEffectiveRole();
-    $$('[data-role]').forEach(el => {
-      const roles = (el.getAttribute('data-role') || '').split(',').map(r=>r.trim()).filter(Boolean);
-      if (!roles.length) { el.style.display = ''; return; }
-      if (role === 'admin') el.style.display = '';
-      else el.style.display = roles.includes(role) ? '' : 'none';
-    });
-  }
-  /* ============================
-   Rollenabhängige Main-Menu Konfiguration
-   - reduziert main-menu-list auf einen Home-Button
-   - setzt Home href basierend auf Rolle
-   - sorgt dafür, dass Brand/Logo auf die richtige Home-Seite linkt
-   - bindet Aktualisierung ein (bei Impersonation / Session-Änderung)
-   ============================ */
-function roleToHome(role){
-  role = (role || '').toLowerCase();
-  if (role === 'admin') return 'home_admin.html';
-  if (role === 'dm')    return 'home_dm.html';
-  // player und guest
-  return 'home.html';
-}
-
-function configureMainMenuMinimal(){
-  const mainList = document.getElementById('main-menu-list');
-  if (!mainList) {
-    // Erstelle fallback main-menu-list, falls menu.html minimal ist
-    const sidebar = document.getElementById('sidebar-menu') || document.querySelector('.cm-sidebar');
-    if (!sidebar) return;
-    const ul = document.createElement('ul');
-    ul.id = 'main-menu-list';
-    ul.role = 'menu';
-    sidebar.innerHTML = ''; // clear maybe
-    sidebar.appendChild(ul);
-  }
-
-  const effectiveRole = getEffectiveRole();
-  const homeHref = roleToHome(effectiveRole);
-
-  const ul = document.getElementById('main-menu-list');
-  // clear existing items
-  ul.innerHTML = '';
-
-  // build Home li
-  const li = document.createElement('li');
-  const a = document.createElement('a');
-  a.setAttribute('role','menuitem');
-  a.href = homeHref;
-  a.dataset.page = 'home';
-  a.textContent = '🏠 Startseite';
-  a.classList.add('home-link');
-  li.appendChild(a);
-  ul.appendChild(li);
-
-  // optional: mark active if we are on that page
-  updateActiveMenuItem();
-
-  // brand click: ensure it navigates to role-specific home
-  const brand = document.getElementById('site-title') || document.querySelector('.menu-brand') || document.querySelector('#main-header .cm-header-left .site-title');
-  if (brand) {
-    brand.style.cursor = 'pointer';
-    brand.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      window.location.href = roleToHome(getEffectiveRole());
-    });
-  }
-
-  // make sure mobile copy is updated too
-  const mobileList = document.getElementById('mobile-menu-list');
-  if (mobileList) {
-    mobileList.innerHTML = '';
-    const li2 = document.createElement('li');
-    const a2 = document.createElement('a');
-    a2.textContent = '🏠 Startseite';
-    a2.href = homeHref;
-    li2.appendChild(a2);
-    mobileList.appendChild(li2);
-  }
-}
-
-/* Hook: Aktualisiere Menu wenn Impersonation/Session sich ändert */
-window.addEventListener('codex:impersonation-changed', () => {
-  configureMainMenuMinimal();
-});
-window.addEventListener('storage', (ev) => {
-  // Rebuild when session key changes in other tab
-  const sessKey = window.CodexMysteria && window.CodexMysteria.SESSION_KEY ? window.CodexMysteria.SESSION_KEY : 'codexmysteria_session';
-  if (ev.key === sessKey || ev.key === 'codexmysteria_impersonate') {
-    configureMainMenuMinimal();
-  }
-});
-
-/* Run once after menu insertion (call from initAfterMenuInserted) */
-if (typeof configureMainMenuMinimal === 'function') {
-  // if initAfterMenuInserted exists, call it there; else call now (defensive)
-  try { configureMainMenuMinimal(); } catch(e) { console.warn('configureMainMenuMinimal error', e); }
-}
-
-  /* ---------- Page description button init ---------- */
-  function initPageDescButton(){
-    const btn = $('#page-desc-btn');
-    if (!btn) return;
-    btn.addEventListener('click', ()=>{
-      // priority: window.CodexMysteria.getPageDescription -> #page-meta[data-page-description] -> meta description
-      let desc = '';
-      try { if (window.CodexMysteria && typeof window.CodexMysteria.getPageDescription === 'function') desc = window.CodexMysteria.getPageDescription(); }
-      catch(e){ console.warn(e); }
-      if (!desc){
-        const pm = $('#page-meta') || qsOrNull('#page-meta');
-        if (pm) desc = pm.dataset.pageDescription || pm.getAttribute('data-page-description') || pm.textContent || '';
-      }
-      if (!desc){
-        const meta = document.querySelector('meta[name="description"]'); if (meta) desc = meta.getAttribute('content');
-      }
-      if (!desc) desc = 'Keine Seitenbeschreibung verfügbar.';
-      const m = buildModal('cm-pagedesc','Seitenbeschreibung', `<p>${escapeHtml(desc)}</p>`);
-      m.querySelector('.cm-modal-actions').innerHTML = '<button class="primary">OK</button>';
-      m.querySelector('.cm-modal-actions button').addEventListener('click', ()=> hideModal('cm-pagedesc'));
-      showModal('cm-pagedesc');
-    });
-  }
-
-  /* ---------- Initialize everything after menu.html is inserted ---------- */
-  async function initAfterMenuInserted(){
-    await wait(20); // allow DOM to parse
-    populateAccountArea();
-    initAccountPopover();
-    initAdminPopover();
-    initMobilePanel();
-    initSettingsModalOnce();
-    initAccountModalOnce();
-    initPageDescButton();
-
-    // sanitize menu and build help map
-    const helpMap = sanitizeMenuAndBuildGuide() || {};
-    // bind page-desc button to reflect info: set page description in header if present
-    // fill current page name and initial active
-    updateActiveMenuItem();
-
-    // create guide button action
-    const guideBtn = $('#page-desc-btn'); // use existing button as guide toggle as well
-    if (guideBtn){
-      // right now page-desc and guide share the same button; attach alt-click to open guide
-      guideBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); showPopupGuide(helpMap); });
-      // or ctrl+click to open guide
-      guideBtn.addEventListener('click', (e) => {
-        if (e.ctrlKey || e.metaKey) { showPopupGuide(helpMap); return; }
-        // normal click opens page desc (already wired by initPageDescButton)
-      });
-    }
-
-    // build TOC
-    buildTOC();
-    // attach smooth behaviours for main menu items -> close mobile panel if open
-    $$('#main-menu-list a').forEach(a => a.addEventListener('click', ()=> { const mp = $('#mobile-panel'); if (mp) mp.setAttribute('aria-hidden','true'); }));
-    // initial role UI
-    rebuildRoleUI();
-
-    // storage listener to detect session changes from other tabs
-    window.addEventListener('storage', (ev) => {
-      const sessKey = window.CodexMysteria && window.CodexMysteria.SESSION_KEY ? window.CodexMysteria.SESSION_KEY : 'codexmysteria_session';
-      if (ev.key === sessKey) { populateAccountArea(); rebuildRoleUI(); }
-      if (ev.key === IMPERSONATE_KEY) { populateAccountArea(); rebuildRoleUI(); }
-    });
-  }
-
-  /* ---------- Fetch menu.html and insert into page (like before) ---------- */
-  async function loadMenuAndInit(){
-    // insert into #menu-container if exists, else put at top of body
-    let container = document.getElementById('menu-container');
-    if (!container){
-      container = document.createElement('div');
-      container.id = 'menu-container';
-      document.body.insertBefore(container, document.body.firstChild);
-    }
-    try {
-      const resp = await fetch(MENU_SRC, {cache:'no-cache'});
-      if (!resp.ok) throw new Error('menu.html not found');
-      const html = await resp.text();
-      container.innerHTML = html;
-      // menu.html may include menu.css linking; ensure it's loaded
-      await wait(40);
-      // now run initialization
-      initAfterMenuInserted();
-    } catch (e){
-      console.warn('menu.js: Fehler beim Laden von menu.html', e);
-      // try to initialize if menu already present in DOM
-      initAfterMenuInserted();
+    } else {
+      if (!attemptInit()) setTimeout(() => attemptInit(), 200);
     }
   }
 
-  /* ---------- Start on DOMContentLoaded ---------- */
-  document.addEventListener('DOMContentLoaded', () => {
-    loadMenuAndInit().catch(err => console.error('menu.js init failed', err));
-  });
-
-  /* ---------- expose helper for external use ---------- */
+  // Expose small API for external use
   window.CodexMysteria = window.CodexMysteria || {};
-  window.CodexMysteria.rebuildMenuUI = function(){ rebuildRoleUI(); buildTOC(); updateActiveMenuItem(); };
+  window.CodexMysteria.menuRebuild = function () {
+    updateHomeAndAccount();
+    buildTOC(DEFAULT_TOC_ROOT);
+  };
+  window.CodexMysteria.clearImpersonation = clearImpersonation;
 
-  /* ---------- small helper to query for fallback selectors (safe) ---------- */
-  function qsOrNull(selector){ try { return document.querySelector(selector); } catch(e){ return null; } }
+  // Start
+  bootstrapWhenReady();
 
 })();
-
