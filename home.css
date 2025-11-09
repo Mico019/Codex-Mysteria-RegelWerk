@@ -1,37 +1,53 @@
-/* home.css — Styles für home.html */
-.home-container{max-width:1100px;padding:22px}
-.welcome-card h2{margin-top:0;color:var(--accent-2)}
-.lead{font-size:15px;margin-top:8px;color:var(--muted)}
-.meta{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
-.meta div{font-size:14px;color:var(--muted)}
-
-.cta-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;
-  margin-top:18px;
-}
-.card{min-height:72px;display:flex;align-items:center;justify-content:center;font-weight:600}
-
-.top-menu{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 0}
-.menu-placeholder{display:flex;align-items:center;gap:10px}
-.user-block{display:flex;align-items:center;gap:10px}
-.user-name{font-weight:700;color:var(--accent-2)}
-.user-role{font-size:12px;color:var(--muted);display:block}
-
-/* Sichtbarkeit nach Rollen */
-.role-player .admin-only,
-.role-player .dm-only,
-.role-dm .admin-only {
-  display:none !important;
+.home-wrap {
+  width: 100%;
+  max-width: 900px;
+  margin: 6vh auto;
+  padding: 1.5rem;
 }
 
-/* Modal */
-.modal{
-  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:rgba(2,6,23,0.45);backdrop-filter:blur(4px);
-  opacity:0;visibility:hidden;transition:opacity 160ms ease;z-index:1200;
+.home-header {
+  text-align: center;
+  margin-bottom: 2rem;
 }
-.modal[aria-hidden="false"]{opacity:1;visibility:visible}
-.modal-panel{width:min(680px,94%);padding:18px;border-radius:12px}
-.modal-close{position:absolute;right:18px;top:14px;background:transparent;border:none;color:var(--muted);font-size:26px;cursor:pointer}
+
+.home-header h1 {
+  font-family: var(--font-fantasy);
+  color: var(--accent-2);
+  margin-bottom: .25rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.action-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.action-card {
+  display: block;
+  text-align: center;
+  background: var(--surface);
+  color: var(--text);
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+}
+
+.home-footer {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.home-footer button {
+  font-size: 1rem;
+}
