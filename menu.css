@@ -1,165 +1,159 @@
-/* menu.css — minimale Top-Leiste + Popover-Fixes
-   - Single topbar, passt sich Theme an via [data-theme]
-   - Popovers fixed über allem (hoher z-index)
-   - body padding-top sorgt dafür, dass Inhalt nicht verdeckt wird
+/* menu.css — Theme-safe + Popover z-index fix
+   - Verwendet ausschließlich CSS-Variablen, die vom main CSS gesetzt werden:
+     --menu-bg, --menu-text, --menu-accent, --menu-hover, --popup-bg, --menu-border, --topbar-h
+   - Wenn die Variablen fehlen, gibt es unaufdringliche Fallbacks (keine starken Farben).
+   - Popovers/Dropdowns sind fixed und haben sehr hohen z-index, damit sie nie unter Content landen.
+   - Überschreibt KEINE globalen Farbvariablen oder Body-Eigenschaften.
 */
 
-/* --- Variablen --- */
-:root{
-  --topbar-h: 56px;
-  --bg: rgba(14,14,18,0.85);
-  --bg-alt: rgba(24,24,30,0.95);
-  --fg: #e9eef6;
-  --muted: rgba(233,238,246,0.7);
-  --accent: #7a5fff;
-  --border: rgba(255,255,255,0.04);
-  --radius: 10px;
-  --shadow: 0 12px 40px rgba(0,0,0,0.45);
-  --transition: 180ms ease;
-  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+/* --- fallback-werte (sanft, überschreiben keine globalen theme-entscheidungen) --- */
+:root {
+  --menu-bg: var(--menu-bg, rgba(0,0,0,0.6));
+  --menu-text: var(--menu-text, inherit);
+  --menu-accent: var(--menu-accent, rgba(125, 100, 255, 0.9));
+  --menu-hover: var(--menu-hover, rgba(255,255,255,0.85));
+  --popup-bg: var(--popup-bg, rgba(16,16,20,0.96));
+  --menu-border: var(--menu-border, rgba(255,255,255,0.04));
+  --topbar-h: var(--topbar-h, 56px);
+  --menu-radius: 10px;
+  --menu-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  --menu-transition: 180ms ease;
 }
 
-/* light theme fallback */
-:root[data-theme="light"]{
-  --bg: rgba(255,255,255,0.92);
-  --bg-alt: rgba(255,255,255,0.98);
-  --fg: #101217;
-  --muted: rgba(16,18,23,0.6);
-  --accent: #2b36c9;
-  --border: rgba(0,0,0,0.06);
-}
-
-/* fantasy */
-:root[data-theme="fantasy"]{
-  --bg: rgba(20,8,28,0.72);
-  --bg-alt: rgba(30,12,40,0.9);
-  --fg: #f6eeff;
-  --muted: rgba(246,238,255,0.8);
-  --accent: #c285ff;
-  --border: rgba(120,60,140,0.12);
-}
-
-/* --- Ensure content is not hidden under the bar --- */
-body { padding-top: var(--topbar-h); }
-
-/* --- Topbar --- */
+/* --- Topbar (nur innerhalb des Menü-Selectors) --- */
+#site-topbar,
 .cm-topbar {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: var(--topbar-h);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, var(--bg), rgba(0,0,0,0.02));
-  color: var(--fg);
-  border-bottom: 1px solid var(--border);
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  border-bottom: 1px solid var(--menu-border);
   backdrop-filter: blur(6px);
-  z-index: 2000;
+  z-index: 1200; /* reicht für die Leiste selbst */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-.cm-topbar-inner{
+/* Innere Breite / Layout */
+.cm-topbar-inner,
+#site-topbar > .cm-topbar-inner {
   width: 100%;
   max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 12px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:12px;
-  padding: 0 12px;
+  gap: 10px;
 }
 
-/* left / center / right */
-.cm-left, .cm-center, .cm-right { display:flex; align-items:center; gap:10px; }
-.cm-center { justify-content:center; flex:1; text-align:center; }
-.cm-left { justify-content:flex-start; }
-.cm-right { justify-content:flex-end; }
+/* Home link / title (inert zu theme) */
+.cm-home {
+  color: var(--menu-text);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background var(--menu-transition), color var(--menu-transition);
+}
+.cm-home:hover { background: rgba(255,255,255,0.03); color: var(--menu-hover); }
 
-/* home link */
-.cm-home { color:var(--fg); text-decoration:none; font-weight:600; padding:6px 10px; border-radius:8px; transition:background var(--transition); }
-.cm-home:hover { background: rgba(255,255,255,0.03); }
+/* Titel zentriert (nimmt textfarbe vom theme) */
+.cm-page-title { color: color-mix(in srgb, var(--menu-text) 75%, transparent 25%); font-weight:600; font-size:0.95rem; }
 
-/* page title */
-.cm-page-title { color:var(--muted); font-weight:600; font-size:0.95rem; }
-
-/* basic button */
+/* Buttons (neutral, benutzt --menu-text) */
 .cm-btn {
   background: transparent;
   border: none;
-  color: var(--muted);
+  color: var(--menu-text);
   padding: 8px 10px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background var(--transition), color var(--transition), transform var(--transition);
+  transition: transform var(--menu-transition), color var(--menu-transition);
 }
-.cm-btn:hover { background: rgba(255,255,255,0.02); color: var(--fg); transform: translateY(-1px); }
+.cm-btn:hover { transform: translateY(-1px); color: var(--menu-hover); }
 
-/* control wrapper */
-.cm-control { position: relative; display:inline-flex; align-items:center; }
+/* Controls container */
+.cm-control { position: relative; display: inline-flex; align-items:center; }
 
-/* --- Popovers / TOC dropdown --- */
-/* Always fixed and above everything else */
+/* --- Popovers und TOC (WICHTIG: fixed + sehr hoher z-index) --- */
+/* fixed + !important to avoid being trapped by other stacking contexts */
 .cm-popover,
 .cm-toc-dropdown {
   position: fixed !important;
-  background: var(--bg-alt);
-  min-width: 220px;
-  max-width: 420px;
-  color: var(--fg);
-  border-radius: var(--radius);
+  background: var(--popup-bg);
+  color: var(--menu-text);
+  border-radius: var(--menu-radius);
   padding: 10px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  min-width: 220px;
+  max-width: 480px;
+  box-shadow: var(--menu-shadow);
+  border: 1px solid var(--menu-border);
   display: none;
-  z-index: 5000; /* very high */
+  z-index: 99999 !important; /* sehr hoch: über allen Inhalten */
+  transition: opacity 160ms ease, transform 160ms ease;
+  will-change: transform, opacity, left, top;
 }
 
-/* visible state controlled via aria-hidden */
+/* sichtbar wenn aria-hidden="false" */
 .cm-popover[aria-hidden="false"],
-.cm-toc-dropdown[aria-hidden="false"] { display:block; }
+.cm-toc-dropdown[aria-hidden="false"] {
+  display: block;
+  opacity: 1;
+}
 
-/* popover close button */
+/* close-button (klein, klar) */
 .cm-popover-close {
   position: absolute;
   right: 8px;
-  top: 6px;
+  top: 8px;
   background: transparent;
   border: none;
-  color: var(--muted);
+  color: var(--menu-text);
   font-size: 16px;
   cursor: pointer;
+  padding: 4px;
 }
 
-/* inner basic styling */
-.cm-popover .account-block { padding:8px 0; }
-.cm-popover .muted { color: var(--muted); font-size:0.9rem; }
-
-/* small popover buttons */
-.cm-popbtn {
-  display:inline-block;
-  width:100%;
-  padding:8px 10px;
-  background:transparent;
-  border:none;
-  text-align:left;
-  color:var(--fg);
-  border-radius:6px;
-  cursor:pointer;
-}
-.cm-popbtn:hover { background: rgba(255,255,255,0.02); }
+/* popup inner layout */
+.cm-popover .muted { color: color-mix(in srgb, var(--menu-text) 65%, transparent 35%); font-size:0.9rem; }
+.cm-popbtn { display:block; width:100%; text-align:left; background:transparent; border:none; padding:8px 6px; border-radius:6px; color:var(--menu-text); cursor:pointer; }
+.cm-popbtn:hover { background: rgba(255,255,255,0.02); color: var(--menu-hover); }
 
 /* TOC inner placeholder */
-.cm-toc-inner { font-size:0.95rem; color:var(--muted); }
+.cm-toc-inner { color: color-mix(in srgb, var(--menu-text) 70%, transparent 30%); font-size:0.95rem; }
 
-/* --- Modal root (where JS may inject modals) --- */
-#cm-modals-root { position: relative; z-index: 5200; }
+/* --- Modals root (JS can inject into this) --- */
+#cm-modals-root { position: fixed; inset: 0; pointer-events: none; z-index: 100000 !important; }
+#cm-modals-root > * { pointer-events: auto; }
 
-/* --- Responsive: keep topbar only; nothing else interferes --- */
+/* --- Small responsive helper: on small screens, popovers span width with margin --- */
 @media (max-width: 780px) {
-  .cm-center .cm-page-title { display:none; }
-  .cm-popover, .cm-toc-dropdown { right: 8px; left: 8px; min-width: auto; width: calc(100% - 16px); }
+  .cm-popover, .cm-toc-dropdown {
+    left: 8px !important;
+    right: 8px !important;
+    top: calc(var(--topbar-h, 56px) + 8px) !important;
+    min-width: unset;
+    width: calc(100% - 16px);
+  }
 }
 
-/* small helper */
-.muted { color: var(--muted); }
+/* --- Safety: avoid touching global elements or theme variables ---
+   Do NOT set body, main, .content, :root theme vars here. This file only reads variables.
+*/
 
-/* allow optional manual override to show admin-control (if script sets body.admin) */
-body.admin .admin-control { display:inline-flex !important; }
+/* --- small accessibility focus styles --- */
+.cm-popbtn:focus, .cm-popover-close:focus, .cm-btn:focus, .cm-home:focus {
+  outline: 2px solid color-mix(in srgb, var(--menu-accent) 60%, transparent 40%);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* --- optional: if some parent creates stacking context with high z-index,
+   the fixed + z-index on popovers should still place them above. If you still
+   see popovers under content, increase this value (careful with enormous values). */
