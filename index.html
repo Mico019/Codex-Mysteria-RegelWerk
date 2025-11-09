@@ -1,76 +1,91 @@
 <!doctype html>
 <html lang="de" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Codex Mysteria — Anmeldung</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Codex Mysteria — Anmelden</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="login.css">
+  <link rel="stylesheet" href="auth.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <h1 class="title">Codex Mysteria</h1>
-      <p class="subtitle">Melde dich an, um dein Abenteuer zu beginnen.</p>
-    </div>
+  <main class="auth-wrap card">
+    <h1>Codex Mysteria</h1>
+    <p class="lead">Melde dich an, um dein Abenteuer zu starten.</p>
 
-    <div class="theme-controls" role="radiogroup" aria-label="Theme auswählen">
-      <button class="theme-btn" data-theme="dark">Dark</button>
-      <button class="theme-btn" data-theme="light">Light</button>
-      <button class="theme-btn" data-theme="fantasy">Fantasy</button>
-    </div>
-  </header>
+    <!-- Login form (nur Username + Passwort) -->
+    <form id="signin-form" autocomplete="on">
+      <div class="form-row">
+        <label for="signin-username">Benutzername</label>
+        <input id="signin-username" type="text" required autocomplete="username" />
+      </div>
 
-  <main class="container">
-    <section class="card login-card" style="max-width:520px;margin:18px auto">
-      <!-- Schnell-Login -->
-      <div id="quick-login" class="quick-login hidden">
-        <p style="margin:0 0 6px">Willkommen zurück, <strong id="ql-username">—</strong>!</p>
-        <p class="hint" style="margin:0">Du kannst dich schnell anmelden oder einen anderen Account auswählen.</p>
-        <div style="margin-top:12px;display:flex;gap:10px">
-          <button id="ql-btn" class="primary">Schnell anmelden</button>
-          <button id="ql-change" class="ghost">Anderer Account</button>
+      <div class="form-row">
+        <label for="signin-password">Passwort</label>
+        <input id="signin-password" type="password" required autocomplete="current-password" />
+      </div>
+
+      <div class="form-row actions-row">
+        <label style="display:flex;align-items:center;gap:8px">
+          <input id="signin-stay" type="checkbox" /> Angemeldet bleiben
+        </label>
+        <div style="margin-left:auto">
+          <button type="button" id="guest-btn" class="btn-guest">Als Gast</button>
         </div>
       </div>
 
-      <!-- Normales Login -->
-      <form id="login-form" class="login-form" autocomplete="on">
-        <label for="code">Account-Code</label>
-        <input id="code" name="code" required placeholder="z. B. PLAYER-START-001" />
+      <div class="form-row">
+        <button id="signin-submit" class="primary" type="submit">Anmelden</button>
+      </div>
 
-        <label for="username">Benutzername</label>
-        <input id="username" name="username" required placeholder="Dein Name" />
+      <p class="msg" id="signin-msg" aria-live="polite"></p>
 
-        <label for="password">Passwort</label>
-        <input id="password" name="password" type="password" required placeholder="Passwort" />
-
-        <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
-          <label class="checkbox" style="font-size:14px">
-            <input id="stay" type="checkbox" />
-            Eingeloggt bleiben
-          </label>
-          <button id="demo-btn" type="button" class="ghost" style="margin-left:auto">Demo</button>
-        </div>
-
-        <div style="margin-top:14px;display:flex;gap:8px">
-          <button id="login-btn" type="submit" class="primary" style="flex:1">Einloggen / Erstellen</button>
-        </div>
-
-        <p id="msg" class="hint" style="margin-top:12px"></p>
-      </form>
-
-      <hr style="margin:16px 0"/>
-      <p class="hint">Dies ist eine lokale (LocalStorage) Auth-Variante. Später serverseitig änderbar.</p>
-    </section>
+      <p class="switch">Noch keinen Account? <a href="register.html">Account erstellen</a></p>
+    </form>
   </main>
 
-  <footer class="site-footer">
-    <small>Codex Mysteria — lokal prototypisiert</small>
-  </footer>
-
   <script src="script.js" defer></script>
-  <script src="login.js" defer></script>
+  <script>
+    // Page-specific logic (keine Account-logic hier, benutzt window.CodexMysteria)
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('signin-form');
+      const msg = document.getElementById('signin-msg');
+      const guestBtn = document.getElementById('guest-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.textContent = '';
+        const username = document.getElementById('signin-username').value.trim();
+        const password = document.getElementById('signin-password').value;
+        const stay = document.getElementById('signin-stay').checked;
+
+        const res = await window.CodexMysteria.authenticate(username, password, stay);
+        if (!res.success) {
+          msg.textContent = res.message || 'Login fehlgeschlagen';
+          msg.className = 'msg error';
+          return;
+        }
+        msg.textContent = 'Erfolgreich angemeldet — Weiterleitung...';
+        msg.className = 'msg success';
+        setTimeout(() => { window.location.href = 'home.html'; }, 450);
+      });
+
+      guestBtn.addEventListener('click', () => {
+        window.CodexMysteria.guestLogin();
+        // guest has limited access — redirect to home
+        window.location.href = 'home.html';
+      });
+
+      // If there's already a session with stay=true -> auto-redirect
+      const sess = window.CodexMysteria.getSession && window.CodexMysteria.getSession();
+      if (sess && sess.stay && !sess.isGuest) {
+        // redirect directly to home
+        msg.textContent = 'Automatisch angemeldet — Weiterleitung...';
+        msg.className = 'msg success';
+        setTimeout(()=> window.location.href = 'home.html', 350);
+      }
+    });
+  </script>
 </body>
 </html>
