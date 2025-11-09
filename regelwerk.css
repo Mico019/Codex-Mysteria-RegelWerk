@@ -1,0 +1,115 @@
+#regelwerk-content {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 0.3rem;
+}
+
+.page-desc {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+.search-container {
+  position: relative;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+#rule-search {
+  width: 80%;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-light);
+  color: var(--text-color);
+}
+
+.suggestions {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background-color: var(--bg-light);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 10;
+  display: none;
+}
+
+.suggestions li {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.suggestions li:hover {
+  background-color: var(--highlight);
+}
+
+.chapter-card {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: var(--bg-light);
+  transition: transform 0.2s;
+}
+
+.chapter-card:hover {
+  transform: translateY(-3px);
+}
+
+.chapter-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.chapter-desc {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Unterschiedliche Schriftfarben pro Kapitel */
+.chapter-card:nth-child(3n+1) .chapter-title { color: var(--accent1); }
+.chapter-card:nth-child(3n+2) .chapter-title { color: var(--accent2); }
+.chapter-card:nth-child(3n+3) .chapter-title { color: var(--accent3); }
+
+:root.light {
+  --bg-light: #fefefe;
+  --text-color: #1a1a1a;
+  --border-color: #ccc;
+  --accent1: #7b5fc9;
+  --accent2: #2e8b57;
+  --accent3: #c96b4b;
+  --highlight: #ddd;
+}
+
+:root.dark {
+  --bg-light: #1e1e1e;
+  --text-color: #eee;
+  --border-color: #444;
+  --accent1: #a992ff;
+  --accent2: #57c98b;
+  --accent3: #e58b63;
+  --highlight: #333;
+}
+
+:root.fantasy {
+  --bg-light: #241c2b;
+  --text-color: #e8dff8;
+  --border-color: #4b2e5a;
+  --accent1: #bb86fc;
+  --accent2: #50fa7b;
+  --accent3: #f1fa8c;
+  --highlight: #3a2a46;
+}
