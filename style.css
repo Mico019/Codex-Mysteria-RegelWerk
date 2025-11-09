@@ -1,0 +1,169 @@
+/* style.css — zentrales Styling / Theme-Variablen
+   Für GitHub Pages: einfach in Projekt-Wurzel ablegen. */
+:root{
+  --bg: #0b1020;
+  --surface: #0f1724;
+  --muted: #9aa3b2;
+  --accent: #7c5cff;
+  --accent-2: #6ef3ff;
+  --card: rgba(255,255,255,0.03);
+  --glass: rgba(255,255,255,0.03);
+  --radius: 14px;
+  --max-width: 920px;
+  --transition: 200ms ease;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-fantasy: "Cinzel Decorative", serif;
+}
+
+/* Light theme overrides */
+:root[data-theme="light"], html[data-theme="light"]{
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --muted: #5a6470;
+  --accent: #4b3bff;
+  --accent-2: #0ea5a3;
+  --card: rgba(0,0,0,0.03);
+  color: #111827;
+}
+
+/* Fantasy theme overrides (magisch, andere Schrift) */
+:root[data-theme="fantasy"], html[data-theme="fantasy"]{
+  --bg: #071226;
+  --surface: linear-gradient(180deg, rgba(10,14,30,0.9), rgba(6,8,20,0.9));
+  --muted: #c9d6ff;
+  --accent: #9f7bff;
+  --accent-2: #7fffd4;
+  --card: rgba(255,255,255,0.03);
+  --font-sans: var(--font-sans);
+  --font-fantasy: "Cinzel Decorative", serif;
+}
+
+/* Global */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--muted);
+  font-family:var(--font-sans);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  transition:background var(--transition), color var(--transition);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* Header */
+.site-header{
+  width:100%;
+  max-width:var(--max-width);
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+}
+.brand .title{
+  margin:0;
+  font-weight:700;
+  font-size:20px;
+  color:var(--accent-2);
+  letter-spacing:0.5px;
+  text-shadow: 0 2px 8px rgba(124,92,255,0.12);
+}
+.brand .subtitle{
+  margin:0;
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* Theme controls */
+.theme-controls{display:flex;align-items:center;gap:8px}
+.theme-label{font-size:13px;color:var(--muted)}
+.theme-buttons{display:flex;gap:6px}
+.theme-btn{
+  padding:6px 10px;
+  border-radius:8px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.04);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all var(--transition);
+  font-size:13px;
+}
+.theme-btn[data-theme="fantasy"]{font-family:var(--font-fantasy)}
+.theme-btn:hover{transform:translateY(-2px)}
+.theme-btn.active{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  border:none;
+  color:white;
+  box-shadow:0 6px 24px rgba(0,0,0,0.35);
+}
+
+/* Main layout */
+.container{width:100%;max-width:var(--max-width);padding:20px}
+.login-card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  padding:22px;
+  box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+  margin:auto;
+  max-width:640px;
+  width:100%;
+}
+.login-card h2{margin-top:0;color:var(--accent-2);text-shadow:0 6px 20px rgba(124,92,255,0.06)}
+.hint{font-size:13px;margin:8px 0 16px;color:var(--muted)}
+
+label{display:block;font-size:13px;margin:10px 0 6px;color:var(--muted)}
+input[type="text"],input[type="password"],input[type="email"],input{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.04);
+  background:var(--card);
+  color:inherit;
+  outline:none;
+  font-size:15px;
+  transition:border-color var(--transition), transform var(--transition);
+}
+input:focus{border-color:var(--accent);transform:translateY(-1px)}
+
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.checkbox{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.actions{display:flex;gap:10px;margin-top:16px}
+.primary{
+  flex:1;
+  padding:10px 16px;
+  border-radius:10px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  box-shadow:0 8px 28px rgba(124,92,255,0.12);
+}
+.ghost{
+  padding:10px 12px;
+  border-radius:10px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.06);
+  color:var(--muted);
+  cursor:pointer;
+}
+
+/* message */
+.msg{margin-top:12px;font-size:13px;color:var(--muted)}
+.msg.error{color:#ff8b8b}
+.msg.success{color:#9fffcc}
+
+/* Footer */
+.site-footer{width:100%;max-width:var(--max-width);padding:18px;text-align:center;color:var(--muted);font-size:12px}
+
+/* Responsive */
+@media (max-width:640px){
+  .site-header{flex-direction:column;align-items:flex-start}
+  .theme-controls{align-self:stretch;justify-content:space-between;width:100%}
+  .actions{flex-direction:column}
+}
