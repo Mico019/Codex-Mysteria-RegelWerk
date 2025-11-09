@@ -190,3 +190,42 @@
   })();
 
 })();
+
+// === AUTO LOAD MENU SYSTEM ===
+// Lädt automatisch menu.css, menu.html und menu.js in jede Seite,
+// solange es ein <body> gibt.
+(function autoLoadMenu() {
+  const body = document.body;
+  if (!body) return;
+
+  // --- menu.css laden ---
+  if (!document.querySelector('link[href="menu.css"]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "menu.css";
+    document.head.appendChild(link);
+  }
+
+  // --- Platzhalter erstellen, falls nicht vorhanden ---
+  let container = document.getElementById("menu-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "menu-container";
+    body.insertBefore(container, body.firstChild);
+  }
+
+  // --- menu.html einfügen ---
+  fetch("menu.html")
+    .then(res => res.text())
+    .then(html => {
+      container.innerHTML = html;
+
+      // --- menu.js nachladen ---
+      const script = document.createElement("script");
+      script.src = "menu.js";
+      script.defer = true;
+      document.body.appendChild(script);
+    })
+    .catch(err => console.warn("Menü konnte nicht geladen werden:", err));
+})();
+
