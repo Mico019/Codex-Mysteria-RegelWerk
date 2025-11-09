@@ -1,0 +1,16 @@
+/* login.css — styles für index.html login-card (zusätzlich zu style.css) */
+.login-card{padding:18px}
+.login-card label{display:block;margin-top:10px;font-size:14px;color:var(--muted)}
+.login-card input{
+  width:100%;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--input-bg);
+  color:var(--text);
+  font-size:15px;
+  margin-top:6px;
+}
+.login-form .checkbox input{transform:scale(1.05)}
+#msg.error{color:#ff8b8b}
+#msg.success{color:#9fffcc}
