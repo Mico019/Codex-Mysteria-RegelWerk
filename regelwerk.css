@@ -1,12 +1,13 @@
-/* Regelwerk – Theme-kompatibel wie Home-Seite */
+/* Regelwerk – visuell passend zum globalen Theme (style.css) */
 
 .regelwerk-wrap {
   width: 100%;
-  max-width: 950px;
+  max-width: 1000px;
   margin: 6vh auto;
   padding: 1.5rem;
 }
 
+/* Kopfbereich */
 .regelwerk-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -15,24 +16,33 @@
 .regelwerk-header h1 {
   font-family: var(--font-fantasy);
   color: var(--accent-2);
-  margin-bottom: .25rem;
+  margin-bottom: 0.25rem;
+  letter-spacing: 1px;
 }
 
+.regelwerk-header p {
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Suchleiste */
 .regelwerk-search {
   text-align: center;
-  margin: 1rem auto 2rem;
+  margin: 1.5rem auto 2rem;
 }
 
 .regelwerk-search input {
   width: 100%;
-  max-width: 400px;
-  padding: .6rem 1rem;
+  max-width: 420px;
+  padding: 0.7rem 1rem;
+  background: var(--input-bg);
+  color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--text);
   font-size: 1rem;
-  transition: border-color .2s, box-shadow .2s;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .regelwerk-search input:focus {
@@ -44,64 +54,73 @@
 /* Kapitelübersicht */
 .chapter-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.2rem;
 }
 
-.chapter-card {
+/* Einzelnes Kapitel (zusammenklappbar) */
+.chapter {
   background: var(--surface);
-  color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1rem;
-  text-decoration: none;
-  transition: transform .2s, box-shadow .2s;
-  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  transition: transform .2s ease, box-shadow .2s ease;
+  overflow: hidden;
 }
 
-.chapter-card:hover {
+.chapter:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 
-/* Detailbereich */
-.chapter-details {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-top: 1rem;
-  padding: 1rem 1.25rem;
-  display: none;
-  color: var(--text);
-}
-
-.chapter-card.open + .chapter-details {
-  display: block;
-}
-
-/* Unterkapitel-Links */
-.subsection-list {
+/* Titelzeile */
+.chapter summary {
+  cursor: pointer;
   list-style: none;
-  padding-left: 1rem;
-  margin: .5rem 0 0;
-}
-
-.subsection-list a {
-  display: block;
-  padding: .25rem 0;
+  padding: 1rem 1.25rem;
   color: var(--accent-2);
-  text-decoration: none;
-  font-size: .95rem;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
 
-.subsection-list a:hover {
-  text-decoration: underline;
+.chapter summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Inhalt, wenn aufgeklappt */
+.chapter .chapter-content {
+  padding: 0.75rem 1.25rem 1rem;
+  color: var(--text);
 }
 
 .chapter-desc {
   color: var(--muted);
-  font-size: .9rem;
-  margin-bottom: .5rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Unterkapitel */
+.subsection-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+}
+
+.subsection-list li {
+  margin: 0.25rem 0;
+}
+
+.subsection-list a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color .2s;
+}
+
+.subsection-list a:hover {
+  color: var(--accent-2);
+  text-decoration: underline;
 }
 
 /* Fußbereich */
@@ -111,4 +130,5 @@
   color: var(--muted);
   font-size: 14px;
 }
+
 
