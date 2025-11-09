@@ -1,115 +1,153 @@
-#regelwerk-content {
-  padding: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
+/* regelwerk.css — theme-safe, keine globalen Farb-/Layout-Overrides
+   Wichtig: diese Datei setzt KEINE Theme-Variablen oder body-padding.
+   Sie verwendet nur vorhandene Variablen (falls vorhanden) und hat sinnvolle fallbacks.
+*/
+
+:root { /* nur fallbacks, keine festen Theme-Entscheidungen */
+  --card-bg: transparent;
+  --card-border: rgba(255,255,255,0.06);
+  --muted: rgba(255,255,255,0.65);
+  --accent: #8e78ff;
+  --link-color: inherit;
 }
 
+/* Container: benutzt die vorhandene Seitenstruktur; keine margins am body setzen */
+#regelwerk-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px; /* kleine Innenabstände, kein top-margin auf body */
+  box-sizing: border-box;
+}
+
+/* Titel und Beschreibung */
 .page-title {
   text-align: center;
-  font-size: 2rem;
-  margin-bottom: 0.3rem;
+  font-size: 1.9rem;
+  margin: 0 0 6px;
+  color: var(--menu-text, inherit);
 }
-
 .page-desc {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  opacity: 0.8;
+  text-align:center;
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
-.search-container {
-  position: relative;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
+/* Suche */
+.search-container { display:flex; justify-content:center; margin-bottom:18px; position:relative; }
 #rule-search {
-  width: 80%;
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background-color: var(--bg-light);
-  color: var(--text-color);
+  width: 84%;
+  max-width: 760px;
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--menu-text, inherit);
+  box-sizing: border-box;
 }
-
 .suggestions {
-  position: absolute;
+  position:absolute;
+  top: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
-  width: 80%;
-  background-color: var(--bg-light);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 10;
-  display: none;
+  width: 84%;
+  max-width: 760px;
+  background: var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  z-index: 60;
+  display:none;
+  max-height: 320px;
+  overflow:auto;
 }
-
 .suggestions li {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+  padding:10px 12px;
+  list-style:none;
+  cursor:pointer;
+  color: var(--menu-text, inherit);
 }
+.suggestions li:hover { background: rgba(255,255,255,0.02); }
 
-.suggestions li:hover {
-  background-color: var(--highlight);
-}
-
+/* Kapitel-Karten (sauber, neutral, keine feste Farben) */
 .chapter-card {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: var(--bg-light);
-  transition: transform 0.2s;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  position: relative;
 }
 
+/* leichte Hover-Ansprache (nicht invasiv) */
 .chapter-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
 }
 
-.chapter-title {
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+/* Header der Karte: Titel + Aktionen nebeneinander */
+.chapter-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
 }
-
+.chapter-title a {
+  font-size:1.15rem;
+  font-weight:700;
+  color: var(--link-color);
+  text-decoration: none;
+}
 .chapter-desc {
-  font-size: 0.9rem;
-  opacity: 0.8;
+  margin-top:8px;
+  color: var(--muted);
+  font-size:0.95rem;
 }
 
-/* Unterschiedliche Schriftfarben pro Kapitel */
-.chapter-card:nth-child(3n+1) .chapter-title { color: var(--accent1); }
-.chapter-card:nth-child(3n+2) .chapter-title { color: var(--accent2); }
-.chapter-card:nth-child(3n+3) .chapter-title { color: var(--accent3); }
+/* Aktionen (Details-Button, Öffnen-Link) */
+.chapter-actions { display:flex; gap:8px; align-items:center; }
+.detail-toggle {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  color: var(--menu-text, inherit);
+}
+.detail-toggle:hover { background: rgba(255,255,255,0.02); }
 
-:root.light {
-  --bg-light: #fefefe;
-  --text-color: #1a1a1a;
-  --border-color: #ccc;
-  --accent1: #7b5fc9;
-  --accent2: #2e8b57;
-  --accent3: #c96b4b;
-  --highlight: #ddd;
+/* "Öffnen" Link-Stil */
+.open-chapter {
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:6px;
+  text-decoration:none;
+  border:1px solid var(--card-border);
+  color: var(--link-color);
 }
 
-:root.dark {
-  --bg-light: #1e1e1e;
-  --text-color: #eee;
-  --border-color: #444;
-  --accent1: #a992ff;
-  --accent2: #57c98b;
-  --accent3: #e58b63;
-  --highlight: #333;
+/* Details-Bereich (anfangs versteckt) */
+.chapter-details {
+  margin-top:12px;
+  padding-top:8px;
+  border-top: 1px dashed var(--card-border);
+  display:none; /* sichtbar durch JS */
+  color: var(--menu-text, inherit);
+  font-size: 0.95rem;
 }
+.chapter-details[aria-hidden="false"] { display:block; }
 
-:root.fantasy {
-  --bg-light: #241c2b;
-  --text-color: #e8dff8;
-  --border-color: #4b2e5a;
-  --accent1: #bb86fc;
-  --accent2: #50fa7b;
-  --accent3: #f1fa8c;
-  --highlight: #3a2a46;
+/* Unterkapitel-Liste */
+.chapter-details ul { margin:6px 0 0 0; padding-left: 16px; }
+.chapter-details li { margin:6px 0; }
+.chapter-details a { color: var(--link-color); text-decoration: none; }
+.chapter-details a:hover { text-decoration: underline; }
+
+/* Kleine Bildschirme: Abstand anpassen, Karten gestapelt bleiben */
+@media (max-width: 720px) {
+  #regelwerk-content { padding: 18px 12px; }
+  .search-container { margin-bottom: 12px; }
+  .chapter-header { flex-direction: column; align-items: flex-start; gap:8px; }
+  .chapter-actions { width:100%; justify-content:flex-start; gap:6px; }
 }
