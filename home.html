@@ -1,83 +1,37 @@
 <!doctype html>
 <html lang="de" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Codex Mysteria — Home</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Codex Mysteria – Spielerportal</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="home.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <h1 class="title">Codex Mysteria</h1>
-      <p class="subtitle">Dein Kontrollzentrum</p>
-    </div>
+  <main class="home-wrap">
+    <header class="home-header">
+      <h1 id="user-welcome">Willkommen, Spieler</h1>
+      <p id="user-role"></p>
+    </header>
 
-    <nav class="top-menu" aria-label="Hauptmenü">
-      <div id="menu-placeholder" class="menu-placeholder">
-        <!-- menu.html wird hier später dynamisch eingefügt -->
-        <button id="menu-guide-btn" class="ghost">Kurzanleitung zum Menü</button>
+    <section id="player-actions" class="card section">
+      <h2>Deine Optionen</h2>
+      <div class="action-list">
+        <a href="regelwerk.html" class="action-card">📖 Regelwerk</a>
+        <a href="charaktere.html" class="action-card">🎭 Charaktere</a>
+        <a href="abenteuer.html" class="action-card">🗺️ Abenteuer</a>
+        <a href="notizen.html" class="action-card">📝 Notizen</a>
       </div>
-
-      <div class="user-block">
-        <div class="user-info">
-          <span id="user-name" class="user-name">—</span>
-          <small id="user-role" class="user-role">—</small>
-        </div>
-        <div class="user-actions">
-          <button id="logout-btn" class="ghost">Abmelden</button>
-        </div>
-      </div>
-    </nav>
-  </header>
-
-  <main class="container home-container">
-    <section class="welcome-card card">
-      <h2>Willkommen</h2>
-      <p class="lead">Dies ist dein persönliches Dashboard. Von hier aus gelangst du schnell zu Regelwerk, Charakteren und Werkzeuge.</p>
-
-      <div class="meta">
-        <div><strong>Benutzer:</strong> <span id="meta-username">—</span></div>
-        <div><strong>Rolle:</strong> <span id="meta-role">—</span></div>
-        <div><strong>Letzte Aktivität:</strong> <span id="meta-lastactive">—</span></div>
-      </div>
-
-      <hr/>
-
-      <div class="cta-grid">
-        <a href="regelwerk.html" class="card link-card">Regelwerk</a>
-        <a href="charaktere.html" class="card link-card">Charaktere</a>
-        <a href="monster.html" class="card link-card">Monsterhandbuch</a>
-      
-
-        <div class="card dm-only">DM-Werkzeuge (nur DM/Admin)</div>
-        <div class="card admin-only">Admin-Konsole (nur Admin)</div>
-      </div>
-
-      <p class="note hint">Admin/DM-Bereiche sind lokal ausgeblendet, wenn du nicht die Rechte hast.</p>
     </section>
+
+    <footer class="home-footer">
+      <button id="logout-btn" class="ghost">Abmelden</button>
+    </footer>
   </main>
 
-  <!-- Menu-Guide Modal -->
-  <div id="menu-guide-modal" class="modal" aria-hidden="true">
-    <div class="modal-panel card">
-      <button class="modal-close" id="modal-close" aria-label="Schließen">&times;</button>
-      <h3 id="menu-guide-title">Kurzanleitung: Menü</h3>
-      <p class="modal-body">Sobald das Menü geladen ist, findest du hier Kapitel, Dropdowns und Schnellaktionen. Admin- und DM-Optionen erscheinen nur, wenn dein Account die Berechtigung hat.</p>
-      <div class="modal-actions">
-        <button id="modal-ok" class="primary">Verstanden</button>
-      </div>
-    </div>
-  </div>
-
-  <footer class="site-footer">
-    <small>Codex Mysteria · lokal prototypisiert</small>
-  </footer>
-
-  <script src="script.js" defer></script>
-  <script src="home.js" defer></script>
+  <script src="script.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>
