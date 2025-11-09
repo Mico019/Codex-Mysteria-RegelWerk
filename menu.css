@@ -1,159 +1,108 @@
-/* menu.css — Theme-safe + Popover z-index fix
-   - Verwendet ausschließlich CSS-Variablen, die vom main CSS gesetzt werden:
-     --menu-bg, --menu-text, --menu-accent, --menu-hover, --popup-bg, --menu-border, --topbar-h
-   - Wenn die Variablen fehlen, gibt es unaufdringliche Fallbacks (keine starken Farben).
-   - Popovers/Dropdowns sind fixed und haben sehr hohen z-index, damit sie nie unter Content landen.
-   - Überschreibt KEINE globalen Farbvariablen oder Body-Eigenschaften.
-*/
-
-/* --- fallback-werte (sanft, überschreiben keine globalen theme-entscheidungen) --- */
-:root {
-  --menu-bg: var(--menu-bg, rgba(0,0,0,0.6));
-  --menu-text: var(--menu-text, inherit);
-  --menu-accent: var(--menu-accent, rgba(125, 100, 255, 0.9));
-  --menu-hover: var(--menu-hover, rgba(255,255,255,0.85));
-  --popup-bg: var(--popup-bg, rgba(16,16,20,0.96));
-  --menu-border: var(--menu-border, rgba(255,255,255,0.04));
-  --topbar-h: var(--topbar-h, 56px);
-  --menu-radius: 10px;
-  --menu-shadow: 0 12px 40px rgba(0,0,0,0.45);
-  --menu-transition: 180ms ease;
-}
-
-/* --- Topbar (nur innerhalb des Menü-Selectors) --- */
-#site-topbar,
-.cm-topbar {
+/* === Grundstruktur für Top-Menü === */
+.menu-bar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--menu-bg, var(--background-color, #1a1a1a));
+  color: var(--menu-text, var(--text-color, #eee));
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: var(--topbar-h);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--menu-bg);
-  color: var(--menu-text);
-  border-bottom: 1px solid var(--menu-border);
-  backdrop-filter: blur(6px);
-  z-index: 1200; /* reicht für die Leiste selbst */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  height: 50px;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
-/* Innere Breite / Layout */
-.cm-topbar-inner,
-#site-topbar > .cm-topbar-inner {
-  width: 100%;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 12px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 10px;
-}
-
-/* Home link / title (inert zu theme) */
-.cm-home {
-  color: var(--menu-text);
-  text-decoration: none;
-  font-weight: 600;
-  padding: 6px 10px;
-  border-radius: 8px;
-  transition: background var(--menu-transition), color var(--menu-transition);
-}
-.cm-home:hover { background: rgba(255,255,255,0.03); color: var(--menu-hover); }
-
-/* Titel zentriert (nimmt textfarbe vom theme) */
-.cm-page-title { color: color-mix(in srgb, var(--menu-text) 75%, transparent 25%); font-weight:600; font-size:0.95rem; }
-
-/* Buttons (neutral, benutzt --menu-text) */
-.cm-btn {
-  background: transparent;
+.menu-bar button {
+  background: none;
   border: none;
-  color: var(--menu-text);
-  padding: 8px 10px;
-  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+  padding: 0.4rem 0.8rem;
   cursor: pointer;
-  transition: transform var(--menu-transition), color var(--menu-transition);
+  transition: background 0.2s ease;
 }
-.cm-btn:hover { transform: translateY(-1px); color: var(--menu-hover); }
+.menu-bar button:hover,
+.menu-bar button:focus {
+  background: rgba(255,255,255,0.1);
+}
 
-/* Controls container */
-.cm-control { position: relative; display: inline-flex; align-items:center; }
-
-/* --- Popovers und TOC (WICHTIG: fixed + sehr hoher z-index) --- */
-/* fixed + !important to avoid being trapped by other stacking contexts */
-.cm-popover,
-.cm-toc-dropdown {
-  position: fixed !important;
-  background: var(--popup-bg);
-  color: var(--menu-text);
-  border-radius: var(--menu-radius);
-  padding: 10px;
-  min-width: 220px;
-  max-width: 480px;
-  box-shadow: var(--menu-shadow);
-  border: 1px solid var(--menu-border);
+/* === Drop-Down Grundlayout === */
+.dropdown {
+  position: relative;
+}
+.dropdown-menu {
   display: none;
-  z-index: 99999 !important; /* sehr hoch: über allen Inhalten */
-  transition: opacity 160ms ease, transform 160ms ease;
-  will-change: transform, opacity, left, top;
-}
-
-/* sichtbar wenn aria-hidden="false" */
-.cm-popover[aria-hidden="false"],
-.cm-toc-dropdown[aria-hidden="false"] {
-  display: block;
-  opacity: 1;
-}
-
-/* close-button (klein, klar) */
-.cm-popover-close {
   position: absolute;
-  right: 8px;
-  top: 8px;
-  background: transparent;
-  border: none;
-  color: var(--menu-text);
-  font-size: 16px;
-  cursor: pointer;
-  padding: 4px;
+  top: 100%;
+  right: 0;                       /* rechtsbündig öffnen */
+  min-width: 220px;
+  background: var(--dropdown-bg, var(--background-alt, #2a2a2a));
+  color: var(--dropdown-text, var(--text-color, #fff));
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  border-radius: 6px;
+  z-index: 2000;
+  overflow: hidden;
+}
+.dropdown.open .dropdown-menu {
+  display: block;
+  animation: dropdownFade 0.15s ease-out;
 }
 
-/* popup inner layout */
-.cm-popover .muted { color: color-mix(in srgb, var(--menu-text) 65%, transparent 35%); font-size:0.9rem; }
-.cm-popbtn { display:block; width:100%; text-align:left; background:transparent; border:none; padding:8px 6px; border-radius:6px; color:var(--menu-text); cursor:pointer; }
-.cm-popbtn:hover { background: rgba(255,255,255,0.02); color: var(--menu-hover); }
+@keyframes dropdownFade {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-/* TOC inner placeholder */
-.cm-toc-inner { color: color-mix(in srgb, var(--menu-text) 70%, transparent 30%); font-size:0.95rem; }
+/* === Drop-Down Inhalt === */
+.dropdown-menu h4 {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+}
+.dropdown-menu button,
+.dropdown-menu a {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  text-decoration: none;
+}
+.dropdown-menu button:hover,
+.dropdown-menu a:hover {
+  background: rgba(255,255,255,0.1);
+}
 
-/* --- Modals root (JS can inject into this) --- */
-#cm-modals-root { position: fixed; inset: 0; pointer-events: none; z-index: 100000 !important; }
-#cm-modals-root > * { pointer-events: auto; }
+/* === Inhaltsverzeichnis-Liste === */
+.section-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.section-list::-webkit-scrollbar {
+  width: 6px;
+}
+.section-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
 
-/* --- Small responsive helper: on small screens, popovers span width with margin --- */
-@media (max-width: 780px) {
-  .cm-popover, .cm-toc-dropdown {
-    left: 8px !important;
-    right: 8px !important;
-    top: calc(var(--topbar-h, 56px) + 8px) !important;
-    min-width: unset;
-    width: calc(100% - 16px);
+/* === Kleinere Bildschirme === */
+@media (max-width: 700px) {
+  .menu-bar {
+    flex-wrap: wrap;
+    height: auto;
+  }
+  .dropdown-menu {
+    right: 10px;
+    min-width: 180px;
   }
 }
-
-/* --- Safety: avoid touching global elements or theme variables ---
-   Do NOT set body, main, .content, :root theme vars here. This file only reads variables.
-*/
-
-/* --- small accessibility focus styles --- */
-.cm-popbtn:focus, .cm-popover-close:focus, .cm-btn:focus, .cm-home:focus {
-  outline: 2px solid color-mix(in srgb, var(--menu-accent) 60%, transparent 40%);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-/* --- optional: if some parent creates stacking context with high z-index,
-   the fixed + z-index on popovers should still place them above. If you still
-   see popovers under content, increase this value (careful with enormous values). */
