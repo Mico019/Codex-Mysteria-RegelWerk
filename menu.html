@@ -1,0 +1,99 @@
+<!-- menu.html
+     Dieses Fragment enthält die Menü-Struktur. menu.js wird es in jede Seite einfügen
+     (z.B. in ein <div id="menu-container"></div> im Header).
+     Achte darauf: menu.js entscheidet, welche Bereiche (admin-only, dm-only, player-only)
+     angezeigt werden, basierend auf window.CodexMysteria.getSession().
+-->
+<nav id="site-menu" class="site-menu" aria-label="Hauptnavigation">
+  <div class="menu-inner">
+
+    <!-- Left: brand / hamburger -->
+    <div class="menu-left">
+      <button id="menu-toggle" class="menu-btn menu-hamburger" aria-label="Menü öffnen">
+        <!-- simple hamburger icon -->
+        <span class="hb-line"></span><span class="hb-line"></span><span class="hb-line"></span>
+      </button>
+      <a href="home.html" class="menu-brand" aria-label="Startseite">
+        <span class="brand-title">Codex Mysteria</span>
+      </a>
+    </div>
+
+    <!-- Center: primary nav -->
+    <div class="menu-center" id="menu-center">
+      <ul class="menu-list" role="menubar" id="main-menu-list">
+        <li role="none"><a role="menuitem" href="home.html" data-page="home">Start</a></li>
+        <li role="none"><a role="menuitem" href="regelwerk.html" data-page="regelwerk">Regelwerk</a></li>
+        <li role="none"><a role="menuitem" href="charaktere.html" data-page="charaktere">Charaktere</a></li>
+        <li role="none"><a role="menuitem" href="monster.html" data-page="monster">Monsterhandbuch</a></li>
+        <!-- dynamic TOC holder (menu.js füllt bei Bedarf) -->
+      </ul>
+    </div>
+
+    <!-- Right: contextual nav / actions -->
+    <div class="menu-right">
+      <!-- breadcrumb / page indicator -->
+      <div id="page-indicator" class="page-indicator" aria-hidden="false">
+        <span id="current-page-name">Start</span>
+      </div>
+
+      <!-- button: shows description (pulled from page via hook) -->
+      <button id="page-desc-btn" class="menu-btn" title="Seitenbeschreibung anzeigen">i</button>
+
+      <!-- Account dropdown -->
+      <div class="account-area" id="account-area">
+        <button id="account-toggle" class="menu-btn account-btn" aria-haspopup="true" aria-expanded="false">
+          <span id="account-username">—</span>
+        </button>
+        <div class="account-popover" id="account-popover" role="menu" aria-hidden="true">
+          <div class="account-block">
+            <strong id="popover-username">—</strong>
+            <div id="popover-role" class="muted">Rolle</div>
+          </div>
+          <ul class="account-actions">
+            <li><button data-action="account-info">Account-Informationen</button></li>
+            <li><button data-action="settings">Einstellungen</button></li>
+            <li><button data-action="logout">Abmelden</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Admin options (desktop dropdown; hidden if not admin) -->
+      <div class="admin-area admin-only" id="admin-area">
+        <button id="admin-toggle" class="menu-btn" aria-haspopup="true" aria-expanded="false">Admin ▾</button>
+        <div class="admin-popover" id="admin-popover" aria-hidden="true">
+          <ul>
+            <li><a href="home_dm.html" data-action="view-as-dm">Ansicht: DM</a></li>
+            <li><a href="home.html" data-action="view-as-player">Ansicht: Spieler</a></li>
+            <li><a href="nutzer.html">Nutzerverwaltung</a></li>
+            <li><a href="logs.html">Systemprotokolle</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div> <!-- .menu-right -->
+  </div>
+
+  <!-- Sidebar / Toc (scroll-assist) - wird auf Desktop rechts oder als off-canvas gezeigt -->
+  <aside id="menu-toc" class="menu-toc" aria-label="Seitennavigation">
+    <div class="toc-inner">
+      <h4>Inhalt</h4>
+      <nav id="toc-list" aria-label="Seitenabschnitte">
+        <!-- menu.js füllt die Liste automatisch aus (z.B. h2/h3). -->
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Mobile off-canvas panel (same items as .menu-list and additional controls) -->
+  <div id="mobile-panel" class="mobile-panel" aria-hidden="true">
+    <div class="mobile-panel-inner">
+      <button id="mobile-close" class="menu-btn">Schließen ✕</button>
+      <nav id="mobile-nav" aria-label="Mobile Navigation">
+        <ul id="mobile-menu-list"></ul>
+      </nav>
+      <div class="mobile-actions">
+        <button data-action="settings">Einstellungen</button>
+        <button data-action="account-info">Account</button>
+      </div>
+    </div>
+  </div>
+</nav>
