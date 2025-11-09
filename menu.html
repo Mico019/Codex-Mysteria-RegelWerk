@@ -1,51 +1,104 @@
-<header id="topMenu">
-  <div class="menu-container">
+<!-- menu.html
+     Codex Mysteria - Menüsystem (vollversion)
+     Enthält Top-Header, Desktop-Sidebar, TOC-Sidebar und Mobile Panel.
+     Popovers enthalten Close-Buttons für sauberes Schließen.
+-->
+<nav id="main-header" class="cm-header" aria-label="Hauptnavigation">
+  <div class="menu-inner">
+
+    <!-- Left: brand + hamburger for mobile -->
     <div class="menu-left">
-      <button id="homeBtn">🏠 Home</button>
-      <button id="guideBtn">❓ Menü-Guide</button>
-      <button id="sectionsBtn">📜 Kapitelübersicht</button>
+      <button id="menu-toggle" class="menu-btn menu-hamburger" aria-label="Menü öffnen">
+        <span class="hb-line"></span><span class="hb-line"></span><span class="hb-line"></span>
+      </button>
+      <a href="home.html" class="menu-brand" id="brand-link" aria-label="Startseite">
+        <span class="brand-title">Codex Mysteria</span>
+      </a>
     </div>
 
+    <!-- Center: primary nav -->
+    <div class="menu-center" id="menu-center">
+      <ul class="menu-list" role="menubar" id="main-menu-list">
+        <li role="none"><a role="menuitem" href="home.html" data-page="home">Start</a></li>
+        <li role="none"><a role="menuitem" href="notizen.html" data-page="notes">Notizen</a></li>
+        <li role="none"><a role="menuitem" href="kampagnen.html" data-page="campaigns">Kampagnen</a></li>
+        <!-- Hinweis: spezifische Links (Regelwerk/Monster/Charaktere) wurden bewusst weggelassen -->
+      </ul>
+    </div>
+
+    <!-- Right: page indicator, description, account, admin -->
     <div class="menu-right">
-      <button id="settingsBtn">⚙️ Einstellungen</button>
-      <button id="logoutBtn">🚪 Logout</button>
-      <button id="accountSwitchBtn" class="admin-only">👤 Account wechseln</button>
-    </div>
-  </div>
 
-  <!-- Popup: Menü-Guide -->
-  <div id="popupGuide" class="popup">
-    <div class="popup-content">
-      <h2>Menü-Guide</h2>
-      <p>🏠 <b>Home</b> – führt dich zur Startseite deines Account-Typs.</p>
-      <p>📜 <b>Kapitelübersicht</b> – zeigt Navigationslinks zu Abschnitten der aktuellen Seite.</p>
-      <p>⚙️ <b>Einstellungen</b> – hier kannst du das Farbschema ändern.</p>
-      <p>🚪 <b>Logout</b> – meldet dich sicher ab.</p>
-      <p>👤 <b>Account wechseln</b> – (nur Admin) erlaubt dir, die Ansicht anderer Rollen zu testen.</p>
-      <button class="close-popup">Schließen</button>
-    </div>
-  </div>
-
-  <!-- Popup: Einstellungen -->
-  <div id="popupSettings" class="popup">
-    <div class="popup-content">
-      <h2>Einstellungen</h2>
-      <div class="setting-group">
-        <label>Farbschema:</label>
-        <button class="theme-btn" data-theme="light">Hell</button>
-        <button class="theme-btn" data-theme="dark">Dunkel</button>
-        <button class="theme-btn" data-theme="mystic">Mystisch</button>
+      <div id="page-indicator" class="page-indicator" aria-hidden="false">
+        <span id="current-page-name">Start</span>
       </div>
-      <button class="close-popup">Schließen</button>
-    </div>
+
+      <button id="page-desc-btn" class="menu-btn" title="Seitenbeschreibung anzeigen">i</button>
+
+      <div class="account-area" id="account-area">
+        <button id="account-toggle" class="menu-btn account-btn" aria-haspopup="true" aria-expanded="false">
+          <span id="account-username">—</span>
+        </button>
+
+        <div class="account-popover cm-popover" id="account-popover" role="menu" aria-hidden="true" data-minwidth="240px">
+          <button class="cm-popover-close" aria-label="Schließen">×</button>
+          <div class="account-block">
+            <strong id="popover-username">—</strong>
+            <div id="popover-role" class="muted">Rolle</div>
+          </div>
+          <hr>
+          <ul class="account-actions">
+            <li><button data-action="account-info">Account-Informationen</button></li>
+            <li><button data-action="settings">Einstellungen</button></li>
+            <li><button data-action="logout">Abmelden</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="admin-area admin-control" id="admin-area" style="display:none;">
+        <button id="admin-toggle" class="menu-btn" aria-haspopup="true" aria-expanded="false">Admin ▾</button>
+        <div id="admin-popover" class="cm-popover" aria-hidden="true" data-minwidth="240px">
+          <button class="cm-popover-close" aria-label="Schließen">×</button>
+          <h4>Admin-Optionen</h4>
+          <ul>
+            <li><button data-action="view-as-admin">Ansicht: Admin</button></li>
+            <li><button data-action="view-as-dm">Ansicht: DM</button></li>
+            <li><button data-action="view-as-player">Ansicht: Spieler</button></li>
+            <li><button data-action="view-as-guest">Ansicht: Gast</button></li>
+            <li><a href="home_admin.html" data-action="goto-admin">Admin-Startseite</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div> <!-- .menu-right -->
   </div>
 
-  <!-- Popup: Kapitelübersicht -->
-  <div id="popupSections" class="popup">
-    <div class="popup-content">
-      <h2>Kapitelübersicht</h2>
-      <nav id="sectionLinks"></nav>
-      <button class="close-popup">Schließen</button>
+  <!-- Sidebar (Desktop) -->
+  <aside id="sidebar-menu" class="cm-sidebar" aria-label="Hauptnavigation">
+    <ul id="sidebar-list" role="menu">
+      <li><a href="home.html" data-page="home">🏠 Start</a></li>
+      <li><a href="notizen.html" data-page="notes">📝 Notizen</a></li>
+      <li><a href="kampagnen.html" data-page="campaigns">📜 Kampagnen</a></li>
+      <li><a href="bibliothek.html" data-page="library">📚 Bibliothek</a></li>
+    </ul>
+  </aside>
+
+  <!-- TOC (rechts) -->
+  <aside id="toc-sidebar" class="cm-toc" aria-label="Seitennavigation">
+    <h4>Inhalt</h4>
+    <nav id="toc-list" aria-label="Seitenabschnitte"></nav>
+  </aside>
+
+  <!-- Mobile Off-canvas panel -->
+  <div id="mobile-panel" class="cm-mobile" aria-hidden="true">
+    <div class="cm-mobile-inner">
+      <button id="mobile-close" class="menu-btn" aria-label="Schließen">✕</button>
+      <nav id="mobile-nav" aria-label="Mobile Navigation">
+        <ul id="mobile-menu-list"></ul>
+      </nav>
     </div>
   </div>
-</header>
+</nav>
+
+<!-- Menü-CSS laden (falls du es separat hast) -->
+<link rel="stylesheet" href="menu.css">
