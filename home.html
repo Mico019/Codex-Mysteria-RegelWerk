@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Codex Mysteria — Home</title>
+
+  <!-- Fonts (wie index.html) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Zentrales Styling -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Home-spezifisches Styling -->
+  <link rel="stylesheet" href="home.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <h1 class="title">Codex Mysteria</h1>
+      <p class="subtitle">Dein Kontrollzentrum</p>
+    </div>
+
+    <nav class="top-menu" aria-label="Hauptmenü">
+      <!-- Platzhalter-Navigationsleiste; das eigentliche Menu wird später via menu.html geladen -->
+      <div id="menu-placeholder" class="menu-placeholder">
+        <button id="menu-guide-btn" class="ghost">Kurzanleitung zum Menü</button>
+      </div>
+
+      <div class="user-block" aria-live="polite">
+        <div class="user-info">
+          <span id="user-name" class="user-name">—</span>
+          <small id="user-role" class="user-role">—</small>
+        </div>
+        <div class="user-actions">
+          <button id="logout-btn" class="ghost">Abmelden</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container home-container" role="main">
+    <section class="welcome-card">
+      <h2>Willkommen</h2>
+      <p class="lead">Dies ist dein persönliches Dashboard. Hier findest du schnellen Zugriff auf Kapitel, Werkzeuge und deine Kampagnen.</p>
+
+      <div class="meta">
+        <div><strong>Benutzer:</strong> <span id="meta-username">—</span></div>
+        <div><strong>Rolle:</strong> <span id="meta-role">—</span></div>
+        <div><strong>Letzte Aktivität:</strong> <span id="meta-lastactive">—</span></div>
+      </div>
+
+      <hr/>
+
+      <div class="cta-grid">
+        <a href="regelwerk.html" class="card link-card">Regelwerk</a>
+        <a href="charaktere.html" class="card link-card">Charaktere</a>
+        <a href="kampf.html" class="card link-card">Kampfregeln</a>
+
+        <!-- Sichtbar nur für DM / Admin -->
+        <div class="card dm-only">DM-Werkzeuge (nur DM/Admin)</div>
+
+        <!-- Sichtbar nur für Admin -->
+        <div class="card admin-only">Admin-Konsole (nur Admin)</div>
+      </div>
+
+      <p class="note">Hinweis: Admin/DM-Bereiche werden lokal ausgeblendet, falls dein Account keine Berechtigung hat. Auf einem Server werden wir später separate geschützte Routen verwenden.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>Codex Mysteria · lokal prototypisiert</small>
+  </footer>
+
+  <!-- Menü-Guide Modal (wird von menu.html später ggf. benutzt; hier ist die Basis-Implementierung) -->
+  <div id="menu-guide-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="menu-guide-title">
+    <div class="modal-panel" role="document">
+      <button class="modal-close" id="modal-close" aria-label="Schließen">&times;</button>
+      <h3 id="menu-guide-title">Kurzanleitung: Menü</h3>
+      <p class="modal-body">Das Menü wird später geladen. Hier findest du dann Kapitel, Dropdowns und Schnellaktionen. Admin- bzw. DM-Optionen erscheinen nur, wenn dein Account die Berechtigung hat.</p>
+      <ul>
+        <li>Regelwerk: Öffnet die Kapitelübersicht</li>
+        <li>Charaktere: Verwalte Charakterbögen</li>
+        <li>Tools: DM-Tools & Notizen (sichtbar für DM/Admin)</li>
+      </ul>
+      <div class="modal-actions">
+        <button id="modal-ok" class="primary">Verstanden</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zentrales Script (enthält window.CodexMysteria API) -->
+  <script src="script.js" defer></script>
+  <!-- Home-spezifisches Script -->
+  <script src="home.js" defer></script>
+</body>
+</html>
