@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Codex Mysteria — Login</title>
+
+  <!-- Fonts (für Fantasy-Mode wird Cinzel Decorative verwendet) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <h1 class="title">Codex Mysteria</h1>
+      <p class="subtitle">Pfade des Äthers — Regelwerk & Spielportal</p>
+    </div>
+    <div class="theme-controls" aria-hidden="false">
+      <label class="theme-label">Theme:</label>
+      <div class="theme-buttons" role="radiogroup" aria-label="Theme auswählen">
+        <button class="theme-btn" data-theme="dark" aria-checked="true">Dark</button>
+        <button class="theme-btn" data-theme="light">Light</button>
+        <button class="theme-btn" data-theme="fantasy">Fantasy</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="login-card" aria-labelledby="login-heading">
+      <h2 id="login-heading">Einloggen / Account erstellen</h2>
+      <p class="hint">Gib deinen **Account-Code**, Benutzernamen und ein Passwort ein. Der Code bestimmt deinen Kontotyp (Admin / DM / Spieler).</p>
+
+      <form id="login-form" autocomplete="on">
+        <label for="code">Account-Code</label>
+        <input id="code" name="code" required placeholder="z. B. DM-ARCANA-001" />
+
+        <label for="username">Benutzername</label>
+        <input id="username" name="username" required placeholder="Dein Spielername" />
+
+        <label for="password">Passwort</label>
+        <input id="password" name="password" type="password" required placeholder="Passwort" />
+
+        <div class="row">
+          <label class="checkbox">
+            <input id="stay" type="checkbox" />
+            Eingeloggt bleiben
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="login-btn" type="submit" class="primary">Einloggen / Erstellen</button>
+          <button id="demo-btn" type="button" class="ghost">Demo (Schnellstart)</button>
+        </div>
+
+        <p id="msg" class="msg" aria-live="polite"></p>
+      </form>
+
+      <hr />
+      <p class="footnote">Hinweis: Dies ist ein lokales (LocalStorage) Account-System. Später kann es auf einen Server migriert werden.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>Codex Mysteria — local prototype · &copy; Projekt</small>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
