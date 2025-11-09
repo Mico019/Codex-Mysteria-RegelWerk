@@ -1,70 +1,76 @@
 <!doctype html>
 <html lang="de" data-theme="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Codex Mysteria — Login</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Codex Mysteria — Anmeldung</title>
 
-  <!-- Fonts (für Fantasy-Mode wird Cinzel Decorative verwendet) -->
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="login.css">
 </head>
 <body>
   <header class="site-header">
     <div class="brand">
       <h1 class="title">Codex Mysteria</h1>
-      <p class="subtitle">Pfade des Äthers — Regelwerk & Spielportal</p>
+      <p class="subtitle">Melde dich an, um dein Abenteuer zu beginnen.</p>
     </div>
-    <div class="theme-controls" aria-hidden="false">
-      <label class="theme-label">Theme:</label>
-      <div class="theme-buttons" role="radiogroup" aria-label="Theme auswählen">
-        <button class="theme-btn" data-theme="dark" aria-checked="true">Dark</button>
-        <button class="theme-btn" data-theme="light">Light</button>
-        <button class="theme-btn" data-theme="fantasy">Fantasy</button>
-      </div>
+
+    <div class="theme-controls" role="radiogroup" aria-label="Theme auswählen">
+      <button class="theme-btn" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+      <button class="theme-btn" data-theme="fantasy">Fantasy</button>
     </div>
   </header>
 
   <main class="container">
-    <section class="login-card" aria-labelledby="login-heading">
-      <h2 id="login-heading">Einloggen / Account erstellen</h2>
-      <p class="hint">Gib deinen **Account-Code**, Benutzernamen und ein Passwort ein. Der Code bestimmt deinen Kontotyp (Admin / DM / Spieler).</p>
+    <section class="card login-card" style="max-width:520px;margin:18px auto">
+      <!-- Schnell-Login -->
+      <div id="quick-login" class="quick-login hidden">
+        <p style="margin:0 0 6px">Willkommen zurück, <strong id="ql-username">—</strong>!</p>
+        <p class="hint" style="margin:0">Du kannst dich schnell anmelden oder einen anderen Account auswählen.</p>
+        <div style="margin-top:12px;display:flex;gap:10px">
+          <button id="ql-btn" class="primary">Schnell anmelden</button>
+          <button id="ql-change" class="ghost">Anderer Account</button>
+        </div>
+      </div>
 
-      <form id="login-form" autocomplete="on">
+      <!-- Normales Login -->
+      <form id="login-form" class="login-form" autocomplete="on">
         <label for="code">Account-Code</label>
-        <input id="code" name="code" required placeholder="z. B. DM-ARCANA-001" />
+        <input id="code" name="code" required placeholder="z. B. PLAYER-START-001" />
 
         <label for="username">Benutzername</label>
-        <input id="username" name="username" required placeholder="Dein Spielername" />
+        <input id="username" name="username" required placeholder="Dein Name" />
 
         <label for="password">Passwort</label>
         <input id="password" name="password" type="password" required placeholder="Passwort" />
 
-        <div class="row">
-          <label class="checkbox">
+        <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+          <label class="checkbox" style="font-size:14px">
             <input id="stay" type="checkbox" />
             Eingeloggt bleiben
           </label>
+          <button id="demo-btn" type="button" class="ghost" style="margin-left:auto">Demo</button>
         </div>
 
-        <div class="actions">
-          <button id="login-btn" type="submit" class="primary">Einloggen / Erstellen</button>
-          <button id="demo-btn" type="button" class="ghost">Demo (Schnellstart)</button>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button id="login-btn" type="submit" class="primary" style="flex:1">Einloggen / Erstellen</button>
         </div>
 
-        <p id="msg" class="msg" aria-live="polite"></p>
+        <p id="msg" class="hint" style="margin-top:12px"></p>
       </form>
 
-      <hr />
-      <p class="footnote">Hinweis: Dies ist ein lokales (LocalStorage) Account-System. Später kann es auf einen Server migriert werden.</p>
+      <hr style="margin:16px 0"/>
+      <p class="hint">Dies ist eine lokale (LocalStorage) Auth-Variante. Später serverseitig änderbar.</p>
     </section>
   </main>
 
   <footer class="site-footer">
-    <small>Codex Mysteria — local prototype · &copy; Projekt</small>
+    <small>Codex Mysteria — lokal prototypisiert</small>
   </footer>
 
   <script src="script.js" defer></script>
+  <script src="login.js" defer></script>
 </body>
 </html>
