@@ -1,0 +1,76 @@
+/* auth.css — Styles für index.html (Login) und register.html (Account erstellen) */
+
+.auth-wrap{
+  width:100%;
+  max-width:520px;
+  margin:8vh auto;
+  padding:18px;
+  border-radius:12px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  box-shadow:0 12px 40px rgba(0,0,0,0.55);
+}
+
+.auth-wrap h1{
+  font-family: var(--font-fantasy);
+  text-align:center;
+  margin:0 0 8px;
+  color:var(--accent-2);
+}
+
+.auth-wrap p.lead{
+  text-align:center;
+  margin:0 0 14px;
+  color:var(--muted);
+}
+
+/* form layout: stacked fields (aligned vertically) */
+.form-row{margin-bottom:12px}
+label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+input[type="text"], input[type="password"], input[type="email"]{
+  width:100%;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--input-bg);
+  color:var(--text);
+  font-size:15px;
+}
+
+/* small actions row */
+.actions-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:10px;
+}
+
+/* switch link (create <-> login) */
+.switch {
+  text-align:center;
+  margin-top:12px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* message box */
+.msg {
+  margin-top:10px;
+  font-size:14px;
+}
+.msg.error { color:#ff8b8b }
+.msg.success { color:#9fffcc }
+
+/* guest button highlight */
+.btn-guest {
+  background: transparent;
+  border:1px dashed var(--border);
+  color:var(--muted);
+  padding:8px 10px;
+  border-radius:10px;
+}
+
+/* compact on mobile */
+@media (max-width:520px){
+  .auth-wrap{margin-top:6vh;padding:14px}
+}
