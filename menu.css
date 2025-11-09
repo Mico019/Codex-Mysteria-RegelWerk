@@ -1,315 +1,183 @@
-/* ==============================
-   Codex Mysteria – Menüsystem
-   Stil: Mystisch & Klar
-   Autor: Mico & GPT
-   ============================== */
+/* menu.css — dezente Top-Leiste, unaufdringlich, orientiert sich am Seiten-Hintergrund */
 
-:root {
-  --color-bg: #0f0f12;
-  --color-bg-alt: #1a1a1e;
-  --color-fg: #eaeaea;
-  --color-accent: #7a5fff;
-  --color-accent-light: #a892ff;
-  --color-border: #2d2d35;
-  --header-height: 60px;
-  --sidebar-width: 250px;
-  --transition: 0.25s ease;
-  --blur-bg: rgba(255, 255, 255, 0.05);
-  font-family: 'Cinzel', 'Merriweather', serif;
+/* Farben und Variablen: nutzt vorhandene CSS-Variablen aus style.css, Fallbacks */
+:root{
+  --cm-bg: rgba(255,255,255,0.02);
+  --cm-fg: #e8eef8;
+  --cm-border: rgba(255,255,255,0.04);
+  --cm-accent: rgba(122,95,255,0.95);
+  --cm-radius: 10px;
+  --cm-height: 56px;
+  --cm-transition: 180ms ease;
+  --cm-muted: rgba(232,238,248,0.75);
 }
 
-/* Light Mode */
-[data-theme="light"] {
-  --color-bg: #f6f6f8;
-  --color-bg-alt: #ffffff;
-  --color-fg: #1c1c1c;
-  --color-accent: #3d3dd1;
-  --color-accent-light: #5959f9;
-  --color-border: #dcdce0;
-  --blur-bg: rgba(0, 0, 0, 0.03);
+/* Falls global theme-variablen vorhanden sind, benutze sie (sanfte Übernahme) */
+:root[data-theme="light"]{
+  --cm-bg: rgba(0,0,0,0.03);
+  --cm-fg: #0b1220;
+  --cm-border: rgba(0,0,0,0.06);
+  --cm-accent: rgba(60,60,200,0.95);
 }
 
-/* Fantasy Mode */
-[data-theme="fantasy"] {
-  --color-bg: #1a0f26;
-  --color-bg-alt: #2c1840;
-  --color-fg: #f7f2ff;
-  --color-accent: #b06aff;
-  --color-accent-light: #d49bff;
-  --color-border: #442a63;
-  --blur-bg: rgba(128, 64, 192, 0.08);
+:root[data-theme="fantasy"]{
+  --cm-bg: rgba(20,6,30,0.55);
+  --cm-fg: #f2eaff;
+  --cm-border: rgba(120,60,150,0.12);
+  --cm-accent: rgba(192,120,255,0.95);
 }
 
-/* ==============================
-   Grundlayout
-   ============================== */
-
-.cm-header {
+/* Topbar Grund */
+.cm-topbar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: var(--header-height);
-  background: var(--color-bg-alt);
-  color: var(--color-fg);
+  right: 0;
+  height: var(--cm-height);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  border-bottom: 1px solid var(--color-border);
-  z-index: 1000;
+  z-index: 1200;
   backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, var(--cm-bg), rgba(0,0,0,0.02));
+  border-bottom: 1px solid var(--cm-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
-.cm-header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 1.1rem;
-}
-
-.cm-header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  color: var(--color-fg);
-  cursor: pointer;
-  padding: 0.4rem;
-  border-radius: 6px;
-  transition: background var(--transition);
-}
-
-.icon-btn:hover {
-  background: var(--blur-bg);
-}
-
-.material-icons {
-  font-size: 1.5rem;
-  vertical-align: middle;
-}
-
-/* ==============================
-   Seitenleiste (Sidebar)
-   ============================== */
-
-.cm-sidebar {
-  position: fixed;
-  top: var(--header-height);
-  left: 0;
-  width: var(--sidebar-width);
-  height: calc(100vh - var(--header-height));
-  background: var(--color-bg-alt);
-  border-right: 1px solid var(--color-border);
-  padding: 1rem 0;
-  overflow-y: auto;
-  transition: transform var(--transition);
-  z-index: 900;
-}
-
-.cm-sidebar.hidden {
-  transform: translateX(-100%);
-}
-
-.cm-sidebar ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.cm-sidebar a {
-  display: block;
-  padding: 0.8rem 1.5rem;
-  color: var(--color-fg);
-  text-decoration: none;
-  font-weight: 500;
-  transition: background var(--transition), color var(--transition);
-}
-
-.cm-sidebar a:hover,
-.cm-sidebar a.active {
-  background: var(--color-accent);
-  color: #fff;
-}
-
-/* ==============================
-   Inhaltsnavigation (TOC)
-   ============================== */
-
-.cm-toc {
-  position: fixed;
-  top: var(--header-height);
-  right: 0;
-  width: 200px;
-  height: calc(100vh - var(--header-height));
-  background: var(--color-bg-alt);
-  border-left: 1px solid var(--color-border);
-  padding: 0.8rem;
-  overflow-y: auto;
-  font-size: 0.9rem;
-}
-
-.cm-toc h4 {
-  margin-top: 0;
-  text-align: center;
-  font-weight: 600;
-  color: var(--color-accent-light);
-}
-
-.cm-toc a {
-  display: block;
-  color: var(--color-fg);
-  text-decoration: none;
-  margin: 0.3rem 0;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-}
-
-.cm-toc a:hover {
-  background: var(--blur-bg);
-}
-
-/* ==============================
-   Mobile Menü
-   ============================== */
-
-.cm-mobile {
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: var(--color-bg);
-  color: var(--color-fg);
+/* Innenlayout */
+.cm-topbar-inner {
   width: 100%;
-  height: 100%;
-  z-index: 2000;
-  display: none;
-  flex-direction: column;
-  transition: opacity var(--transition);
-}
-
-.cm-mobile[aria-hidden="false"] {
+  max-width: 1100px;
+  margin: 0 auto;
   display: flex;
-}
-
-.cm-mobile-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-border);
+  justify-content: space-between;
+  padding: 0 14px;
+  gap: 12px;
 }
 
-.cm-mobile ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Links/Mitte/Rechts */
+.cm-left, .cm-center, .cm-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.cm-mobile li {
-  border-bottom: 1px solid var(--color-border);
-}
+.cm-left { flex: 0 0 auto; }
+.cm-center { flex: 1 1 auto; justify-content: center; text-align: center; }
+.cm-right { flex: 0 0 auto; }
 
-.cm-mobile a {
-  display: block;
-  padding: 1rem;
+/* Home Button (unaufdringlich) */
+.cm-home {
+  color: var(--cm-fg);
   text-decoration: none;
-  color: var(--color-fg);
-}
-
-.cm-mobile a:hover {
-  background: var(--blur-bg);
-}
-
-/* ==============================
-   Popover / Modals
-   ============================== */
-
-.cm-popover {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: var(--color-bg-alt);
-  color: var(--color-fg);
-  border: 1px solid var(--color-border);
+  padding: 8px 12px;
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  padding: 0.6rem;
-  min-width: 180px;
-  z-index: 1500;
-  display: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background var(--cm-transition), color var(--cm-transition);
+}
+.cm-home:hover {
+  background: rgba(0,0,0,0.06);
 }
 
-.cm-popover[aria-hidden="false"] {
+/* Page title (zentriert, dezent) */
+.cm-page-title {
+  font-weight: 600;
+  color: var(--cm-muted);
+  font-size: 0.98rem;
+}
+
+/* Buttons / Controls */
+.cm-btn {
+  background: transparent;
+  border: none;
+  color: var(--cm-fg);
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background var(--cm-transition), color var(--cm-transition);
+}
+.cm-btn:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+/* Controls group spacing */
+.cm-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Popover (TOC, Account, Admin) */
+.cm-popover,
+.cm-toc-dropdown {
+  position: absolute;
+  top: calc(var(--cm-height) + 8px);
+  right: 0;
+  min-width: 220px;
+  max-width: 420px;
+  background: inherit;
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--cm-border);
+  padding: 10px;
+  border-radius: var(--cm-radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  display: none;
+  color: var(--cm-fg);
+  z-index: 1300;
+}
+.cm-popover[aria-hidden="false"],
+.cm-toc-dropdown[aria-hidden="false"] {
   display: block;
 }
 
+/* Popover content elements */
 .cm-popover button,
 .cm-popover a {
-  display: block;
   width: 100%;
+  text-align: left;
   background: none;
   border: none;
-  color: var(--color-fg);
-  padding: 0.4rem 0.6rem;
-  text-align: left;
+  padding: 8px 6px;
+  border-radius: 6px;
+  color: var(--cm-fg);
   cursor: pointer;
-  border-radius: 4px;
-  transition: background var(--transition);
-  text-decoration: none;
 }
-
 .cm-popover button:hover,
 .cm-popover a:hover {
-  background: var(--blur-bg);
+  background: rgba(0,0,0,0.05);
 }
 
-/* ==============================
-   Scrollbars (dezent)
-   ============================== */
+/* TOC list styling (simple) */
+.cm-toc-dropdown a {
+  display: block;
+  padding: 6px 6px;
+  color: var(--cm-fg);
+  text-decoration: none;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+.cm-toc-dropdown a:hover { background: rgba(0,0,0,0.04); }
 
-.cm-sidebar::-webkit-scrollbar,
-.cm-toc::-webkit-scrollbar {
-  width: 6px;
+/* Account popover inner layout */
+.account-control #account-username {
+  margin-right: 6px;
+  color: var(--cm-fg);
+  font-weight: 600;
 }
 
-.cm-sidebar::-webkit-scrollbar-thumb,
-.cm-toc::-webkit-scrollbar-thumb {
-  background: var(--color-accent);
-  border-radius: 3px;
+/* Admin control is hidden by default; menu.js will show it */
+.admin-control { display: none; }
+
+/* Small screens: compress, keep topbar only */
+@media (max-width: 720px) {
+  .cm-page-title { display: none; }
+  .cm-toc-dropdown { right: 8px; left: 8px; }
+  .cm-topbar-inner { padding: 0 10px; }
 }
 
-/* ==============================
-   Responsives Verhalten
-   ============================== */
-
-@media (max-width: 900px) {
-  .cm-sidebar,
-  .cm-toc {
-    display: none;
-  }
-}
-
-/* ==============================
-   Kleine Extras
-   ============================== */
-
-#site-title {
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-
-.cm-current-page {
-  opacity: 0.7;
-  font-size: 1rem;
-}
-
-.admin-area h4 {
-  margin: 0 0 0.4rem;
-  font-size: 1rem;
-  color: var(--color-accent-light);
-}
+/* Keep the topbar non-intrusive — content should start below it.
+   If your pages still have old headers, you can hide them once menu is active. */
+body { padding-top: var(--cm-height); }
