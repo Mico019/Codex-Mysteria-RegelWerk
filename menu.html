@@ -1,99 +1,62 @@
-<!-- =========================
- Codex Mysteria - Menüsystem
- Version: v2.0
- Dieses Menü wird von menu.js dynamisch erweitert & gesteuert.
-========================= -->
+<!-- menu.html — einfache, dezente Top-Leiste (kopiere als menu.html) -->
+<nav id="site-topbar" class="cm-topbar" role="navigation" aria-label="Hauptmenü">
+  <div class="cm-topbar-inner">
 
-<nav id="main-header" class="cm-header">
-  <!-- Linke Seite: Branding + Seitenname -->
-  <div class="cm-header-left">
-    <button id="menu-toggle" class="icon-btn" aria-label="Menü öffnen">
-      <span class="material-icons">menu</span>
-    </button>
-    <span id="site-title">Codex Mysteria</span>
-    <span id="current-page-name" class="cm-current-page">–</span>
-  </div>
-
-  <!-- Rechte Seite: Navigation / Account -->
-  <div class="cm-header-right">
-    <!-- Seitenbeschreibung / Hilfe -->
-    <button id="page-desc-btn" class="icon-btn" title="Seitenbeschreibung / Hilfe">
-      <span class="material-icons">info</span>
-    </button>
-
-    <!-- Admin-Knopf (nur sichtbar für Admins) -->
-    <div id="admin-area" class="admin-area" style="display:none; position:relative;">
-      <button id="admin-toggle" class="icon-btn" aria-label="Adminmenü öffnen">
-        <span class="material-icons">admin_panel_settings</span>
-      </button>
-      <div id="admin-popover" class="cm-popover" aria-hidden="true">
-        <h4>Admin-Optionen</h4>
-        <ul>
-          <li><a href="#" data-action="view-as-dm">Ansicht als Spielleiter</a></li>
-          <li><a href="#" data-action="view-as-player">Ansicht als Spieler</a></li>
-          <li><a href="#" data-action="view-as-guest">Ansicht als Gast</a></li>
-        </ul>
-      </div>
+    <!-- Linke Seite: Home-Button (JS setzt href je nach Rolle) -->
+    <div class="cm-left">
+      <a id="home-btn" class="cm-home" href="#" title="Startseite">Start</a>
     </div>
 
-    <!-- Account -->
-    <div id="account-area" class="account-area">
-      <button id="account-toggle" aria-haspopup="true" aria-expanded="false">
-        <span id="account-username">Gast</span>
-        <span class="material-icons">account_circle</span>
-      </button>
-      <div id="account-popover" class="cm-popover" aria-hidden="true">
-        <div class="popover-header">
-          <strong id="popover-username">Gast</strong><br>
-          <small id="popover-role">Gast</small>
+    <!-- Mitte: Seitenname / Platzhalter (optional) -->
+    <div class="cm-center">
+      <span id="current-page-title" class="cm-page-title" aria-hidden="true"></span>
+    </div>
+
+    <!-- Rechte Seite: Controls -->
+    <div class="cm-right">
+
+      <!-- Seiten-TOC (Dropdown). menu.js füllt #toc-list automatisch. -->
+      <div class="cm-control">
+        <button id="toc-toggle" class="cm-btn" aria-expanded="false" aria-controls="toc-list" title="Abschnitte anzeigen">
+          Inhaltsverzeichnis ▾
+        </button>
+        <div id="toc-list" class="cm-toc-dropdown" role="menu" aria-hidden="true">
+          <!-- menu.js füllt diesen Bereich mit Links (li > a) -->
         </div>
-        <hr>
-        <button data-action="account-info">Account-Informationen</button>
-        <button data-action="settings">Einstellungen</button>
-        <button data-action="logout">Abmelden</button>
       </div>
-    </div>
-  </div>
+
+      <!-- Menü-Guide: öffnet Popup mit Erklärungen (menu.js zeigt Modal) -->
+      <button id="menu-guide-btn" class="cm-btn" title="Kurzanleitung (Guide)">Guide</button>
+
+      <!-- Einstellungen: öffnet Einstellungs-Modal (menu.js) -->
+      <button id="settings-btn" class="cm-btn" title="Einstellungen">Einstellungen</button>
+
+      <!-- Accountbereich (zeigt Benutzername). menu.js aktualisiert Namen -->
+      <div class="cm-control account-control">
+        <button id="account-toggle" class="cm-btn" aria-expanded="false" aria-controls="account-popover" title="Account-Optionen">
+          <span id="account-username">—</span> ▾
+        </button>
+        <div id="account-popover" class="cm-popover" role="menu" aria-hidden="true">
+          <button data-action="account-info">Account-Informationen</button>
+          <button data-action="logout" id="logout-btn">Abmelden</button>
+        </div>
+      </div>
+
+      <!-- Admin: Ansicht wechseln (sichtbar nur für Admins; menu.js zeigt/verbirgt) -->
+      <div class="cm-control admin-control" style="display:none;">
+        <button id="admin-view-btn" class="cm-btn" aria-haspopup="true" aria-expanded="false" title="Admin: Ansicht wechseln">
+          Admin ▾
+        </button>
+        <div id="admin-popover" class="cm-popover" role="menu" aria-hidden="true">
+          <button data-action="view-as-admin">Ansicht: Admin</button>
+          <button data-action="view-as-dm">Ansicht: DM</button>
+          <button data-action="view-as-player">Ansicht: Spieler</button>
+          <button data-action="view-as-guest">Ansicht: Gast</button>
+        </div>
+      </div>
+
+    </div><!-- .cm-right -->
+
+  </div><!-- .cm-topbar-inner -->
 </nav>
 
-<!-- =======================
-   Desktop-Menü-Leiste
-======================= -->
-<aside id="sidebar-menu" class="cm-sidebar">
-  <ul id="main-menu-list" role="menu"></ul>
-</aside>
-
-
-<!-- =======================
-   Inhalts-Navigation (TOC)
-======================= -->
-<aside id="toc-sidebar" class="cm-toc">
-  <h4>Abschnitte</h4>
-  <nav id="toc-list"></nav>
-</aside>
-
-<!-- =======================
-   Mobile Menü Panel
-======================= -->
-<div id="mobile-panel" class="cm-mobile" aria-hidden="true">
-  <div class="cm-mobile-header">
-    <span>Menü</span>
-    <button id="mobile-close" class="icon-btn" aria-label="Schließen">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-  <nav>
-    <ul id="mobile-menu-list"></ul>
-  </nav>
-</div>
-
-<!-- =======================
-   Platz für Modals:
-   werden von menu.js generiert:
-   - Einstellungen
-   - Account-Modal
-   - Seitenbeschreibung
-   - Guide
-======================= -->
-
-<link rel="stylesheet" href="menu.css">
