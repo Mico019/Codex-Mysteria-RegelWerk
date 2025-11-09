@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Codex Mysteria — Account erstellen</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+  <main class="auth-wrap card">
+    <h1>Neuen Account erstellen</h1>
+    <p class="lead">Gib einen Account-Code ein, um den Kontotyp festzulegen (Admin / DM / Spieler).</p>
+
+    <form id="create-form">
+      <div class="form-row">
+        <label for="create-username">Benutzername</label>
+        <input id="create-username" type="text" required autocomplete="username" />
+      </div>
+
+      <div class="form-row">
+        <label for="create-password">Passwort</label>
+        <input id="create-password" type="password" required autocomplete="new-password" />
+      </div>
+
+      <div class="form-row">
+        <label for="create-code">Account-Code</label>
+        <input id="create-code" type="text" required placeholder="z. B. DM-ARCANA-001" />
+      </div>
+
+      <div class="form-row">
+        <button id="create-submit" class="primary" type="submit">Account erstellen</button>
+      </div>
+
+      <p class="msg" id="create-msg" aria-live="polite"></p>
+
+      <p class="switch">Bereits registriert? <a href="index.html">Anmelden</a></p>
+    </form>
+  </main>
+
+  <script src="script.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('create-form');
+      const msg = document.getElementById('create-msg');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.textContent = '';
+
+        const username = document.getElementById('create-username').value.trim();
+        const password = document.getElementById('create-password').value;
+        const code     = document.getElementById('create-code').value.trim();
+
+        if (!username || !password || !code) {
+          msg.textContent = 'Bitte alle Felder ausfüllen.';
+          msg.className = 'msg error';
+          return;
+        }
+
+        // createAccount uses hashing internally
+        const res = await window.CodexMysteria.createAccount(username, password, code);
+
+        if (!res.success) {
+          msg.textContent = res.message || 'Account konnte nicht erstellt werden.';
+          msg.className = 'msg error';
+          return;
+        }
+
+        msg.textContent = 'Account erstellt — Weiterleitung zum Dashboard...';
+        msg.className = 'msg success';
+        setTimeout(() => { window.location.href = 'home.html'; }, 700);
+      });
+    });
+  </script>
+</body>
+</html>
