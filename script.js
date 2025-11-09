@@ -167,3 +167,32 @@
   });
 
 })();
+document.addEventListener("DOMContentLoaded", () => {
+  const accStr = localStorage.getItem(window.CodexMysteria.ACCOUNT_KEY);
+  if (!accStr) return;
+  const acc = JSON.parse(accStr);
+
+  // Prüfe, ob wir "stayLoggedIn" oder gespeicherten Nutzer haben
+  if (acc.username) {
+    const ql = document.getElementById("quick-login");
+    const qlUser = document.getElementById("ql-username");
+    const loginForm = document.getElementById("login-form");
+
+    if (ql && qlUser && loginForm) {
+      qlUser.textContent = acc.username;
+      ql.classList.remove("hidden");
+      loginForm.classList.add("hidden");
+
+      document.getElementById("ql-btn").addEventListener("click", () => {
+        // Direkt weiter zur Home-Seite
+        window.location.href = "home.html";
+      });
+
+      document.getElementById("ql-change").addEventListener("click", () => {
+        // Erlaube Neu-Login
+        ql.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+      });
+    }
+  }
+});
