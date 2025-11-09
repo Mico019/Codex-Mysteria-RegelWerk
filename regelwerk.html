@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regelwerk – Codex Mystica</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="menu.css">
+  <link rel="stylesheet" href="regelwerk.css">
+  <script src="script.js" defer></script>
+  <script src="menu.js" defer></script>
+  <script src="regelwerk.js" defer></script>
+</head>
+<body>
+  <header id="main-header"></header>
+
+  <main id="regelwerk-content">
+    <h1 class="page-title">Das große Regelwerk</h1>
+    <p class="page-desc">Hier findest du alle Kapitel des Spiels, unterteilt in Themenbereiche. Nutze die Suchleiste, um bestimmte Regeln oder Unterkapitel schnell zu finden.</p>
+
+    <div class="search-container">
+      <input type="text" id="rule-search" placeholder="🔍 Nach einem Kapitel oder Unterkapitel suchen...">
+      <ul id="search-suggestions" class="suggestions"></ul>
+    </div>
+
+    <section id="chapter-list">
+      <!-- Kapitel werden per JS hier eingefügt -->
+    </section>
+  </main>
+</body>
+</html>
