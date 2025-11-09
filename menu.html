@@ -1,62 +1,51 @@
-<!-- menu.html — einfache, dezente Top-Leiste (kopiere als menu.html) -->
-<nav id="site-topbar" class="cm-topbar" role="navigation" aria-label="Hauptmenü">
-  <div class="cm-topbar-inner">
-
-    <!-- Linke Seite: Home-Button (JS setzt href je nach Rolle) -->
-    <div class="cm-left">
-      <a id="home-btn" class="cm-home" href="#" title="Startseite">Start</a>
+<header id="topMenu">
+  <div class="menu-container">
+    <div class="menu-left">
+      <button id="homeBtn">🏠 Home</button>
+      <button id="guideBtn">❓ Menü-Guide</button>
+      <button id="sectionsBtn">📜 Kapitelübersicht</button>
     </div>
 
-    <!-- Mitte: Seitenname / Platzhalter (optional) -->
-    <div class="cm-center">
-      <span id="current-page-title" class="cm-page-title" aria-hidden="true"></span>
+    <div class="menu-right">
+      <button id="settingsBtn">⚙️ Einstellungen</button>
+      <button id="logoutBtn">🚪 Logout</button>
+      <button id="accountSwitchBtn" class="admin-only">👤 Account wechseln</button>
     </div>
+  </div>
 
-    <!-- Rechte Seite: Controls -->
-    <div class="cm-right">
+  <!-- Popup: Menü-Guide -->
+  <div id="popupGuide" class="popup">
+    <div class="popup-content">
+      <h2>Menü-Guide</h2>
+      <p>🏠 <b>Home</b> – führt dich zur Startseite deines Account-Typs.</p>
+      <p>📜 <b>Kapitelübersicht</b> – zeigt Navigationslinks zu Abschnitten der aktuellen Seite.</p>
+      <p>⚙️ <b>Einstellungen</b> – hier kannst du das Farbschema ändern.</p>
+      <p>🚪 <b>Logout</b> – meldet dich sicher ab.</p>
+      <p>👤 <b>Account wechseln</b> – (nur Admin) erlaubt dir, die Ansicht anderer Rollen zu testen.</p>
+      <button class="close-popup">Schließen</button>
+    </div>
+  </div>
 
-      <!-- Seiten-TOC (Dropdown). menu.js füllt #toc-list automatisch. -->
-      <div class="cm-control">
-        <button id="toc-toggle" class="cm-btn" aria-expanded="false" aria-controls="toc-list" title="Abschnitte anzeigen">
-          Inhaltsverzeichnis ▾
-        </button>
-        <div id="toc-list" class="cm-toc-dropdown" role="menu" aria-hidden="true">
-          <!-- menu.js füllt diesen Bereich mit Links (li > a) -->
-        </div>
+  <!-- Popup: Einstellungen -->
+  <div id="popupSettings" class="popup">
+    <div class="popup-content">
+      <h2>Einstellungen</h2>
+      <div class="setting-group">
+        <label>Farbschema:</label>
+        <button class="theme-btn" data-theme="light">Hell</button>
+        <button class="theme-btn" data-theme="dark">Dunkel</button>
+        <button class="theme-btn" data-theme="mystic">Mystisch</button>
       </div>
+      <button class="close-popup">Schließen</button>
+    </div>
+  </div>
 
-      <!-- Menü-Guide: öffnet Popup mit Erklärungen (menu.js zeigt Modal) -->
-      <button id="menu-guide-btn" class="cm-btn" title="Kurzanleitung (Guide)">Guide</button>
-
-      <!-- Einstellungen: öffnet Einstellungs-Modal (menu.js) -->
-      <button id="settings-btn" class="cm-btn" title="Einstellungen">Einstellungen</button>
-
-      <!-- Accountbereich (zeigt Benutzername). menu.js aktualisiert Namen -->
-      <div class="cm-control account-control">
-        <button id="account-toggle" class="cm-btn" aria-expanded="false" aria-controls="account-popover" title="Account-Optionen">
-          <span id="account-username">—</span> ▾
-        </button>
-        <div id="account-popover" class="cm-popover" role="menu" aria-hidden="true">
-          <button data-action="account-info">Account-Informationen</button>
-          <button data-action="logout" id="logout-btn">Abmelden</button>
-        </div>
-      </div>
-
-      <!-- Admin: Ansicht wechseln (sichtbar nur für Admins; menu.js zeigt/verbirgt) -->
-      <div class="cm-control admin-control" style="display:none;">
-        <button id="admin-view-btn" class="cm-btn" aria-haspopup="true" aria-expanded="false" title="Admin: Ansicht wechseln">
-          Admin ▾
-        </button>
-        <div id="admin-popover" class="cm-popover" role="menu" aria-hidden="true">
-          <button data-action="view-as-admin">Ansicht: Admin</button>
-          <button data-action="view-as-dm">Ansicht: DM</button>
-          <button data-action="view-as-player">Ansicht: Spieler</button>
-          <button data-action="view-as-guest">Ansicht: Gast</button>
-        </div>
-      </div>
-
-    </div><!-- .cm-right -->
-
-  </div><!-- .cm-topbar-inner -->
-</nav>
-
+  <!-- Popup: Kapitelübersicht -->
+  <div id="popupSections" class="popup">
+    <div class="popup-content">
+      <h2>Kapitelübersicht</h2>
+      <nav id="sectionLinks"></nav>
+      <button class="close-popup">Schließen</button>
+    </div>
+  </div>
+</header>
