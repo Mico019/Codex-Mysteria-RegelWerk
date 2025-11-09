@@ -1,151 +1,192 @@
-/* script.js — zentrale API für Codex Mysteria
-   Enthält:
-   - Theme-System (apply/load)
-   - Account-Handling (LocalStorage)
-   - login(username,password,code,stay)
-   - logout()
-   - helper: getAccount, isLoggedIn
-   - allowedCodes mapping (anpassbar)
-   - Menu-Hooks: loadMenu, onMenuLoaded, showMenuGuide
+/* script.js — zentrale Engine für Accounts, Session, Theme
+   - Accounts werden in localStorage unter "codexmysteria_accounts" gespeichert (Array).
+   - Session wird in localStorage unter "codexmysteria_session" gespeichert.
+   - Passwort-Hashes: SHA-256 (browser crypto.subtle). Nicht 100% sicher wie Server-Hash+Salt,
+     aber deutlich besser als Klartext.
+   - Funktionen:
+       createAccount(username, password, accountCode)  -> {success, message}
+       authenticate(username, password, stay)          -> {success, message}
+       guestLogin()                                     -> creates ephemeral guest session
+       getSession()                                     -> session object or null
+       logout()                                         -> clears session
+       isAllowed(role, permissionKey)                   -> helper for pages
+       listAccounts()                                   -> array of accounts (for debug)
+   - allowedCodes: change mapping of codes -> role here.
 */
 
 (function(){
-  // ---------- Konstanten ----------
-  const ACCOUNT_KEY = 'codexmysteria_account';
-  const THEME_KEY = 'codexmysteria_theme';
+  const ACCOUNTS_KEY = 'codexmysteria_accounts';
+  const SESSION_KEY  = 'codexmysteria_session';
+  const THEME_KEY    = 'codexmysteria_theme';
 
-  // Demo / initial codes — ändere diese später, wenn nötig
+  // ----- Config: Code -> role mapping (editiere nach Bedarf) -----
+  // Format: 'CODE': 'role'  (roles: 'admin', 'dm', 'player')
   const allowedCodes = {
     'ADMIN-ROOT-001': 'admin',
     'DM-ARCANA-001': 'dm',
     'PLAYER-START-001': 'player'
   };
 
-  // ---------- Theme Funktionen ----------
-  function applyTheme(theme){
-    if (!theme) theme = 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem(THEME_KEY, theme);
-    // mark active buttons if present
-    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+  // ----- Helpers -----
+  function loadAccounts(){
+    const raw = localStorage.getItem(ACCOUNTS_KEY);
+    if (!raw) return [];
+    try { return JSON.parse(raw) || []; } catch { return []; }
   }
-
-  function loadTheme(){
-    const saved = localStorage.getItem(THEME_KEY) || 'dark';
-    applyTheme(saved);
+  function saveAccounts(list){
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(list));
   }
-
-  // ---------- Account / LocalStorage ----------
-  function saveAccount(accountObj){
-    // keine Passwörter speichern (für Sicherheit). Falls du es brauchst, überarbeite lokal und verschlüssel.
-    const sanitized = {
-      username: accountObj.username,
-      accountType: accountObj.accountType,
-      code: accountObj.code,
-      stayLoggedIn: !!accountObj.stayLoggedIn,
-      createdAt: accountObj.createdAt || new Date().toISOString(),
-      lastActive: new Date().toISOString()
-    };
-    localStorage.setItem(ACCOUNT_KEY, JSON.stringify(sanitized));
+  function saveSession(obj){
+    localStorage.setItem(SESSION_KEY, JSON.stringify(obj));
   }
-
-  function clearAccount(){
-    localStorage.removeItem(ACCOUNT_KEY);
+  function clearSession(){
+    localStorage.removeItem(SESSION_KEY);
   }
-
-  function getAccount(){
-    const raw = localStorage.getItem(ACCOUNT_KEY);
+  function loadSession(){
+    const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     try { return JSON.parse(raw); } catch { return null; }
   }
-
-  function isLoggedIn(){
-    const acc = getAccount();
-    return !!(acc && (acc.stayLoggedIn === true));
+  function findAccountByUsername(username){
+    username = (username || '').toString();
+    return loadAccounts().find(a => a.username.toLowerCase() === username.toLowerCase()) || null;
   }
 
-  // ---------- Login / Logout ----------
-  function login(username, password/*unused but accepted*/, code, stayLoggedIn){
-    // Validierung der Eingaben
-    username = (username || '').trim();
-    code = (code || '').trim().toUpperCase();
+  // Passwort-Hash mit SHA-256
+  async function hashPassword(password){
+    const enc = new TextEncoder();
+    const data = enc.encode(password);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
 
-    if (!username || !code) {
-      return { success:false, message: 'Benutzername und Code erforderlich.' };
+  // ----- Core API -----
+  async function createAccount(username, password, accountCode){
+    username = (username || '').trim();
+    password = (password || '');
+    accountCode = (accountCode || '').trim().toUpperCase();
+
+    if (!username || !password || !accountCode) {
+      return { success:false, message: 'Bitte alle Felder ausfüllen.' };
     }
 
-    // Erkenne Rolle via allowedCodes mapping
-    const role = allowedCodes[code];
+    // Check duplicate username
+    if (findAccountByUsername(username)) {
+      return { success:false, message: 'Benutzername bereits vergeben.' };
+    }
+
+    // Resolve role from code
+    const role = allowedCodes[accountCode];
     if (!role) {
       return { success:false, message: 'Ungültiger Account-Code.' };
     }
 
+    const pwHash = await hashPassword(password);
+    const accounts = loadAccounts();
     const accountObj = {
       username,
-      accountType: role,
-      code,
-      stayLoggedIn: !!stayLoggedIn,
-      createdAt: new Date().toISOString(),
-      lastActive: new Date().toISOString()
+      passwordHash: pwHash,
+      role,
+      code: accountCode,
+      createdAt: new Date().toISOString()
     };
-    saveAccount(accountObj);
+    accounts.push(accountObj);
+    saveAccounts(accounts);
+
+    // Set session after creation (stay = true by default for a smoother UX)
+    const session = {
+      username,
+      role,
+      createdAt: new Date().toISOString(),
+      isGuest: false,
+      stay: true
+    };
+    saveSession(session);
+
     return { success:true, account: accountObj };
   }
 
+  async function authenticate(username, password, stay = false){
+    username = (username || '').trim();
+    password = (password || '');
+    if (!username || !password) return { success:false, message: 'Benutzername und Passwort erforderlich.' };
+
+    const account = findAccountByUsername(username);
+    if (!account) return { success:false, message: 'Benutzer nicht gefunden.' };
+
+    const pwHash = await hashPassword(password);
+    if (pwHash !== account.passwordHash) return { success:false, message: 'Falsches Passwort.' };
+
+    // success: create session
+    const session = {
+      username: account.username,
+      role: account.role,
+      createdAt: new Date().toISOString(),
+      isGuest: false,
+      stay: !!stay
+    };
+    saveSession(session);
+    return { success:true, session };
+  }
+
+  function guestLogin(){
+    // ephemeral guest session — nicht in accounts gespeichert
+    const session = {
+      username: 'Gast',
+      role: 'guest',
+      createdAt: new Date().toISOString(),
+      isGuest: true,
+      stay: false
+    };
+    saveSession(session);
+    return { success:true, session };
+  }
+
   function logout(){
-    clearAccount();
-    // falls Seite geändert wird, handle in caller
+    clearSession();
+    // leave redirect to caller (page script)
   }
 
-  // ---------- Menu Hooks & helpers ----------
-  // loadMenu(containerSelector, src) lädt menu.html in container (fetch). Hook onMenuLoaded kann initialisieren.
-  function loadMenu(selector = '#menu-placeholder', src = 'menu.html'){
-    const container = document.querySelector(selector);
-    if (!container) return Promise.reject(new Error('Menu container nicht gefunden'));
-    return fetch(src, {cache:'no-cache'})
-      .then(resp => {
-        if (!resp.ok) throw new Error('menu.html konnte nicht geladen werden');
-        return resp.text();
-      })
-      .then(html => {
-        container.innerHTML = html;
-        if (typeof window.CodexMysteria.onMenuLoaded === 'function') {
-          try { window.CodexMysteria.onMenuLoaded(container); } catch(e){ console.error(e); }
-        }
-        return container;
-      });
+  function getSession(){
+    return loadSession();
   }
 
-  // Menu guide placeholder — kann überschrieben werden
-  function defaultShowMenuGuide(){
-    const el = document.getElementById('menu-guide-modal');
-    if (!el) return;
-    el.setAttribute('aria-hidden','false');
+  function listAccounts(){
+    return loadAccounts();
   }
 
-  // Expose API
+  // permissions helper — sehr simpel; erweitertbar
+  // permissionKey examples: 'view_rules', 'manage_campaigns', 'admin_panel'
+  function isAllowed(role, permissionKey){
+    // default policy:
+    // guest -> only 'view_rules'
+    // player -> view_rules, use_tools
+    // dm -> view_rules, use_tools, dm_tools
+    // admin -> everything
+    const map = {
+      'guest': ['view_rules'],
+      'player': ['view_rules','use_tools'],
+      'dm': ['view_rules','use_tools','dm_tools'],
+      'admin': ['view_rules','use_tools','dm_tools','admin_panel']
+    };
+    const allowed = map[role] || [];
+    return allowed.includes(permissionKey);
+  }
+
+  // expose API to global namespace
   window.CodexMysteria = window.CodexMysteria || {};
   Object.assign(window.CodexMysteria, {
-    ACCOUNT_KEY,
-    THEME_KEY,
-    allowedCodes,
-    applyTheme,
-    loadTheme,
-    login,         // returns {success, message/account}
-    logout,
-    getAccount,
-    isLoggedIn,
-    saveAccount,
-    clearAccount,
-    loadMenu,
-    onMenuLoaded: null,
-    showMenuGuide: defaultShowMenuGuide
+    createAccount, authenticate, guestLogin, logout, getSession,
+    listAccounts, isAllowed,
+    ACCOUNTS_KEY, SESSION_KEY, THEME_KEY,
+    // for dev/debug:
+    _internal_allowedCodes: allowedCodes
   });
 
-  // initial apply theme on script load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadTheme);
-  } else {
-    loadTheme();
-  }
+  // auto-load theme if saved (simple)
+  (function loadThemeOnStart(){
+    const t = localStorage.getItem(THEME_KEY) || 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+
 })();
