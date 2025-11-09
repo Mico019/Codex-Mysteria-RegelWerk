@@ -167,3 +167,20 @@ input:focus{border-color:var(--accent);transform:translateY(-1px)}
   .theme-controls{align-self:stretch;justify-content:space-between;width:100%}
   .actions{flex-direction:column}
 }
+.quick-login {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--muted);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+.quick-login.hidden { display: none; }
+.quick-login button {
+  margin: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
