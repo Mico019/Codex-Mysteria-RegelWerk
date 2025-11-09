@@ -415,6 +415,95 @@
       else el.style.display = roles.includes(role) ? '' : 'none';
     });
   }
+  /* ============================
+   Rollenabhängige Main-Menu Konfiguration
+   - reduziert main-menu-list auf einen Home-Button
+   - setzt Home href basierend auf Rolle
+   - sorgt dafür, dass Brand/Logo auf die richtige Home-Seite linkt
+   - bindet Aktualisierung ein (bei Impersonation / Session-Änderung)
+   ============================ */
+function roleToHome(role){
+  role = (role || '').toLowerCase();
+  if (role === 'admin') return 'home_admin.html';
+  if (role === 'dm')    return 'home_dm.html';
+  // player und guest
+  return 'home.html';
+}
+
+function configureMainMenuMinimal(){
+  const mainList = document.getElementById('main-menu-list');
+  if (!mainList) {
+    // Erstelle fallback main-menu-list, falls menu.html minimal ist
+    const sidebar = document.getElementById('sidebar-menu') || document.querySelector('.cm-sidebar');
+    if (!sidebar) return;
+    const ul = document.createElement('ul');
+    ul.id = 'main-menu-list';
+    ul.role = 'menu';
+    sidebar.innerHTML = ''; // clear maybe
+    sidebar.appendChild(ul);
+  }
+
+  const effectiveRole = getEffectiveRole();
+  const homeHref = roleToHome(effectiveRole);
+
+  const ul = document.getElementById('main-menu-list');
+  // clear existing items
+  ul.innerHTML = '';
+
+  // build Home li
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.setAttribute('role','menuitem');
+  a.href = homeHref;
+  a.dataset.page = 'home';
+  a.textContent = '🏠 Startseite';
+  a.classList.add('home-link');
+  li.appendChild(a);
+  ul.appendChild(li);
+
+  // optional: mark active if we are on that page
+  updateActiveMenuItem();
+
+  // brand click: ensure it navigates to role-specific home
+  const brand = document.getElementById('site-title') || document.querySelector('.menu-brand') || document.querySelector('#main-header .cm-header-left .site-title');
+  if (brand) {
+    brand.style.cursor = 'pointer';
+    brand.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      window.location.href = roleToHome(getEffectiveRole());
+    });
+  }
+
+  // make sure mobile copy is updated too
+  const mobileList = document.getElementById('mobile-menu-list');
+  if (mobileList) {
+    mobileList.innerHTML = '';
+    const li2 = document.createElement('li');
+    const a2 = document.createElement('a');
+    a2.textContent = '🏠 Startseite';
+    a2.href = homeHref;
+    li2.appendChild(a2);
+    mobileList.appendChild(li2);
+  }
+}
+
+/* Hook: Aktualisiere Menu wenn Impersonation/Session sich ändert */
+window.addEventListener('codex:impersonation-changed', () => {
+  configureMainMenuMinimal();
+});
+window.addEventListener('storage', (ev) => {
+  // Rebuild when session key changes in other tab
+  const sessKey = window.CodexMysteria && window.CodexMysteria.SESSION_KEY ? window.CodexMysteria.SESSION_KEY : 'codexmysteria_session';
+  if (ev.key === sessKey || ev.key === 'codexmysteria_impersonate') {
+    configureMainMenuMinimal();
+  }
+});
+
+/* Run once after menu insertion (call from initAfterMenuInserted) */
+if (typeof configureMainMenuMinimal === 'function') {
+  // if initAfterMenuInserted exists, call it there; else call now (defensive)
+  try { configureMainMenuMinimal(); } catch(e) { console.warn('configureMainMenuMinimal error', e); }
+}
 
   /* ---------- Page description button init ---------- */
   function initPageDescButton(){
