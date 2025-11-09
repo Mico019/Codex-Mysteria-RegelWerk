@@ -4,11 +4,21 @@
 */
 
 #regelwerk-content {
+  /* Nimmt exakt das Theme-Farbschema an */
+  color: inherit;
+  background-color: transparent;
+  
   max-width: 1100px;
-  margin: 0 auto;
+  margin: inherit;
   padding: 24px 20px;
   box-sizing: border-box;
 }
+
+#regelwerk-content * {
+  color: inherit;
+  background-color: transparent;
+}
+
 
 /* Titel und Beschreibung */
 #regelwerk-content .page-title {
