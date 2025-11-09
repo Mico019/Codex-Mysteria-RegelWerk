@@ -191,41 +191,55 @@
 
 })();
 
-// === AUTO LOAD MENU SYSTEM ===
-// Lädt automatisch menu.css, menu.html und menu.js in jede Seite,
-// solange es ein <body> gibt.
+/* === 🔮 AUTO LOAD MENU SYSTEM ===
+   Fügt menu.css, menu.html und menu.js automatisch auf allen Seiten hinzu.
+   Wird automatisch übersprungen, wenn man sich auf der Login-Seite befindet.
+*/
 (function autoLoadMenu() {
-  const body = document.body;
-  if (!body) return;
+  // --- Prüfen ob wir uns auf der Login- oder Register-Seite befinden ---
+  const path = window.location.pathname.toLowerCase();
+  if (path.includes("login") || path.includes("register")) {
+    console.log("[Codex Mysteria] Menü wird auf dieser Seite übersprungen.");
+    return;
+  }
 
-  // --- menu.css laden ---
+  // --- CSS laden (nur einmal, falls noch nicht vorhanden) ---
   if (!document.querySelector('link[href="menu.css"]')) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "menu.css";
     document.head.appendChild(link);
+    console.log("[Codex Mysteria] menu.css geladen.");
   }
 
-  // --- Platzhalter erstellen, falls nicht vorhanden ---
+  // --- Platzhalter einfügen, falls nicht vorhanden ---
   let container = document.getElementById("menu-container");
   if (!container) {
     container = document.createElement("div");
     container.id = "menu-container";
-    body.insertBefore(container, body.firstChild);
+    // Menü immer an den Anfang des <body> setzen
+    document.body.insertBefore(container, document.body.firstChild);
   }
 
-  // --- menu.html einfügen ---
+  // --- menu.html laden und einfügen ---
   fetch("menu.html")
-    .then(res => res.text())
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    })
     .then(html => {
       container.innerHTML = html;
+      console.log("[Codex Mysteria] menu.html eingefügt.");
 
-      // --- menu.js nachladen ---
+      // --- menu.js dynamisch nachladen ---
       const script = document.createElement("script");
       script.src = "menu.js";
       script.defer = true;
+      script.onload = () => console.log("[Codex Mysteria] menu.js geladen & aktiv.");
+      script.onerror = e => console.warn("Fehler beim Laden von menu.js:", e);
       document.body.appendChild(script);
     })
-    .catch(err => console.warn("Menü konnte nicht geladen werden:", err));
+    .catch(err => {
+      console.warn("[Codex Mysteria] Menü konnte nicht geladen werden:", err);
+    });
 })();
-
