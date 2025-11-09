@@ -1,209 +1,168 @@
-/*
-  menu.js — Topbar controller for Codex Mysteria
-  - floats popovers to body, sets z-index, positions them
-  - Home link role-aware (uses impersonation if set)
-  - TOC builder + ScrollSpy
-  - Guide modal, Settings modal (theme)
-  - Account modal (username + password change) with password visibility toggle
-  - Admin "view-as" impersonation
-  - Robust: outside-click close, ESC close, storage syncing
+/* menu.js — Dropdown-basiertes Topbar-Menü
+   - ersetzt Popups durch Dropdowns (Guide, Settings, Account, Admin, TOC)
+   - Dropdowns öffnen rechts am Bildschirm unter dem zugehörigen Button
+   - Outside-click, ESC, Close-Buttons funktionieren
+   - Account-Impersonation (View-as) zyklisch/back-to-admin repariert
+   - Erstellt fehlende Dropdown-Container automatisch
 */
 
 (function () {
   'use strict';
 
-  /* ---------- Config / keys ---------- */
+  /* --------- Konfiguration / Keys --------- */
   const IMPERSONATE_KEY = 'codexmysteria_impersonate';
   const THEME_KEY = (window.CodexMysteria && window.CodexMysteria.THEME_KEY) || 'codexmysteria_theme';
   const ACCOUNTS_KEY = (window.CodexMysteria && window.CodexMysteria.ACCOUNTS_KEY) || 'codexmysteria_accounts';
   const SESSION_KEY  = (window.CodexMysteria && window.CodexMysteria.SESSION_KEY) || 'codexmysteria_session';
-  const TOC_ROOT = 'main'; // default root selector for TOC generation
+  const ROLES_CYCLE = ['admin', 'dm', 'player', 'guest'];
 
-  /* ---------- tiny helpers ---------- */
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from((root || document).querySelectorAll(sel));
-  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
-  const escapeHtml = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  /* --------- Hilfsfunktionen --------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from((r || document).querySelectorAll(s));
+  const on = (el, ev, fn) => { if (el) el.addEventListener(ev, fn); };
 
-  function log(...a){ console.debug('[menu.js]', ...a); }
+  function safeGetSession() {
+    try {
+      if (window.CodexMysteria && typeof window.CodexMysteria.getSession === 'function') return window.CodexMysteria.getSession();
+      return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    } catch (e) { return null; }
+  }
 
-  /* ---------- session / impersonation helpers ---------- */
-  function safeGetSession(){
-    try { return window.CodexMysteria && typeof window.CodexMysteria.getSession === 'function' ? window.CodexMysteria.getSession() : (JSON.parse(localStorage.getItem(SESSION_KEY) || 'null')); }
-    catch(e){ return null; }
+  function getImpersonation() { return localStorage.getItem(IMPERSONATE_KEY) || null; }
+  function setImpersonation(role) { if (!role) localStorage.removeItem(IMPERSONATE_KEY); else localStorage.setItem(IMPERSONATE_KEY, role); window.dispatchEvent(new CustomEvent('codex:impersonation-changed', { detail: { role } })); }
+  function clearImpersonation() { localStorage.removeItem(IMPERSONATE_KEY); window.dispatchEvent(new CustomEvent('codex:impersonation-changed', { detail: { role: null } })); }
+
+  function effectiveRole() {
+    const imp = getImpersonation(); if (imp) return imp;
+    const s = safeGetSession(); return s ? (s.role || 'guest') : 'guest';
   }
-  function getImpersonation(){ return localStorage.getItem(IMPERSONATE_KEY) || null; }
-  function setImpersonation(role){ if (!role) localStorage.removeItem(IMPERSONATE_KEY); else localStorage.setItem(IMPERSONATE_KEY, role); window.dispatchEvent(new CustomEvent('codex:impersonation-changed',{detail:{role}})); }
-  function clearImpersonation(){ localStorage.removeItem(IMPERSONATE_KEY); window.dispatchEvent(new CustomEvent('codex:impersonation-changed',{detail:{role:null}})); }
-  function effectiveRole(){
-    const imp = getImpersonation();
-    if (imp) return imp;
-    const s = safeGetSession();
-    return s ? (s.role || 'guest') : 'guest';
-  }
-  function realSessionRole(){
-    const s = safeGetSession();
-    return s ? (s.role || 'guest') : 'guest';
-  }
-  function roleToHome(role){
+  function realSessionRole() { const s = safeGetSession(); return s ? (s.role || 'guest') : 'guest'; }
+
+  function roleToHomeHref(role) {
     role = (role || '').toLowerCase();
     if (role === 'admin') return 'home_admin.html';
     if (role === 'dm') return 'home_dm.html';
     return 'home.html';
   }
 
-  /* ---------- modal builder ---------- */
-  function buildModal(id, title, bodyHtml){
-    let m = document.getElementById(id);
-    if (m) return m;
-    m = document.createElement('div');
-    m.id = id;
-    m.className = 'cm-modal';
-    m.setAttribute('aria-hidden','true');
-    m.innerHTML = `
-      <div class="cm-modal-backdrop" data-role="backdrop"></div>
-      <div class="cm-modal-panel card" role="dialog" aria-modal="true" aria-labelledby="${id}-title">
-        <button class="cm-modal-close" aria-label="Schließen">×</button>
-        <h3 id="${id}-title" class="cm-modal-title">${escapeHtml(title)}</h3>
-        <div class="cm-modal-body">${bodyHtml}</div>
-        <div class="cm-modal-actions"></div>
-      </div>
-    `;
-    // Append to modal root if exists, else body
-    const root = document.getElementById('cm-modals-root') || document.body;
-    root.appendChild(m);
+  function escapeHtml(str) { return String(str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-    // handlers
-    m.querySelector('.cm-modal-close').addEventListener('click', ()=> hideModal(id));
-    m.querySelector('[data-role="backdrop"]').addEventListener('click', ()=> hideModal(id));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && m.getAttribute('aria-hidden') === 'false') hideModal(id); });
-    return m;
-  }
-  function showModal(id){
-    const m = document.getElementById(id); if (!m) return;
-    m.setAttribute('aria-hidden','false');
-    // focus first interactive element
-    const focus = m.querySelector('input,button,a,select,textarea') || m;
-    focus.focus();
-  }
-  function hideModal(id){
-    const m = document.getElementById(id); if (!m) return;
-    m.setAttribute('aria-hidden','true');
+  async function hashPassword(pw) {
+    const enc = new TextEncoder();
+    const buf = enc.encode(pw || '');
+    const hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
   }
 
-  /* ---------- password hashing helper (for storing) ---------- */
-  async function hashPassword(pw){
-    const enc = new TextEncoder(); const buf = enc.encode(pw||'');
-    const digest = await crypto.subtle.digest('SHA-256', buf);
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+  /* --------- Dropdown-Utility (erstellt Container falls nötig) --------- */
+  function ensureDropdown(id) {
+    let el = document.getElementById(id);
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'cm-dropdown';
+    el.setAttribute('aria-hidden', 'true');
+    // simple default content placeholder; real content will be filled later where needed
+    el.innerHTML = '<div class="cm-dropdown-inner">...</div>';
+    document.body.appendChild(el); // append to body so z-index/stacking is safe
+    return el;
   }
 
-  /* ---------- floating popovers helpers ---------- */
-  function ensureInBody(el){
-    if (!el) return;
-    if (el.parentElement !== document.body) document.body.appendChild(el);
-    // set base styles so JS can position
-    el.style.position = 'fixed';
-    el.style.zIndex = el.style.zIndex || '99999';
-  }
+  function showDropdown(dropEl, anchorBtn) {
+    if (!dropEl) return;
+    // close other dropdowns
+    closeAllDropdowns(dropEl);
+    ensureDropdown(dropEl.id);
+    dropEl.setAttribute('aria-hidden', 'false');
+    anchorBtn && anchorBtn.setAttribute('aria-expanded', 'true');
 
-  function ensureCloseButton(popEl){
-    if (!popEl) return;
-    if (popEl.querySelector('.cm-popover-close')) return;
-    const btn = document.createElement('button');
-    btn.className = 'cm-popover-close';
-    btn.setAttribute('aria-label','Schließen');
-    btn.textContent = '×';
-    // simple inline style to make it visible; CSS file should also style it
-    btn.style.cursor = 'pointer';
-    popEl.insertBefore(btn, popEl.firstChild);
-    btn.addEventListener('click', ()=> { hidePopover(popEl); });
-  }
-
-  function showPopover(popEl, anchorEl){
-    if (!popEl || !anchorEl) { if(popEl) popEl.setAttribute('aria-hidden','false'); return; }
-    ensureInBody(popEl);
-    ensureCloseButton(popEl);
-    popEl.setAttribute('aria-hidden','false');
-
-    // position under anchor; prefer aligning right edge of pop to anchor right edge
-    const rect = anchorEl.getBoundingClientRect();
-    // allow popEl to be measured (if display none prior; ensure visible)
-    popEl.style.left = '0px';
-    popEl.style.top = '0px';
-    popEl.style.transform = 'translate(0,0)';
-    popEl.style.opacity = '1';
-    // measure
-    const popRect = popEl.getBoundingClientRect();
-    const desiredLeft = Math.min(window.innerWidth - popRect.width - 8, Math.max(8, rect.right - popRect.width));
-    const desiredTop = Math.min(window.innerHeight - popRect.height - 8, rect.bottom + 8);
-    popEl.style.left = desiredLeft + 'px';
-    popEl.style.top  = desiredTop + 'px';
-  }
-
-  function hidePopover(popEl){
-    if (!popEl) return;
-    popEl.setAttribute('aria-hidden','true');
-    // clear inline position
-    popEl.style.left = '';
-    popEl.style.top = '';
-  }
-
-  // close all popovers on outside click (registered once)
-  function initGlobalClickClose(){
-    document.addEventListener('click', (ev) => {
-      // if click is inside any open popover or its toggle, ignore; else close them
-      const allPopovers = Array.from(document.querySelectorAll('.cm-popover, .cm-toc-dropdown'));
-      allPopovers.forEach(pop => {
-        if (pop.getAttribute('aria-hidden') === 'false') {
-          const toggle = document.querySelector(`[aria-controls="${pop.id}"]`);
-          const insidePop = pop.contains(ev.target);
-          const isToggle = toggle && toggle.contains(ev.target);
-          if (!insidePop && !isToggle) hidePopover(pop);
-        }
-      });
-    }, true);
-    // ESC close
-    document.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Escape') {
-        Array.from(document.querySelectorAll('.cm-popover[aria-hidden="false"], .cm-toc-dropdown[aria-hidden="false"]'))
-          .forEach(p => hidePopover(p));
-      }
+    // position: always aligned to RIGHT side of screen, below button
+    const rect = anchorBtn ? anchorBtn.getBoundingClientRect() : { bottom: 8, right: 8 };
+    const top = Math.max(8, rect.bottom + window.scrollY + 8);
+    const right = 8; // fixed right margin
+    Object.assign(dropEl.style, {
+      position: 'fixed',
+      top: `${top}px`,
+      right: `${right}px`,
+      left: 'auto',
+      zIndex: '99999',
+      display: 'block'
     });
+
+    // auto adjust height if it would go off screen
+    const popupRect = dropEl.getBoundingClientRect();
+    const bottomSpace = window.innerHeight - rect.bottom - 16;
+    if (popupRect.height > bottomSpace) {
+      dropEl.style.maxHeight = (window.innerHeight - rect.bottom - 24) + 'px';
+      dropEl.style.overflowY = 'auto';
+    } else {
+      dropEl.style.maxHeight = '';
+      dropEl.style.overflowY = '';
+    }
   }
 
-  /* ---------- TOC builder & scrollspy ---------- */
+  function hideDropdown(dropEl) {
+    if (!dropEl) return;
+    dropEl.setAttribute('aria-hidden', 'true');
+    dropEl.style.display = 'none';
+    // reset anchor expanded attributes where possible
+    const toggles = Array.from(document.querySelectorAll(`[aria-controls="${dropEl.id}"]`));
+    toggles.forEach(t => t.setAttribute('aria-expanded', 'false'));
+  }
+
+  function closeAllDropdowns(except = null) {
+    const drops = Array.from(document.querySelectorAll('.cm-dropdown, .cm-popover, .cm-toc-dropdown'));
+    drops.forEach(d => { if (d !== except) hideDropdown(d); });
+  }
+
+  /* Close on outside click — robust */
+  document.addEventListener('click', (ev) => {
+    // if click is inside any open dropdown or its toggle, do nothing; otherwise close
+    const allDropdowns = Array.from(document.querySelectorAll('.cm-dropdown, .cm-popover, .cm-toc-dropdown'));
+    let clickedInsideAny = false;
+    for (const dd of allDropdowns) {
+      if (dd.getAttribute('aria-hidden') === 'false' && (dd.contains(ev.target) || (document.querySelector(`[aria-controls="${dd.id}"]`) || {}).contains && document.querySelector(`[aria-controls="${dd.id}"]`).contains(ev.target))) {
+        clickedInsideAny = true; break;
+      }
+    }
+    if (!clickedInsideAny) closeAllDropdowns();
+  }, true);
+
+  // ESC closes dropdowns
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') closeAllDropdowns();
+  });
+
+  /* --------- TOC (Inhaltsverzeichnis) bauen --------- */
   let tocObserver = null;
-  function buildTOC(rootSelector = TOC_ROOT){
-    const toc = document.getElementById('toc-list');
-    if (!toc) return;
-    toc.innerHTML = '';
+  function buildTOC(rootSelector = 'main') {
+    const tocContainer = document.getElementById('toc-list') || ensureDropdown('toc-list');
+    tocContainer.innerHTML = ''; // clear
     const root = document.querySelector(rootSelector) || document.body;
     let sections = Array.from(root.querySelectorAll('[data-section]'));
     if (!sections.length) sections = Array.from(root.querySelectorAll('h2, h3'));
-    if (!sections.length){
-      const placeholder = document.createElement('div'); placeholder.className = 'cm-toc-inner'; placeholder.textContent = 'Keine Abschnitte gefunden.';
-      toc.appendChild(placeholder); return;
+    if (!sections.length) {
+      const no = document.createElement('div'); no.className = 'cm-toc-inner'; no.textContent = 'Keine Abschnitte gefunden.'; tocContainer.appendChild(no);
+      return;
     }
-    sections.forEach((s, idx) => {
-      if (!s.id) s.id = `cm-sec-${idx}-${s.textContent.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^\w\-]/g,'')}`;
+    sections.forEach((s, i) => {
+      if (!s.id) s.id = `cm-sec-${i}-${s.textContent.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^\w\-]/g,'')}`;
       const a = document.createElement('a');
-      a.href = `#${s.id}`;
+      a.href = '#' + s.id;
       a.textContent = s.textContent.trim();
-      a.addEventListener('click', (ev) => { ev.preventDefault(); document.getElementById(s.id).scrollIntoView({behavior:'smooth', block:'start'}); hideTOC(); });
-      const li = document.createElement('div'); li.appendChild(a);
-      toc.appendChild(li);
+      a.addEventListener('click', (ev) => { ev.preventDefault(); document.getElementById(s.id).scrollIntoView({ behavior: 'smooth', block: 'start' }); hideDropdown(tocContainer); });
+      const wrap = document.createElement('div'); wrap.appendChild(a);
+      tocContainer.appendChild(wrap);
     });
 
-    // IntersectionObserver for highlighting and updating center title
+    // scrollspy: observe sections and update center title + active link
     if (tocObserver) tocObserver.disconnect();
-    const links = Array.from(toc.querySelectorAll('a'));
-    if ('IntersectionObserver' in window){
-      const opts = { root: null, rootMargin: '0px 0px -60% 0px', threshold: 0.15 };
+    const links = Array.from(tocContainer.querySelectorAll('a'));
+    if ('IntersectionObserver' in window) {
       tocObserver = new IntersectionObserver(entries => {
         entries.forEach(en => {
           if (!en.target.id) return;
-          const link = toc.querySelector(`a[href="#${en.target.id}"]`);
+          const link = tocContainer.querySelector(`a[href="#${en.target.id}"]`);
           if (!link) return;
           if (en.isIntersecting) {
             links.forEach(l => l.classList.remove('active'));
@@ -212,320 +171,274 @@
             if (titleEl) titleEl.textContent = en.target.textContent.trim();
           }
         });
-      }, opts);
+      }, { root: null, rootMargin: '0px 0px -60% 0px', threshold: 0.15 });
       sections.forEach(s => tocObserver.observe(s));
     } else {
-      // fallback: set page title from document.title
       const titleEl = document.getElementById('current-page-title');
       if (titleEl) titleEl.textContent = document.title || '';
     }
   }
-  function toggleTOC(){
-    const btn = document.getElementById('toc-toggle'); const toc = document.getElementById('toc-list');
-    if (!btn || !toc) return;
-    const open = toc.getAttribute('aria-hidden') === 'false';
-    if (!open) { buildTOC(TOC_ROOT); showPopover(toc, btn); btn.setAttribute('aria-expanded','true'); }
-    else { hidePopover(toc); btn.setAttribute('aria-expanded','false'); }
-  }
-  function hideTOC(){ const btn=document.getElementById('toc-toggle'), toc=document.getElementById('toc-list'); if (!toc) return; toc.setAttribute('aria-hidden','true'); if (btn) btn.setAttribute('aria-expanded','false'); }
 
-  /* ---------- Guide modal ---------- */
-  function openGuide(){
-    const mapping = {
-      'Start': 'Leitet zur Startseite passend zu deinem Accounttyp (Admin/DM/Spieler).',
-      'Inhaltsverzeichnis': 'Zeigt die Abschnitte dieser Seite, damit du direkt springen kannst.',
-      'Guide': 'Öffnet diese Kurzanleitung.',
-      'Einstellungen': 'Ändere das Farbschema (Dark / Light / Fantasy).',
-      'Account': 'Account-Informationen anzeigen oder Abmelden.',
-      'Admin': 'Nur für Admins: Ansicht eines anderen Accounttyps simulieren (View-as).'
-    };
-    // include page-provided data-desc
-    $$('[data-desc]').forEach(el => { const key = el.dataset.descKey || el.id || el.tagName; mapping[key] = el.dataset.desc; });
-
-    let html = '<div class="cm-guide-list">';
-    for (const k in mapping) html += `<div class="cm-guide-item"><strong>${escapeHtml(k)}</strong><div class="cm-guide-desc">${escapeHtml(mapping[k])}</div></div>`;
-    html += '</div>';
-    const m = buildModal('cm-guide-modal', 'Kurzanleitung', html);
-    const actions = m.querySelector('.cm-modal-actions'); actions.innerHTML = '';
-    const ok = document.createElement('button'); ok.className = 'primary'; ok.textContent = 'OK'; ok.addEventListener('click', ()=> hideModal('cm-guide-modal'));
-    actions.appendChild(ok);
-    showModal('cm-guide-modal');
-  }
-
-  /* ---------- Settings modal (theme) ---------- */
-  function openSettings(){
-    const bodyHtml = `
-      <p class="hint">Wähle ein Farbschema:</p>
-      <label><input type="radio" name="cm-theme" value="dark"> Dark</label><br>
-      <label><input type="radio" name="cm-theme" value="light"> Light</label><br>
-      <label><input type="radio" name="cm-theme" value="fantasy"> Fantasy</label>
-    `;
-    const m = buildModal('cm-settings-modal','Einstellungen', bodyHtml);
-    const actions = m.querySelector('.cm-modal-actions'); actions.innerHTML = '';
-    const cancel = document.createElement('button'); cancel.className='ghost'; cancel.textContent='Abbrechen';
-    const apply = document.createElement('button'); apply.className='primary'; apply.textContent='Anwenden';
-    actions.appendChild(cancel); actions.appendChild(apply);
-
-    // set current selection
+  /* --------- Einstellungen (Dropdown Inhalt) --------- */
+  function buildSettingsDropdown(dropEl) {
+    dropEl.innerHTML = ''; // clear
+    const wrap = document.createElement('div');
+    wrap.className = 'cm-settings-inner';
     const cur = localStorage.getItem(THEME_KEY) || document.documentElement.getAttribute('data-theme') || (document.body.classList.contains('dark') ? 'dark' : 'dark');
-    m.querySelectorAll('input[name="cm-theme"]').forEach(r => { if (r.value === cur) r.checked = true; });
-
-    cancel.addEventListener('click', ()=> hideModal('cm-settings-modal'));
-    apply.addEventListener('click', ()=> {
-      const sel = m.querySelector('input[name="cm-theme"]:checked');
+    wrap.innerHTML = `
+      <div style="padding:8px 12px; min-width:200px;">
+        <div style="font-weight:600; margin-bottom:8px;">Einstellungen</div>
+        <div style="margin-bottom:8px;">
+          <label><input type="radio" name="cm-theme" value="dark"> Dark</label><br>
+          <label><input type="radio" name="cm-theme" value="light"> Light</label><br>
+          <label><input type="radio" name="cm-theme" value="fantasy"> Fantasy</label>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button id="cm-settings-cancel" class="cm-popbtn">Abbrechen</button>
+          <button id="cm-settings-apply" class="cm-popbtn">Anwenden</button>
+        </div>
+      </div>
+    `;
+    dropEl.appendChild(wrap);
+    // preselect
+    dropEl.querySelectorAll('input[name="cm-theme"]').forEach(r => { if (r.value === cur) r.checked = true; });
+    // handlers
+    on(dropEl.querySelector('#cm-settings-cancel'), 'click', () => hideDropdown(dropEl));
+    on(dropEl.querySelector('#cm-settings-apply'), 'click', () => {
+      const sel = dropEl.querySelector('input[name="cm-theme"]:checked');
       const theme = sel ? sel.value : 'dark';
       if (window.CodexMysteria && typeof window.CodexMysteria.applyTheme === 'function') {
         window.CodexMysteria.applyTheme(theme);
       } else {
-        // fallback: set body class and localStorage
         document.documentElement.setAttribute('data-theme', theme);
+        // keep body classes backward-compatible
         document.body.classList.remove('light','dark','mystic','fantasy');
-        document.body.classList.add(theme === 'light' ? 'light' : (theme === 'fantasy' ? 'mystic' : 'dark'));
+        if (theme === 'light') document.body.classList.add('light');
+        else if (theme === 'fantasy') document.body.classList.add('mystic');
+        else document.body.classList.add('dark');
         localStorage.setItem(THEME_KEY, theme);
       }
-      hideModal('cm-settings-modal');
+      hideDropdown(dropEl);
     });
-
-    showModal('cm-settings-modal');
   }
 
-  /* ---------- Account modal (username + password with visibility toggle) ---------- */
-  function openAccountModal(){
-    const sess = safeGetSession();
-    const role = effectiveRole();
-    const currentName = sess ? (sess.username || '') : '';
-    const body = `
-      <div>
-        <label>Benutzername<br><input id="cm-account-name" type="text" value="${escapeHtml(currentName)}"></label>
+  /* --------- Guide (Dropdown Inhalt) --------- */
+  function buildGuideDropdown(dropEl) {
+    dropEl.innerHTML = '';
+    const html = `
+      <div style="padding:8px 12px; min-width:220px;">
+        <div style="font-weight:700; margin-bottom:6px;">Kurzanleitung</div>
+        <div style="font-size:0.95rem; margin-bottom:8px;">
+          <div><strong>Start:</strong> Führt zur Startseite für deinen Account-Typ.</div>
+          <div><strong>Inhaltsverzeichnis:</strong> Zeigt Abschnitte der aktuellen Seite.</div>
+          <div><strong>Einstellungen:</strong> Theme wählen (Dark/Light/Fantasy).</div>
+          <div><strong>Account:</strong> Username ändern, Passwort setzen, Abmelden.</div>
+        </div>
+        <div style="text-align:right;"><button id="cm-guide-close" class="cm-popbtn">Schließen</button></div>
       </div>
-      <div style="margin-top:8px;">
-        <label>Passwort (neu)<br>
-          <div style="display:flex;gap:6px;align-items:center">
-            <input id="cm-account-pass" type="password" placeholder="Leer lassen = unverändert">
-            <button id="cm-account-pass-toggle" class="cm-btn" type="button" title="Passwort anzeigen">👁️</button>
+    `;
+    dropEl.insertAdjacentHTML('beforeend', html);
+    on(dropEl.querySelector('#cm-guide-close'), 'click', () => hideDropdown(dropEl));
+  }
+
+  /* --------- Account Dropdown (Inline edit) --------- */
+  function buildAccountDropdown(dropEl) {
+    dropEl.innerHTML = '';
+    const sess = safeGetSession();
+    const uname = sess ? (sess.username || '') : '';
+    const role = effectiveRole();
+    const html = `
+      <div style="padding:8px 12px; min-width:240px;">
+        <div style="font-weight:700; margin-bottom:6px;">Account</div>
+        <label style="display:block; margin-bottom:6px;">Benutzername<br>
+          <input id="cm-acc-name" type="text" value="${escapeHtml(uname)}" style="width:100%; padding:6px; margin-top:4px;">
+        </label>
+        <label style="display:block; margin-bottom:6px;">Neues Passwort<br>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
+            <input id="cm-acc-pass" type="password" placeholder="Leer = unverändert" style="flex:1; padding:6px;">
+            <button id="cm-acc-pass-toggle" class="cm-btn" title="Passwort zeigen">👁️</button>
           </div>
         </label>
+        <div style="margin:6px 0; color:var(--muted)">Rolle: <strong>${escapeHtml(role)}</strong></div>
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px;">
+          <button id="cm-acc-cancel" class="cm-popbtn">Abbrechen</button>
+          <button id="cm-acc-save" class="cm-popbtn">Speichern</button>
+        </div>
       </div>
-      <div style="margin-top:10px;color:var(--muted)">Rolle: <strong id="cm-account-role">${escapeHtml(role)}</strong></div>
     `;
-    const m = buildModal('cm-account-modal','Account-Informationen', body);
-    const actions = m.querySelector('.cm-modal-actions'); actions.innerHTML = '';
-    const cancel = document.createElement('button'); cancel.className='ghost'; cancel.textContent='Abbrechen';
-    const save = document.createElement('button'); save.className='primary'; save.textContent='Speichern';
-    actions.appendChild(cancel); actions.appendChild(save);
-
-    cancel.addEventListener('click', ()=> hideModal('cm-account-modal'));
-    // toggle eye
-    on(m.querySelector('#cm-account-pass-toggle'), 'click', () => {
-      const ip = m.querySelector('#cm-account-pass'); if (!ip) return;
+    dropEl.insertAdjacentHTML('beforeend', html);
+    // handlers
+    on(dropEl.querySelector('#cm-acc-pass-toggle'), 'click', (ev) => {
+      const ip = dropEl.querySelector('#cm-acc-pass'); if (!ip) return;
       ip.type = ip.type === 'password' ? 'text' : 'password';
     });
-
-    save.addEventListener('click', async () => {
-      const newName = m.querySelector('#cm-account-name').value.trim();
-      const newPass = m.querySelector('#cm-account-pass').value;
+    on(dropEl.querySelector('#cm-acc-cancel'),'click', ()=> hideDropdown(dropEl));
+    on(dropEl.querySelector('#cm-acc-save'),'click', async () => {
+      const newName = dropEl.querySelector('#cm-acc-name').value.trim();
+      const newPass = dropEl.querySelector('#cm-acc-pass').value;
       const s = safeGetSession();
-      if (!s) { alert('Kein aktives Konto.'); hideModal('cm-account-modal'); return; }
-
-      // update local accounts store if applicable; otherwise update session object
+      if (!s) { alert('Kein aktives Konto.'); hideDropdown(dropEl); return; }
+      // update local accounts list if exists
       let accounts = [];
-      try { accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]'); } catch(e){ accounts = []; }
+      try { accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]'); } catch (e) { accounts = []; }
       const idx = accounts.findIndex(a => a.username && a.username.toLowerCase() === (s.username||'').toLowerCase());
       if (idx === -1) {
-        // fallback: update session only
+        // update session object if present
         try {
           const sessRaw = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
           if (newName) sessRaw.username = newName;
           localStorage.setItem(SESSION_KEY, JSON.stringify(sessRaw));
         } catch(e){}
         alert('Session aktualisiert.');
-        hideModal('cm-account-modal');
+        hideDropdown(dropEl);
         refreshHomeAndAccount();
         return;
       }
-      // check name change
-      if (newName && newName.toLowerCase() !== accounts[idx].username.toLowerCase()){
+      if (newName && newName.toLowerCase() !== accounts[idx].username.toLowerCase()) {
         const dup = accounts.some((a,i)=> i!==idx && a.username.toLowerCase() === newName.toLowerCase());
         if (dup) { alert('Benutzername bereits vergeben.'); return; }
         accounts[idx].username = newName;
       }
-      if (newPass){
-        try { accounts[idx].passwordHash = await hashPassword(newPass); } catch(e){ alert('Fehler beim Speichern des Passworts'); return; }
+      if (newPass) {
+        try { accounts[idx].passwordHash = await hashPassword(newPass); } catch(e) { alert('Fehler beim Speichern des Passworts'); return; }
       }
       localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-      // update session username if changed
+      // also update session username
       try { const sessRaw = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}'); if (newName) sessRaw.username = newName; localStorage.setItem(SESSION_KEY, JSON.stringify(sessRaw)); } catch(e){}
       alert('Account aktualisiert.');
-      hideModal('cm-account-modal');
+      hideDropdown(dropEl);
       refreshHomeAndAccount();
     });
-
-    showModal('cm-account-modal');
   }
 
-  /* ---------- Logout ---------- */
-  function doLogout(){
-    if (window.CodexMysteria && typeof window.CodexMysteria.logout === 'function') {
-      window.CodexMysteria.logout();
-    } else {
-      localStorage.removeItem(SESSION_KEY);
-    }
-    clearImpersonation();
-    // redirect to index/login
-    window.location.href = 'index.html';
-  }
-
-  /* ---------- Admin popover init ---------- */
-  function initAdmin(){
-    const adminBtn = document.getElementById('admin-view-btn');
-    const adminPop = document.getElementById('admin-popover');
-    if (!adminBtn || !adminPop) return;
-    // ensure floating + close button
-    ensureInBody(adminPop);
-    ensureCloseButton(adminPop);
-    // toggle
-    adminBtn.addEventListener('click', (e) => {
-      const open = adminPop.getAttribute('aria-hidden') === 'false';
-      if (!open) showPopover(adminPop, adminBtn); else hidePopover(adminPop);
+  /* --------- Admin Dropdown Inhalt (View-as cycle + goto admin start) --------- */
+  function buildAdminDropdown(dropEl) {
+    dropEl.innerHTML = '';
+    const html = `
+      <div style="padding:8px 12px; min-width:220px;">
+        <div style="font-weight:700; margin-bottom:8px;">Admin-Optionen</div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <button id="cm-admin-view-cycle" class="cm-popbtn">Ansicht wechseln (Cycle)</button>
+          <button id="cm-admin-clear" class="cm-popbtn">Impersonation zurücksetzen</button>
+          <a id="cm-admin-start" href="home_admin.html" class="cm-popbtn" style="text-decoration:none; display:inline-block;">Admin-Startseite</a>
+        </div>
+      </div>
+    `;
+    dropEl.insertAdjacentHTML('beforeend', html);
+    on(dropEl.querySelector('#cm-admin-view-cycle'), 'click', () => {
+      // cycle impersonation: admin -> dm -> player -> guest -> admin ...
+      const current = getImpersonation() || realSessionRole();
+      const idx = ROLES_CYCLE.indexOf(current) >= 0 ? ROLES_CYCLE.indexOf(current) : 0;
+      const next = ROLES_CYCLE[(idx + 1) % ROLES_CYCLE.length];
+      setImpersonation(next);
+      alert('Ansicht gewechselt: ' + next);
+      refreshHomeAndAccount();
+      // keep dropdown open but update contents if necessary
     });
-    // actions
-    adminPop.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener('click', (ev) => {
-        const action = btn.getAttribute('data-action');
-        if (action === 'view-as-admin') setImpersonation('admin');
-        else if (action === 'view-as-dm') setImpersonation('dm');
-        else if (action === 'view-as-player') setImpersonation('player');
-        else if (action === 'view-as-guest') setImpersonation('guest');
-        // after impersonation: refresh UI
-        refreshHomeAndAccount();
-        hidePopover(adminPop);
-      });
+    on(dropEl.querySelector('#cm-admin-clear'), 'click', () => {
+      clearImpersonation();
+      alert('Impersonation entfernt. Rückkehr zur echten Sitzung.');
+      refreshHomeAndAccount();
     });
   }
 
-  /* ---------- Account popover init ---------- */
-  function initAccount(){
-    const accBtn = document.getElementById('account-toggle');
-    const accPop = document.getElementById('account-popover');
-    if (!accBtn || !accPop) return;
-    ensureInBody(accPop);
-    ensureCloseButton(accPop);
-    // toggle
-    accBtn.addEventListener('click', (e) => {
-      const open = accPop.getAttribute('aria-hidden') === 'false';
-      if (!open) showPopover(accPop, accBtn); else hidePopover(accPop);
-    });
-    // bind actions inside popover
-    accPop.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener('click', (ev) => {
-        const a = btn.getAttribute('data-action');
-        if (a === 'account-info') openAccountModal();
-        else if (a === 'settings') openSettings();
-        else if (a === 'logout') doLogout();
-        hidePopover(accPop);
-      });
-    });
-  }
-
-  /* ---------- Home & account refresh ---------- */
-  function refreshHomeAndAccount(){
-    // set home link according to effective role (includes impersonation)
+  /* --------- Refresh Home link + account label + admin visibility --------- */
+  function refreshHomeAndAccount() {
     const home = document.getElementById('home-btn');
-    if (home) home.setAttribute('href', roleToHome(effectiveRole()));
-    // update username
+    if (home) home.setAttribute('href', roleToHomeHref(effectiveRole()));
     const sess = safeGetSession();
-    const uname = document.getElementById('account-username');
-    if (uname) uname.textContent = sess ? (sess.username || '—') : '—';
-    const popUser = document.getElementById('popover-username');
-    if (popUser) popUser.textContent = sess ? (sess.username || '—') : '—';
-    const popRole = document.getElementById('popover-role');
-    if (popRole) popRole.textContent = effectiveRole();
+    const unameEl = document.getElementById('account-username');
+    if (unameEl) unameEl.textContent = sess ? (sess.username || 'Gast') : 'Gast';
+    const popUser = document.getElementById('popover-username'); if (popUser) popUser.textContent = sess ? (sess.username || 'Gast') : 'Gast';
+    const popRole = document.getElementById('popover-role'); if (popRole) popRole.textContent = effectiveRole();
 
-    // admin-control visibility: show only if real session is admin
-    const adminControl = document.querySelector('.admin-control');
-    if (adminControl) {
-      adminControl.style.display = (realSessionRole() === 'admin') ? '' : 'none';
-    }
+    // admin controls visible only if real session role is admin
+    const adminCtrl = document.querySelector('.admin-control');
+    if (adminCtrl) adminCtrl.style.display = (realSessionRole() === 'admin') ? '' : 'none';
   }
 
-  /* ---------- init topbar wiring ---------- */
-  function initTopbar(){
-    // wire home (click will follow href)
-    const home = document.getElementById('home-btn');
-    if (home) home.addEventListener('click', ()=> { /* no-op; native navigation */ });
+  /* --------- Init wiring (buttons -> dropdowns) --------- */
+  function initDropdowns() {
+    // ensure containers exist (reuse ids used in your HTML)
+    const toc = ensureDropdown('toc-list'); // your HTML may already have it; ensureDropdown will return existing
+    const accountDrop = document.getElementById('account-popover') || ensureDropdown('account-popover');
+    const adminDrop = document.getElementById('admin-popover') || ensureDropdown('admin-popover');
+    const guideDrop = ensureDropdown('dropdown-guide');
+    const settingsDrop = ensureDropdown('dropdown-settings');
 
-    // TOC toggle
-    on(document.getElementById('toc-toggle'), 'click', ()=> toggleTOC());
+    // build content
+    buildTOC();                 // fills toc-list
+    buildAccountDropdown(accountDrop);
+    buildAdminDropdown(adminDrop);
+    buildGuideDropdown(guideDrop);
+    buildSettingsDropdown(settingsDrop);
 
-    // guide & settings
-    on(document.getElementById('menu-guide-btn'), 'click', ()=> openGuide());
-    on(document.getElementById('settings-btn'), 'click', ()=> openSettings());
+    // wire toggles (buttons should have aria-controls pointing to container id)
+    const btnTOC = document.getElementById('toc-toggle');
+    if (btnTOC) { btnTOC.setAttribute('aria-controls','toc-list'); on(btnTOC, 'click', () => { showDropdown(toc, btnTOC); }); }
 
-    // account & admin
-    initAccount();
-    initAdmin();
+    const btnAccount = document.getElementById('account-toggle');
+    if (btnAccount) { btnAccount.setAttribute('aria-controls', accountDrop.id); on(btnAccount, 'click', () => { showDropdown(accountDrop, btnAccount); }); }
 
-    // global click close
-    initGlobalClickClose();
+    const btnAdmin = document.getElementById('admin-view-btn');
+    if (btnAdmin) { btnAdmin.setAttribute('aria-controls', adminDrop.id); on(btnAdmin, 'click', () => { showDropdown(adminDrop, btnAdmin); }); }
 
-    // initial population
-    refreshHomeAndAccount();
-    buildTOC(TOC_ROOT);
+    const btnGuide = document.getElementById('menu-guide-btn');
+    if (btnGuide) { btnGuide.setAttribute('aria-controls', guideDrop.id); on(btnGuide, 'click', () => { showDropdown(guideDrop, btnGuide); }); }
 
-    // reposition popovers on resize/scroll so they remain visible
-    window.addEventListener('resize', () => {
-      Array.from(document.querySelectorAll('.cm-popover[aria-hidden="false"], .cm-toc-dropdown[aria-hidden="false"]')).forEach(pop => {
-        const ctrlId = Array.from(document.querySelectorAll('[aria-controls]')).find(el => el.getAttribute('aria-controls') === pop.id);
-        if (ctrlId) showPopover(pop, ctrlId);
-      });
-    });
-    window.addEventListener('scroll', () => {
-      // keep popover below the toggle if open
-      Array.from(document.querySelectorAll('.cm-popover[aria-hidden="false"], .cm-toc-dropdown[aria-hidden="false"]')).forEach(pop => {
-        const ctrl = Array.from(document.querySelectorAll('[aria-controls]')).find(el => el.getAttribute('aria-controls') === pop.id);
-        if (ctrl) showPopover(pop, ctrl);
-      });
-    }, true);
+    const btnSettings = document.getElementById('settings-btn');
+    if (btnSettings) { btnSettings.setAttribute('aria-controls', settingsDrop.id); on(btnSettings, 'click', () => { showDropdown(settingsDrop, btnSettings); }); }
 
-    // sync on storage changes (other tab)
-    window.addEventListener('storage', (ev) => {
-      if (ev.key === IMPERSONATE_KEY || ev.key === SESSION_KEY) {
-        refreshHomeAndAccount();
-        buildTOC(TOC_ROOT);
+    // add close buttons inside each created dropdown for direct click (if not already)
+    ['dropdown-guide','dropdown-settings','account-popover','admin-popover','toc-list','dropdown-settings'].forEach(id => {
+      const d = document.getElementById(id);
+      if (!d) return;
+      if (!d.querySelector('.cm-dropdown-close')) {
+        const btn = document.createElement('button');
+        btn.className = 'cm-dropdown-close';
+        btn.textContent = '×';
+        btn.style.position = 'absolute';
+        btn.style.top = '6px';
+        btn.style.right = '8px';
+        btn.style.background = 'transparent';
+        btn.style.border = 'none';
+        btn.style.color = 'inherit';
+        btn.style.cursor = 'pointer';
+        btn.addEventListener('click', () => hideDropdown(d));
+        d.style.position = d.style.position || 'fixed';
+        d.style.zIndex = d.style.zIndex || '99999';
+        d.insertBefore(btn, d.firstChild);
       }
     });
 
-    // listen to our custom impersonation event to refresh quickly
-    window.addEventListener('codex:impersonation-changed', ()=> { refreshHomeAndAccount(); buildTOC(TOC_ROOT); });
-
-    // small accessibility: ensure any .cm-popover-close works
-    $$('.cm-popover-close').forEach(btn => {
-      btn.addEventListener('click', (ev) => {
-        const pop = btn.closest('.cm-popover, .cm-toc-dropdown');
-        if (pop) hidePopover(pop);
-      });
-    });
+    // refresh UI initially
+    refreshHomeAndAccount();
   }
 
-  /* ---------- bootstrap when DOM ready ---------- */
-  function bootstrap(){
+  /* --------- Bootstrapping (DOM ready) --------- */
+  function bootstrap() {
+    // wait DOM ready
     const start = () => {
       const topbar = document.getElementById('site-topbar') || document.getElementById('main-header');
       if (!topbar) return false;
-      try { initTopbar(); return true; } catch(e){ console.error('menu.js init error', e); return false; }
+      initDropdowns();
+      // reposition open dropdowns on resize/scroll
+      window.addEventListener('resize', () => { Array.from(document.querySelectorAll('.cm-dropdown')).forEach(d => { if (d.getAttribute('aria-hidden') === 'false') { const toggle = document.querySelector(`[aria-controls="${d.id}"]`); if (toggle) showDropdown(d, toggle); } }); });
+      window.addEventListener('scroll', () => { Array.from(document.querySelectorAll('.cm-dropdown')).forEach(d => { if (d.getAttribute('aria-hidden') === 'false') { const toggle = document.querySelector(`[aria-controls="${d.id}"]`); if (toggle) showDropdown(d, toggle); } }); }, true);
+      // update when impersonation changes (other tab)
+      window.addEventListener('storage', (ev) => { if (ev.key === IMPERSONATE_KEY || ev.key === SESSION_KEY) { refreshHomeAndAccount(); buildTOC(); }});
+      window.addEventListener('codex:impersonation-changed', () => { refreshHomeAndAccount(); buildTOC(); });
+      return true;
     };
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => { if (!start()) setTimeout(start, 200); });
-    } else { if (!start()) setTimeout(start, 200); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { if (!start()) setTimeout(start, 200); });
+    else if (!start()) setTimeout(start, 200);
   }
 
-  // Expose small API
+  // expose small helpers
   window.CodexMysteria = window.CodexMysteria || {};
-  window.CodexMysteria.menuRefresh = function(){ refreshHomeAndAccount(); buildTOC(TOC_ROOT); };
   window.CodexMysteria.clearImpersonation = clearImpersonation;
   window.CodexMysteria.setImpersonation = setImpersonation;
+  window.CodexMysteria.menuRefresh = () => { refreshHomeAndAccount(); buildTOC(); };
 
-  // Start
   bootstrap();
-
 })();
