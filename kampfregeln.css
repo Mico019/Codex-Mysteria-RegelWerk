@@ -1,0 +1,164 @@
+/* kampfregeln.css — Scoped styling für Kapitel "Kampfregeln"
+   Wirken nur innerhalb #kampfregeln oder .regelwerk-page.kampfregeln
+*/
+
+#kampfregeln, .regelwerk-page.kampfregeln {
+  width: 100%;
+  max-width: 980px;
+  margin: 6vh auto;
+  padding: 1.6rem;
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+/* HEADLINE */
+#kampfregeln h1,
+.regelwerk-page.kampfregeln h1 {
+  font-family: var(--font-fantasy);
+  color: var(--accent-2);
+  margin: 0 0 .6rem 0;
+  font-size: 2rem;
+}
+
+/* Sektionen */
+#kampfregeln section {
+  margin: 1.2rem 0;
+  padding: .9rem;
+  background: transparent;
+}
+
+/* details/summary (geordnet, kompakt) */
+#kampfregeln details {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 0;
+  overflow: visible;
+  margin: .6rem 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+
+#kampfregeln summary {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none; /* verhindert standard marker */
+  color: var(--accent-2);
+  font-weight: 700;
+  font-size: 1.05rem;
+  outline: none;
+}
+
+#kampfregeln summary::-webkit-details-marker { display: none; } /* hide default triangle */
+
+/* offener summary */
+#kampfregeln details[open] > summary {
+  color: var(--accent);
+}
+
+/* content inside details */
+#kampfregeln .chapter-content,
+#kampfregeln details > .content {
+  padding: 12px 14px 16px;
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+/* Überschriften in content */
+#kampfregeln h2, #kampfregeln h3, #kampfregeln h4 {
+  color: var(--text);
+  margin-top: .6rem;
+}
+
+/* Fließtext */
+#kampfregeln p { color: var(--muted); margin: .5rem 0; }
+
+/* Tabellen — scoped, sauber, lesbar */
+#kampfregeln table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: .6rem 0;
+  background: transparent;
+}
+
+#kampfregeln thead th {
+  text-align: left;
+  padding: 8px 10px;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(0,0,0,0.03), transparent);
+}
+
+#kampfregeln tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px dashed var(--border);
+  color: var(--muted);
+  vertical-align: top;
+}
+
+/* responsive table: horizontal scroll on small screens */
+@media (max-width: 820px) {
+  #kampfregeln table { display:block; overflow-x:auto; -webkit-overflow-scrolling: touch; }
+  #kampfregeln thead, #kampfregeln tbody, #kampfregeln tr, #kampfregeln th, #kampfregeln td { display: table; }
+}
+
+/* code / inline */
+#kampfregeln code {
+  background: rgba(255,255,255,0.02);
+  color: var(--accent-2);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+  font-size: .95em;
+}
+
+/* Listen (Sauberer Abstand) */
+#kampfregeln ul, #kampfregeln ol {
+  margin: .4rem 0 0.8rem 1.1rem;
+  color: var(--muted);
+}
+
+/* Buttons/Links */
+#kampfregeln a {
+  color: var(--accent-2);
+  text-decoration: none;
+}
+
+#kampfregeln a:hover { color: var(--accent); text-decoration: underline; }
+
+/* kleine Hilfs-UI für suchergebnisse / anchors */
+#kampfregeln .anchor-link {
+  font-size: .9rem;
+  color: var(--muted);
+  margin-left: 8px;
+}
+
+/* leichte Trennung der Kapitelabschnitte */
+#kampfregeln hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  margin: 1.2rem 0;
+}
+
+/* Fokus-States (zugänglich) */
+#kampfregeln summary:focus,
+#kampfregeln a:focus,
+#kampfregeln button:focus {
+  outline: 3px solid rgba(124,92,255,0.12);
+  outline-offset: 3px;
+}
+
+/* kleine Fußnoten / meta-Info */
+#kampfregeln .meta { font-size: .9rem; color: var(--muted); }
+
+/* Safe mobile spacing */
+@media (max-width:720px){
+  #kampfregeln { padding: 1rem; margin: 5vh 8px; }
+  #kampfregeln summary { font-size: 1rem; padding: 10px; }
+  #kampfregeln .chapter-content { padding: 10px; font-size: .95rem; }
+}
