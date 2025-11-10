@@ -1,9 +1,5 @@
-/* menu.js — Dropdown-basiertes Topbar-Menü
-   - ersetzt Popups durch Dropdowns (Guide, Settings, Account, Admin, TOC)
-   - Dropdowns öffnen rechts am Bildschirm unter dem zugehörigen Button
-   - Outside-click, ESC, Close-Buttons funktionieren
-   - Account-Impersonation (View-as) zyklisch/back-to-admin repariert
-   - Erstellt fehlende Dropdown-Container automatisch
+/* menu.js — Dropdown-basiertes Topbar-Menü (TOC deaktiviert)
+   Hinweis: Das automatische Inhaltsverzeichnis (TOC) und alle zugehörigen Titel-Updates sind deaktiviert.
 */
 
 (function () {
@@ -62,24 +58,21 @@
     el.id = id;
     el.className = 'cm-dropdown';
     el.setAttribute('aria-hidden', 'true');
-    // simple default content placeholder; real content will be filled later where needed
     el.innerHTML = '<div class="cm-dropdown-inner">...</div>';
-    document.body.appendChild(el); // append to body so z-index/stacking is safe
+    document.body.appendChild(el);
     return el;
   }
 
   function showDropdown(dropEl, anchorBtn) {
     if (!dropEl) return;
-    // close other dropdowns
     closeAllDropdowns(dropEl);
     ensureDropdown(dropEl.id);
     dropEl.setAttribute('aria-hidden', 'false');
     anchorBtn && anchorBtn.setAttribute('aria-expanded', 'true');
 
-    // position: always aligned to RIGHT side of screen, below button
     const rect = anchorBtn ? anchorBtn.getBoundingClientRect() : { bottom: 8, right: 8 };
     const top = Math.max(8, rect.bottom + window.scrollY + 8);
-    const right = 8; // fixed right margin
+    const right = 8;
     Object.assign(dropEl.style, {
       position: 'fixed',
       top: `${top}px`,
@@ -89,7 +82,6 @@
       display: 'block'
     });
 
-    // auto adjust height if it would go off screen
     const popupRect = dropEl.getBoundingClientRect();
     const bottomSpace = window.innerHeight - rect.bottom - 16;
     if (popupRect.height > bottomSpace) {
@@ -105,7 +97,6 @@
     if (!dropEl) return;
     dropEl.setAttribute('aria-hidden', 'true');
     dropEl.style.display = 'none';
-    // reset anchor expanded attributes where possible
     const toggles = Array.from(document.querySelectorAll(`[aria-controls="${dropEl.id}"]`));
     toggles.forEach(t => t.setAttribute('aria-expanded', 'false'));
   }
@@ -117,7 +108,6 @@
 
   /* Close on outside click — robust */
   document.addEventListener('click', (ev) => {
-    // if click is inside any open dropdown or its toggle, do nothing; otherwise close
     const allDropdowns = Array.from(document.querySelectorAll('.cm-dropdown, .cm-popover, .cm-toc-dropdown'));
     let clickedInsideAny = false;
     for (const dd of allDropdowns) {
@@ -128,62 +118,33 @@
     if (!clickedInsideAny) closeAllDropdowns();
   }, true);
 
-  // ESC closes dropdowns
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Escape') closeAllDropdowns();
   });
 
-  /* --------- TOC (Inhaltsverzeichnis) bauen --------- */
-  let tocObserver = null;
+  /* --------- TOC (DEAKTIVIERT) --------- */
+  // buildTOC exists but is intentionally a no-op to avoid side-effects elsewhere
   function buildTOC(rootSelector = 'main') {
-    const tocContainer = document.getElementById('toc-list') || ensureDropdown('toc-list');
-    tocContainer.innerHTML = ''; // clear
-    const root = document.querySelector(rootSelector) || document.body;
-    let sections = Array.from(root.querySelectorAll('[data-section]'));
-    if (!sections.length) sections = Array.from(root.querySelectorAll('h2, h3'));
-    if (!sections.length) {
-      const no = document.createElement('div'); no.className = 'cm-toc-inner'; no.textContent = 'Keine Abschnitte gefunden.'; tocContainer.appendChild(no);
-      return;
+    // TOC disabled by user request — do not create or populate #toc-list
+    // If a #toc-list element exists in the DOM, hide it.
+    try {
+      const tocEl = document.getElementById('toc-list');
+      if (tocEl) {
+        tocEl.style.display = 'none';
+        tocEl.setAttribute('aria-hidden', 'true');
+      }
+      // also hide any toggle button if present
+      const tocToggle = document.getElementById('toc-toggle');
+      if (tocToggle) tocToggle.style.display = 'none';
+    } catch (e) {
+      // silent fail
     }
-    sections.forEach((s, i) => {
-      if (!s.id) s.id = `cm-sec-${i}-${s.textContent.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^\w\-]/g,'')}`;
-      const a = document.createElement('a');
-      a.href = '#' + s.id;
-      a.textContent = s.textContent.trim();
-      a.addEventListener('click', (ev) => { ev.preventDefault(); document.getElementById(s.id).scrollIntoView({ behavior: 'smooth', block: 'start' }); hideDropdown(tocContainer); });
-      const wrap = document.createElement('div'); wrap.appendChild(a);
-      tocContainer.appendChild(wrap);
-    });
-
-    // scrollspy: observe sections and update center title + active link
-    if (tocObserver) tocObserver.disconnect();
-    const links = Array.from(tocContainer.querySelectorAll('a'));
-    if ('IntersectionObserver' in window) {
-      tocObserver = new IntersectionObserver(entries => {
-        entries.forEach(en => {
-          if (!en.target.id) return;
-          const link = tocContainer.querySelector(`a[href="#${en.target.id}"]`);
-          if (!link) return;
-          if (en.isIntersecting) {
-            links.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            // NOTE: automatic page-title / content update has been intentionally disabled
-            // const titleEl = document.getElementById('current-page-title');
-            // if (titleEl) titleEl.textContent = en.target.textContent.trim();
-          }
-        });
-      }, { root: null, rootMargin: '0px 0px -60% 0px', threshold: 0.15 });
-      sections.forEach(s => tocObserver.observe(s));
-    } else {
-      // Fallback: do not write to #current-page-title to avoid automatic content description in the menu
-      // const titleEl = document.getElementById('current-page-title');
-      // if (titleEl) titleEl.textContent = document.title || '';
-    }
+    return;
   }
 
   /* --------- Einstellungen (Dropdown Inhalt) --------- */
   function buildSettingsDropdown(dropEl) {
-    dropEl.innerHTML = ''; // clear
+    dropEl.innerHTML = '';
     const wrap = document.createElement('div');
     wrap.className = 'cm-settings-inner';
     const cur = localStorage.getItem(THEME_KEY) || document.documentElement.getAttribute('data-theme') || (document.body.classList.contains('dark') ? 'dark' : 'dark');
@@ -202,9 +163,7 @@
       </div>
     `;
     dropEl.appendChild(wrap);
-    // preselect
     dropEl.querySelectorAll('input[name="cm-theme"]').forEach(r => { if (r.value === cur) r.checked = true; });
-    // handlers
     on(dropEl.querySelector('#cm-settings-cancel'), 'click', () => hideDropdown(dropEl));
     on(dropEl.querySelector('#cm-settings-apply'), 'click', () => {
       const sel = dropEl.querySelector('input[name="cm-theme"]:checked');
@@ -213,7 +172,6 @@
         window.CodexMysteria.applyTheme(theme);
       } else {
         document.documentElement.setAttribute('data-theme', theme);
-        // keep body classes backward-compatible
         document.body.classList.remove('light','dark','mystic','fantasy');
         if (theme === 'light') document.body.classList.add('light');
         else if (theme === 'fantasy') document.body.classList.add('mystic');
@@ -232,7 +190,7 @@
         <div style="font-weight:700; margin-bottom:6px;">Kurzanleitung</div>
         <div style="font-size:0.95rem; margin-bottom:8px;">
           <div><strong>Start:</strong> Führt zur Startseite für deinen Account-Typ.</div>
-          <div><strong>Inhaltsverzeichnis:</strong> Zeigt Abschnitte der aktuellen Seite.</div>
+          <div><strong>Inhaltsverzeichnis:</strong> (deaktiviert)</div>
           <div><strong>Einstellungen:</strong> Theme wählen (Dark/Light/Fantasy).</div>
           <div><strong>Account:</strong> Username ändern, Passwort setzen, Abmelden.</div>
         </div>
@@ -269,7 +227,6 @@
       </div>
     `;
     dropEl.insertAdjacentHTML('beforeend', html);
-    // handlers
     on(dropEl.querySelector('#cm-acc-pass-toggle'), 'click', (ev) => {
       const ip = dropEl.querySelector('#cm-acc-pass'); if (!ip) return;
       ip.type = ip.type === 'password' ? 'text' : 'password';
@@ -280,12 +237,10 @@
       const newPass = dropEl.querySelector('#cm-acc-pass').value;
       const s = safeGetSession();
       if (!s) { alert('Kein aktives Konto.'); hideDropdown(dropEl); return; }
-      // update local accounts list if exists
       let accounts = [];
       try { accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]'); } catch (e) { accounts = []; }
       const idx = accounts.findIndex(a => a.username && a.username.toLowerCase() === (s.username||'').toLowerCase());
       if (idx === -1) {
-        // update session object if present
         try {
           const sessRaw = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
           if (newName) sessRaw.username = newName;
@@ -305,7 +260,6 @@
         try { accounts[idx].passwordHash = await hashPassword(newPass); } catch(e) { alert('Fehler beim Speichern des Passworts'); return; }
       }
       localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-      // also update session username
       try { const sessRaw = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}'); if (newName) sessRaw.username = newName; localStorage.setItem(SESSION_KEY, JSON.stringify(sessRaw)); } catch(e){}
       alert('Account aktualisiert.');
       hideDropdown(dropEl);
@@ -328,14 +282,12 @@
     `;
     dropEl.insertAdjacentHTML('beforeend', html);
     on(dropEl.querySelector('#cm-admin-view-cycle'), 'click', () => {
-      // cycle impersonation: admin -> dm -> player -> guest -> admin ...
       const current = getImpersonation() || realSessionRole();
       const idx = ROLES_CYCLE.indexOf(current) >= 0 ? ROLES_CYCLE.indexOf(current) : 0;
       const next = ROLES_CYCLE[(idx + 1) % ROLES_CYCLE.length];
       setImpersonation(next);
       alert('Ansicht gewechselt: ' + next);
       refreshHomeAndAccount();
-      // keep dropdown open but update contents if necessary
     });
     on(dropEl.querySelector('#cm-admin-clear'), 'click', () => {
       clearImpersonation();
@@ -354,31 +306,24 @@
     const popUser = document.getElementById('popover-username'); if (popUser) popUser.textContent = sess ? (sess.username || 'Gast') : 'Gast';
     const popRole = document.getElementById('popover-role'); if (popRole) popRole.textContent = effectiveRole();
 
-    // admin controls visible only if real session role is admin
     const adminCtrl = document.querySelector('.admin-control');
     if (adminCtrl) adminCtrl.style.display = (realSessionRole() === 'admin') ? '' : 'none';
   }
 
   /* --------- Init wiring (buttons -> dropdowns) --------- */
   function initDropdowns() {
-    // ensure containers exist (reuse ids used in your HTML)
-    const toc = ensureDropdown('toc-list'); // your HTML may already have it; ensureDropdown will return existing
+    // NOTE: TOC is intentionally NOT created or wired here.
     const accountDrop = document.getElementById('account-popover') || ensureDropdown('account-popover');
     const adminDrop = document.getElementById('admin-popover') || ensureDropdown('admin-popover');
     const guideDrop = ensureDropdown('dropdown-guide');
     const settingsDrop = ensureDropdown('dropdown-settings');
 
-    // build content
-    buildTOC();                 // fills toc-list
     buildAccountDropdown(accountDrop);
     buildAdminDropdown(adminDrop);
     buildGuideDropdown(guideDrop);
     buildSettingsDropdown(settingsDrop);
 
     // wire toggles (buttons should have aria-controls pointing to container id)
-    const btnTOC = document.getElementById('toc-toggle');
-    if (btnTOC) { btnTOC.setAttribute('aria-controls','toc-list'); on(btnTOC, 'click', () => { showDropdown(toc, btnTOC); }); }
-
     const btnAccount = document.getElementById('account-toggle');
     if (btnAccount) { btnAccount.setAttribute('aria-controls', accountDrop.id); on(btnAccount, 'click', () => { showDropdown(accountDrop, btnAccount); }); }
 
@@ -391,8 +336,8 @@
     const btnSettings = document.getElementById('settings-btn');
     if (btnSettings) { btnSettings.setAttribute('aria-controls', settingsDrop.id); on(btnSettings, 'click', () => { showDropdown(settingsDrop, btnSettings); }); }
 
-    // add close buttons inside each created dropdown for direct click (if not already)
-    ['dropdown-guide','dropdown-settings','account-popover','admin-popover','toc-list','dropdown-settings'].forEach(id => {
+    // add close buttons inside each created dropdown (exclude toc-list)
+    ['dropdown-guide','dropdown-settings','account-popover','admin-popover'].forEach(id => {
       const d = document.getElementById(id);
       if (!d) return;
       if (!d.querySelector('.cm-dropdown-close')) {
@@ -413,23 +358,19 @@
       }
     });
 
-    // refresh UI initially
     refreshHomeAndAccount();
   }
 
   /* --------- Bootstrapping (DOM ready) --------- */
   function bootstrap() {
-    // wait DOM ready
     const start = () => {
       const topbar = document.getElementById('site-topbar') || document.getElementById('main-header');
       if (!topbar) return false;
       initDropdowns();
-      // reposition open dropdowns on resize/scroll
       window.addEventListener('resize', () => { Array.from(document.querySelectorAll('.cm-dropdown')).forEach(d => { if (d.getAttribute('aria-hidden') === 'false') { const toggle = document.querySelector(`[aria-controls="${d.id}"]`); if (toggle) showDropdown(d, toggle); } }); });
       window.addEventListener('scroll', () => { Array.from(document.querySelectorAll('.cm-dropdown')).forEach(d => { if (d.getAttribute('aria-hidden') === 'false') { const toggle = document.querySelector(`[aria-controls="${d.id}"]`); if (toggle) showDropdown(d, toggle); } }); }, true);
-      // update when impersonation changes (other tab)
-      window.addEventListener('storage', (ev) => { if (ev.key === IMPERSONATE_KEY || ev.key === SESSION_KEY) { refreshHomeAndAccount(); buildTOC(); }});
-      window.addEventListener('codex:impersonation-changed', () => { refreshHomeAndAccount(); buildTOC(); });
+      window.addEventListener('storage', (ev) => { if (ev.key === IMPERSONATE_KEY || ev.key === SESSION_KEY) { refreshHomeAndAccount(); /* TOC disabled */ }});
+      window.addEventListener('codex:impersonation-changed', () => { refreshHomeAndAccount(); /* TOC disabled */ });
       return true;
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { if (!start()) setTimeout(start, 200); });
@@ -440,7 +381,8 @@
   window.CodexMysteria = window.CodexMysteria || {};
   window.CodexMysteria.clearImpersonation = clearImpersonation;
   window.CodexMysteria.setImpersonation = setImpersonation;
-  window.CodexMysteria.menuRefresh = () => { refreshHomeAndAccount(); buildTOC(); };
+  // menuRefresh no longer rebuilds TOC (disabled)
+  window.CodexMysteria.menuRefresh = () => { refreshHomeAndAccount(); };
 
   bootstrap();
 })();
