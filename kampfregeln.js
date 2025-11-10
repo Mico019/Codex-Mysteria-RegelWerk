@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const turns = calcTurns(value);
     result.innerHTML =
-      `Bei einer Initiative von <strong>${value}</strong> darfst du <strong>${turns}</strong> Zug${turns > 1 ? "e" : ""} pro Runde ausführen.`;
+      `Bei einer Initiative von <strong>${value}</strong> darfst du <strong>${turns}</strong> Zug${turns > 1 ? "e" : ""} pro/diese Runde ausführen.`;
   });
 });
 
