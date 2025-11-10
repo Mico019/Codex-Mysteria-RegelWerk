@@ -167,15 +167,17 @@
           if (en.isIntersecting) {
             links.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
-            const titleEl = document.getElementById('current-page-title');
-            if (titleEl) titleEl.textContent = en.target.textContent.trim();
+            // NOTE: automatic page-title / content update has been intentionally disabled
+            // const titleEl = document.getElementById('current-page-title');
+            // if (titleEl) titleEl.textContent = en.target.textContent.trim();
           }
         });
       }, { root: null, rootMargin: '0px 0px -60% 0px', threshold: 0.15 });
       sections.forEach(s => tocObserver.observe(s));
     } else {
-      const titleEl = document.getElementById('current-page-title');
-      if (titleEl) titleEl.textContent = document.title || '';
+      // Fallback: do not write to #current-page-title to avoid automatic content description in the menu
+      // const titleEl = document.getElementById('current-page-title');
+      // if (titleEl) titleEl.textContent = document.title || '';
     }
   }
 
