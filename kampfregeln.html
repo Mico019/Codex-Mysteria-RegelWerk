@@ -1,0 +1,1273 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kapitel 6 – Kampfregeln</title>
+  <!-- Style-Hook: dein späteres CSS kann hier verlinkt werden -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main id="content" class="container">
+    <header id="chapter-hero" class="chapter-hero">
+      <h1 class="chapter-title">Kapitel 6 – Kampfregeln</h1>
+    </header>
+
+    <!-- ====================== RUNDENABLAUF ====================== -->
+    <section id="rundenablauf" data-section class="section-card">
+      <details open class="detail">
+        <summary class="detail-summary"><h2>⚔️ Rundenablauf (statische Initiative + Aktionssystem)</h2></summary>
+        <div class="chapter-content">
+
+          <details class="sub-detail" id="rundenablauf-initiative">
+            <summary class="sub-summary"><h3>1. Initiative (zu Kampfbeginn)</h3></summary>
+            <div class="sub-content">
+              <p>
+                Zu Beginn des Kampfes würfeln alle Beteiligten einmal: <code>1W20 + Klassen-Initiativbonus</code>.
+                Das Ergebnis legt die Reihenfolge der Züge fest. Diese Reihenfolge bleibt während des gesamten Kampfes unverändert,
+                außer spezielle Effekte oder Fähigkeiten verändern sie ausdrücklich (z. B. Zeitverzögerung, Initiative-Sprung o. Ä.).
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="rundenablauf-rundenstruktur">
+            <summary class="sub-summary"><h3>2. Rundenstruktur</h3></summary>
+            <div class="sub-content">
+              <p>
+                Eine Kampfrunde umfasst alle Züge aller Beteiligten. Wenn der letzte Akteur gehandelt hat, beginnt sofort die nächste Runde.
+                Eine Runde entspricht ca. 12 Sekunden In-Game-Zeit.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="rundenablauf-spielerzug">
+            <summary class="sub-summary"><h3>3. Spielerzug – Ablauf</h3></summary>
+            <div class="sub-content">
+              <p>Jeder Charakter hat in seinem Zug zwei Aktionen: Eine Aktion kann ganz oder halb sein. Zwei halbe Aktionen = eine ganze Aktion. Aktionen dürfen in beliebiger Reihenfolge innerhalb des Zugs genutzt werden.</p>
+
+              <details class="sub-detail" id="rundenablauf-rettungseffekt">
+                <summary class="sub-summary"><h4>3.1 Rettungs- &amp; Effektphase</h4></summary>
+                <div class="sub-content">
+                  <ul>
+                    <li>Führe Rettungswürfe gegen laufende negative Effekte durch.</li>
+                    <li>Wende anhaltende Effekte (Schaden, Heilung, Buffs) an.</li>
+                    <li>Reduziere Cooldowns um 1 und entferne abgelaufene Effekte.</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="rundenablauf-bewegungsphase">
+                <summary class="sub-summary"><h4>3.2 Bewegungsphase</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Bewegung kostet ½ Aktion pro Bewegungsreichweite (BR). Ein Charakter kann sich also mehrfach bewegen, solange Aktionen verbleiben.
+                  </p>
+                  <p><strong>Reaktionen:</strong><br />
+                    Können im Prinzip durch alles ausgelöst werden, und müssen für den Fall das sich der Reagierende dafür entscheidet sofort ausgeführt werden.
+                  </p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="rundenablauf-aktionsphase">
+                <summary class="sub-summary"><h4>3.3 Aktionsphase</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Verbleibende Aktionen können für beliebige zugelassene Handlungen verwendet werden, z. B. Angriff, Zauber, Interaktion oder Erholung – die genauen Kosten werden in Kapitel 7 definiert.
+                    Aktionen können frei kombiniert werden (z. B. 1× ganze + 0½, oder 2× ½).
+                  </p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="rundenablauf-trefferphase">
+                <summary class="sub-summary"><h4>3.4 Treffer- / Probenphase</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Wenn eine Aktion Würfel erfordert: <code>1W20 + Modifikatoren ± Vorteil / Nachteil</code><br />
+                    Der Wurf wird gegen den Ausweich-Warscheinlichkeit (AW) des Gegners geworfen.
+                  </p>
+
+                  <div class="note-block">
+                    <p><strong>Kritische Regeln:</strong></p>
+                    <ul>
+                      <li>Wurf = NAT. 20 → Kritischer Treffer.</li>
+                      <li>Wurf = NAT. 1 → Kritischer Fehlschlag.</li>
+                      <li>Kritische Treffer ignorieren keine Rüstung; stattdessen gelten die Multiplikatoren und Sonderwürfe aus dem Krit-System.</li>
+                    </ul>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="rundenablauf-schadensphase">
+                <summary class="sub-summary"><h4>3.5 Schadensphase</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Bei Treffer →<br />
+                    <strong>Gesamtschaden</strong> = Grundschaden + Waffen / Zauberwürfel<br />
+                    <strong>Endschaden</strong> = Gesamtschaden − Rüstungswert (RZ)<br />
+                    Schilde oder defensive Fähigkeiten werden danach angewendet. Sinkt ein Charakter auf 0 LP → Sterbenszustand (siehe Todesregeln).
+                  </p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="rundenablauf-endphase">
+                <summary class="sub-summary"><h4>3.6 Endphase</h4></summary>
+                <div class="sub-content">
+                  <ul>
+                    <li>AP / Ausdauer aktualisieren.</li>
+                    <li>Alle „Rundenende“-Effekte abhandeln (z. B. Ausbrennen, Regeneration, Buff-Ablauf).</li>
+                    <li>Zug endet → nächster Charakter laut Initiative.</li>
+                  </ul>
+                </div>
+              </details>
+
+            </div>
+          </details>
+
+          <details class="sub-detail" id="rundenablauf-gegner">
+            <summary class="sub-summary"><h3>4. Gegnerzüge</h3></summary>
+            <div class="sub-content">
+              <p>
+                Gegner handeln nach denselben Regeln: zwei Aktionen pro Zug, gleiche Phasenabfolge. Der Spielleiter entscheidet, in welcher Reihenfolge Gruppen oder Einheiten handeln, um den Ablauf übersichtlich zu halten.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="rundenablauf-uebersicht">
+            <summary class="sub-summary"><h3>5. Zug-Übersicht</h3></summary>
+            <div class="sub-content">
+              <table class="data-table example-table" aria-describedby="zug-uebersicht-desc">
+                <caption id="zug-uebersicht-desc" class="sr-only">Übersicht der Phasen eines Zuges</caption>
+                <thead>
+                  <tr>
+                    <th>Phase</th>
+                    <th>Inhalt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Rettungs- &amp; Effektphase</td>
+                    <td>Effekte abhandeln, Rettungswürfe, Cooldowns</td>
+                  </tr>
+                  <tr>
+                    <td>Bewegung</td>
+                    <td>½ Aktion pro BR, Reaktionen möglich</td>
+                  </tr>
+                  <tr>
+                    <td>Aktionen</td>
+                    <td>2 pro Zug (½ oder ganz), freie Reihenfolge</td>
+                  </tr>
+                  <tr>
+                    <td>Treffer / Proben</td>
+                    <td>1 W20 + Attribut ± Modifikatoren gegen ZW</td>
+                  </tr>
+                  <tr>
+                    <td>Schadensphase</td>
+                    <td>Schaden berechnen, Rüstung anwenden</td>
+                  </tr>
+                  <tr>
+                    <td>Endphase</td>
+                    <td>AP aktualisieren, Effekte am Rundenende</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </section>
+
+    <!-- ====================== KRITISCHE TREFFER / KRITISCHE REGELN ====================== -->
+    <section id="kritische-treffer" data-section class="section-card">
+      <details class="detail">
+        <summary class="detail-summary"><h2>2. Kritische Treffer – Gesamtregel</h2></summary>
+        <div class="chapter-content">
+
+          <details class="sub-detail" id="krit-allgemein">
+            <summary class="sub-summary"><h3>1. Allgemeine Definition</h3></summary>
+            <div class="sub-content">
+              <p>Ein Angriff gilt als kritischer Treffer, wenn mindestens eine der folgenden Bedingungen erfüllt ist:</p>
+              <ul>
+                <li>Es wurde eine natürliche 20 auf 1W20 gewürfelt.</li>
+                <li>Ein Effekt, Zauber oder eine Fähigkeit gewährt einen automatischen Krit (z. B. Hold Person).</li>
+                <li>Nur eine natürliche 20 trifft automatisch. Bei allen anderen Krits muss das Ergebnis den AW (Verteidigungswert) des Ziels erreichen oder übertreffen.</li>
+                <li>Eine natürliche 1 ist immer ein kritischer Fehlschlag (siehe separates Kapitel).</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="krit-schadensberechnung">
+            <summary class="sub-summary"><h3>2. Schadensberechnung bei Krits</h3></summary>
+            <div class="sub-content">
+              <p>Nach einem bestätigten Krit kann der Spieler eine von zwei Methoden verwenden:</p>
+
+              <details class="sub-detail" id="krit-variante-a">
+                <summary class="sub-summary"><strong>A) Flacher Multiplikator</strong></summary>
+                <div class="sub-content">
+                  <p>Berechne den normalen Schaden (alle Würfel + flache Boni) und multipliziere das Endergebnis mit dem Multiplikator der Waffe oder Fähigkeit.</p>
+                  <p>Beispiel: 1W8 + 3 = 9 → × 2 = 18 Schaden</p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="krit-variante-b">
+                <summary class="sub-summary"><strong>B) Erneutes Würfeln</strong></summary>
+                <div class="sub-content">
+                  <p>Würfle alle Schadenswürfel erneut und addiere beide Ergebnisse, inklusive aller flachen Boni.</p>
+                  <p>Beispiel: 1W8 + 3 = 9, zweiter Wurf 1W8 + 3 = 7 → Gesamt = 16 Schaden</p>
+                </div>
+              </details>
+
+              <p>Die gewählte Methode gilt nur für diesen einen Krit.</p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="krit-verstaerkung">
+            <summary class="sub-summary"><h3>3. Kritische Verstärkung</h3></summary>
+            <div class="sub-content">
+              <p>
+                <strong>Typ:</strong> Aktiv | <strong>Nutzung:</strong> 1 × pro Lange Rast | <strong>Kosten:</strong> optional 1 AP<br />
+                <strong>Bedingung:</strong> Ein bestätigter kritischer Treffer.<br />
+                <strong>Effekt:</strong><br />
+                Würfle alle Schadenswürfel so oft, wie dein Multiplikator vorgibt (× 2 → 2 Wurfserien, × 3 → 3 usw.). Addiere bei jeder Serie die Würfel und flachen Boni. Wähle das höchste Gesamtergebnis dieser Serien. Multipliziere dieses Ergebnis mit deinem Krit-Multiplikator.
+              </p>
+              <p>Beispiel: 1W8 + 3 → Würfe (8 + 3) = 11 und (5 + 3) = 8 → höher = 11 → Endschaden = 11 × 2 = 22 Schaden</p>
+              <p>
+                Besonderheiten:<br />
+                Nur 1 × pro Lange Rast nutzbar (weitere Verwendungen durch Spezialisierungen möglich). Multiplikator bleibt unverändert – die Fähigkeit reizt nur den Schaden maximal aus. Nicht kombinierbar mit anderen Schadens-Multiplikatoren oder Bonuswürfen.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="krit-stacks">
+            <summary class="sub-summary"><h3>4. Kritische Stacks (gestapelte Krits)</h3></summary>
+            <div class="sub-content">
+
+              <details class="sub-detail" id="krit-stacks-bildung">
+                <summary class="sub-summary"><h4>4.1 Bildung von Stacks</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Ein Angriff kann durch Vorteil, Auto-Krit-Effekte oder mehrere natürliche 20 innerhalb eines Angriffs zusätzliche Krit-Ereignisse auslösen. Nach dem ersten Krit muss jede weitere Bestätigung eine natürliche 20 zeigen.
+                  </p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="krit-stacks-multiplikator">
+                <summary class="sub-summary"><h4>4.2 Multiplikator-Regel</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Jeder zusätzliche Krit erhöht die Potenz des vorhandenen Multiplikators.<br />
+                    <strong>Endmultiplikator</strong> = (Basis-Multiplikator) ^ (Anzahl der Krits)
+                  </p>
+                  <p>Beispiel: Basis × 2 und 3 Krits → 2³ = × 8 Gesamt-Multiplikator.</p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="krit-stacks-vorteil">
+                <summary class="sub-summary"><h4>4.3 Vorteil / Nachteil</h4></summary>
+                <div class="sub-content">
+                  <p>Vorteil = zwei Würfe; beide 20 = Doppelkrit.<br />
+                    Nachteil = beide 20 = ebenfalls Doppelkrit (möglich, aber selten).
+                  </p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="krit-stacks-cap">
+                <summary class="sub-summary"><h4>4.4 Sicherheitsgrenze (Cap)</h4></summary>
+                <div class="sub-content">
+                  <table class="data-table example-table">
+                    <thead>
+                      <tr>
+                        <th>Variante</th>
+                        <th>Effekt</th>
+                        <th>Empfehlung</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Cap 3</td>
+                        <td>max. 3 Stacks → Multiplikator³</td>
+                        <td>Standard</td>
+                      </tr>
+                      <tr>
+                        <td>Cap 4</td>
+                        <td>max. 4 Stacks → Multiplikator⁴</td>
+                        <td>Episch</td>
+                      </tr>
+                      <tr>
+                        <td>Episch</td>
+                        <td>Kein Cap</td>
+                        <td>unbeschränkt (One-Shot-Option)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+
+            </div>
+          </details>
+
+          <details class="sub-detail" id="krit-beispiele">
+            <summary class="sub-summary"><h3>5. Schadensbeispiele</h3></summary>
+            <div class="sub-content">
+              <table class="data-table example-table">
+                <thead>
+                  <tr>
+                    <th>Situation</th>
+                    <th>Basis</th>
+                    <th>Krits</th>
+                    <th>Berechnung</th>
+                    <th>Endschaden</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Doppelkrit</td>
+                    <td>× 2</td>
+                    <td>2</td>
+                    <td>2² = × 4</td>
+                    <td>(1W8 + 3) × 4 = 40</td>
+                  </tr>
+                  <tr>
+                    <td>Dreifachkrit</td>
+                    <td>× 3</td>
+                    <td>3</td>
+                    <td>3³ = × 27</td>
+                    <td>(1W8 + 3) × 27 = 270 – 297</td>
+                  </tr>
+                  <tr>
+                    <td>Vierfachkrit</td>
+                    <td>× 5</td>
+                    <td>4</td>
+                    <td>5⁴ = × 625</td>
+                    <td>(1W20 + 5) × 625 = 12 500 +</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="krit-verstaerkung-stacks">
+            <summary class="sub-summary"><h3>6. Kritische Verstärkung + Stacks</h3></summary>
+            <div class="sub-content">
+              <p>
+                Wenn Kritische Verstärkung aktiv ist, nutzt sie den höchsten Einzelwurf aller Serien und multipliziert ihn anschließend mit dem Endmultiplikator aus den Stacks.<br />
+                Beispiel: Perfekter Schlag (11 höchster Wurf) × Multiplikator 8 = 88 Schaden
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="krit-design">
+            <summary class="sub-summary"><h3>7. Design- und Balancing-Hinweise</h3></summary>
+            <div class="sub-content">
+              <ul>
+                <li>Ketten-Krits sind statistisch extrem selten und sollen spektakulär bleiben.</li>
+                <li>Krit-Stacks werden immer exponentiell, nicht linear berechnet.</li>
+                <li>Krits beeinflussen nur den aktuellen Angriff – keine Folgeaktionen.</li>
+                <li>Gegner mit besonderer Resistenz können ein Cap erzwingen (z. B. max. × 2).</li>
+                <li>Multiplikatoren über × 625 sollten nur in Sonder-Kampagnen oder Boss-Events auftreten.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="krit-formel">
+            <summary class="sub-summary"><h3>8. Kurzformel (für Regeltabellen)</h3></summary>
+            <div class="sub-content">
+              <p><code>Endschaden = (Grundschaden) × (Basis-Multiplikator ^ Krit-Anzahl)</code> (nach Anwendung von Kritischer Verstärkung falls aktiv)</p>
+              <p>
+                Damit ist dein kritisches Treffersystem v4.0 komplett definiert: Einheitliche Mechanik, Erweiterbar durch Spezialisierungen, Klar skalierbar, Keine Wahrscheinlichkeitslücken, Und ohne Prozentlogik – voll kompatibel mit deinem Würfel-/Flachwert-System.
+              </p>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </section>
+
+    <!-- ====================== KRITISCHER FEHLSCHLAG ====================== -->
+    <section id="kritischer-fehlschlag" data-section class="section-card">
+      <details class="detail">
+        <summary class="detail-summary"><h2>3. Kritischer Fehlschlag – Reaktionsoptionen</h2></summary>
+        <div class="chapter-content">
+
+          <details class="sub-detail" id="fehlschlag-definition">
+            <summary class="sub-summary"><h3>1. Definition</h3></summary>
+            <div class="sub-content">
+              <p>
+                Eine natürliche 1 auf einem W20-Angriff oder einer Probe ist ein kritischer Fehlschlag. Das Ergebnis gilt immer als Fehlschlag – unabhängig von Boni oder Zielwerten.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="fehlschlag-effekt">
+            <summary class="sub-summary"><h3>2. Effekt – Gegnerreaktion</h3></summary>
+            <div class="sub-content">
+              <p>
+                Das Ziel des Fehlschlags darf eine kostenlose Reaktion ausführen. Diese kostet keine AP, keine Aktion und keine Reaktion und zählt nicht gegen das Rundenlimit. Sie kann nur den Fehlschlagenden betreffen.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="fehlschlag-ablauf">
+            <summary class="sub-summary"><h3>3. Ablauf</h3></summary>
+            <div class="sub-content">
+              <ol>
+                <li>Fehlschlag wird erkannt (natürliche 1).</li>
+                <li>Das Ziel wählt eine Option aus der Reaktionsliste.</li>
+                <li>Der Effekt tritt sofort ein; dann läuft der Kampf normal weiter. (DM oder Ziel dürfen die Option wählen, je nach Spielart.)</li>
+              </ol>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="fehlschlag-liste">
+            <summary class="sub-summary"><h3>4. Reaktionsliste – Beispiele (Erweiterbar)</h3></summary>
+            <div class="sub-content">
+              <p>Du kannst pro Kampagnenstil 3 – 10 Optionen zulassen; mehr Erweiterungen können später als Spezialisierungen oder Klassenfähigkeiten hinzukommen.</p>
+
+              <table class="data-table example-table">
+                <thead>
+                  <tr>
+                    <th>Nr.</th>
+                    <th>Name</th>
+                    <th>Beschreibung / Effekt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td>Konterangriff</td><td>Das Ziel darf sofort einen einfachen Angriff gegen den Fehlschlagenden ausführen. Dieser Angriff kann nicht kritisch treffen.</td></tr>
+                  <tr><td>2</td><td>Kostenlose Bewegung</td><td>Das Ziel darf sich bis zu 2 Bewegungsreichweiten (BR) in beliebige Richtung bewegen, ohne AP oder Reaktion zu verbrauchen. Bewegung provoziert keine Gelegenheitsangriffe.</td></tr>
+                  <tr><td>3</td><td>Entwaffnen</td><td>Das Ziel führt einen Entwaffnungsversuch aus. Bei Erfolg verliert der Fehlschlagende seine Waffe oder Haupthand-Item (landet in 1 m Entfernung).</td></tr>
+                  <tr><td>4</td><td>Gelegenheitsschlag</td><td>Wie ein standardisierter Angriff der Gelegenheit; der Fehlschlagende zählt als würde er den Nahbereich verlassen haben.</td></tr>
+                  <tr><td>5</td><td>Blockhaltung</td><td>Das Ziel geht in defensive Stellung und erhält +5 AW bis zu seiner nächsten Runde.</td></tr>
+                  <tr><td>6</td><td>Opportunitätszauber</td><td>Das Ziel darf einen Zauber mit reduzierter Zauberstufe (–3) oder verringertem Kostenwert wirken. Der Zauber muss den Fehlschlagenden betreffen oder von ihm ausgehen.</td></tr>
+                  <tr><td>7</td><td>Positionswechsel</td><td>Das Ziel darf sofort seinen Platz mit dem Fehlschlagenden tauschen, wenn beide in Reichweite stehen.</td></tr>
+                  <tr><td>8</td><td>Waffenkontrolle</td><td>Das Ziel hakt die Waffe des Fehlschlagenden ein → dieser erleidet –2 auf alle Angriffe bis zum Ende seiner nächsten Runde.</td></tr>
+                  <tr><td>9</td><td>Standvorteil</td><td>Das Ziel erhält +2 auf alle Angriffe gegen den Fehlschlagenden bis zum Ende seiner nächsten Runde.</td></tr>
+                  <tr><td>10</td><td>Rückschritt</td><td>Das Ziel darf sich bis zu 2 m vom Fehlschlagenden entfernen, ohne eine Reaktion zu provozieren.</td></tr>
+                </tbody>
+              </table>
+
+            </div>
+          </details>
+
+          <details class="sub-detail" id="fehlschlag-balance">
+            <summary class="sub-summary"><h3>5. Balancinghinweise</h3></summary>
+            <div class="sub-content">
+              <ul>
+                <li>Kein Effekt darf sofort töten oder massiven Schaden verursachen; es geht um Vorteil, nicht Strafe.</li>
+                <li>Der Fehlschlagende bleibt im Kampf, aber gerät in eine taktische Unterposition.</li>
+                <li>Diese Regel kann auch für magische Fehlschläge verwendet werden (der Gegnervorteil wird dann nach Zauberlogik beschrieben).</li>
+                <li>Gegner mit Sonderfertigkeiten können ihre eigenen Fehlschlag-Reaktionslisten haben.</li>
+              </ul>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </section>
+
+    <!-- ====================== EFFEKT SYSTEM ====================== -->
+    <section id="effektsystem" data-section class="section-card">
+      <details class="detail">
+        <summary class="detail-summary"><h2>4. Effektsystem – Stacks, Würfel &amp; Wirkungssteigerung (WS)</h2></summary>
+        <div class="chapter-content">
+
+          <details class="sub-detail" id="effekt-grundprinzip">
+            <summary class="sub-summary"><h3>1. Grundprinzip</h3></summary>
+            <div class="sub-content">
+              <p>
+                Effekte (z. B. Gift, Feuer, Blutung, Rüstungsschwund, Regeneration, Segen, Flüche usw.) verursachen fortlaufende Wirkungen, die mit jeder Anwendung Stacks erzeugen.
+                Ein Stack ist eine Verstärkung oder Wiederholung desselben Effekts auf einem Ziel. Jeder Effekt kann beliebig viele Stacks besitzen; es gibt kein Stacklimit.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-wuerfelfolge">
+            <summary class="sub-summary"><h3>2. Würfelfolge (Grundreihe)</h3></summary>
+            <div class="sub-content">
+              <p>Alle Effekte skalieren anhand einer festen Würfelfolge, die ihre Stärke bestimmt:</p>
+              <p class="code"><code>1W4 → 1W6 → 1W8 → 1W10 → 1W12 → 1W12+1W4 → 1W12+1W6 → 1W20 → 1W20+1W4 → 1W20+1W6 → 1W20+1W8 → …</code></p>
+              <p>Jeder Schritt in der Reihe steht für eine höhere Wirkungsstufe.</p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-stackverhalten">
+            <summary class="sub-summary"><h3>3. Stackverhalten</h3></summary>
+            <div class="sub-content">
+              <ul>
+                <li>Jeder Effekt startet mit einer bestimmten Anzahl an Stacks (empfohlen: 7).</li>
+                <li>Stacks 1–5 gelten als inaktiv für Skalierung – der Effekt bleibt auf der Basisstufe.</li>
+                <li>Ab Stack 6 wird bei jedem neuen Stack die Würfelfolge nach der Wirkungssteigerung (WS) berechnet.</li>
+                <li>Wenn der Cooldown des Effekts abläuft, verliert dieser 1 Stack.</li>
+                <li>Effekte enden nur, wenn sie ausgelaufen sind oder durch einen erfolgreichen Rettungswurf entfernt werden.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-cooldown-dauer">
+            <summary class="sub-summary"><h3>4. Cooldown &amp; Dauer</h3></summary>
+            <div class="sub-content">
+              <p>
+                Jeder Effekt hat einen Basis-Cooldown (BC). Der tatsächliche Cooldown wächst linear mit der Stackzahl:<br />
+                <code>Cooldown = BC × Stackzahl</code><br />
+                Wenn der Cooldown endet, verliert der Effekt 1 Stack. Effekte enden nur, wenn sie ausgelaufen sind oder durch einen erfolgreichen Rettungswurf entfernt werden.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-ws">
+            <summary class="sub-summary"><h3>5. Wirkungssteigerung (WS)</h3></summary>
+            <div class="sub-content">
+              <p>Die Wirkungssteigerung (WS) legt fest, wie stark der Effekt pro Stack an Würfelschritten zunimmt.</p>
+
+              <table class="data-table example-table">
+                <thead>
+                  <tr>
+                    <th>WS-Wert</th>
+                    <th>Bedeutung</th>
+                    <th>Beispiel</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>WS ½</td><td>Sehr langsam – nur alle 2 Stacks ein neuer Würfelschritt.</td><td>Stack 5 = 1W4 → 6 = 1W4 → 7 = 1W6 → 8 = 1W6 …</td></tr>
+                  <tr><td>WS 1</td><td>Standard – bei jedem Stack ein Würfelschritt.</td><td>Stack 5 = 1W4 → 6 = 1W6 → 7 = 1W8 …</td></tr>
+                  <tr><td>WS 2</td><td>Schnell – überspringt 1 Schritt pro Stack.</td><td>Stack 5 = 1W4 → 6 = 1W8 → 7 = 1W12 …</td></tr>
+                  <tr><td>WS 3</td><td>Sehr schnell – überspringt 2 Schritte pro Stack.</td><td>Stack 5 = 1W4 → 6 = 1W10 → 7 = 1W12+1W4 …</td></tr>
+                </tbody>
+              </table>
+
+              <p>Je höher der WS-Wert, desto stärker die Sprünge in der Würfelfolge. Je niedriger der WS-Wert, desto feiner die Skalierung.</p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-wirkungsstaerke">
+            <summary class="sub-summary"><h3>6. Effektstärke</h3></summary>
+            <div class="sub-content">
+              <p>
+                Die Effektstärke entspricht der aktuellen Würfelstufe gemäß der Würfelfolge. Zusätzlich kann der Effekt Multiplikatoren oder Zusatzwürfel haben (z. B. Schaden × 2 oder +1W4 Zusatzschaden).
+                Starke Effekte dürfen nur jeden 2., 3. oder 4. Würfelschritt der Folge nutzen, z. B. „WS = 2x“ = nur jeder zweite Wert, aber doppelter Schadenswurf.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-rw">
+            <summary class="sub-summary"><h3>7. Rettungswürfe (RW)</h3></summary>
+            <div class="sub-content">
+              <p>
+                Effekte können durch Rettungswürfe vollständig beendet werden.<br />
+                <strong>Zielwert:</strong><br />
+                Ausdauer (des Wirkenden) − (Stackzahl ÷ 2) — Mindestwert 2 (Zielwert kann nie unter 2 fallen).<br />
+                <strong>Wurfregel:</strong> → 1W20 + Modifikator (abhängig vom Effekt): Stärke, Ausdauer, Wahrnehmung, Geschicklichkeit, Weisheit, Charisma oder Gesundheit.
+              </p>
+
+              <table class="data-table example-table">
+                <thead>
+                  <tr><th>Ergebnis</th><th>Wirkung</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Wurf ≥ Zielwert</td><td>Effekt endet vollständig; alle Stacks werden entfernt.</td></tr>
+                  <tr><td>Wurf &lt; Zielwert</td><td>Effekt bleibt unverändert.</td></tr>
+                  <tr><td>Nat 1</td><td>Kritischer Fehlschlag – Effekt erhält +1 Stack.</td></tr>
+                  <tr><td>Nat 20</td><td>Kritischer Erfolg – Effekt endet sofort.</td></tr>
+                </tbody>
+              </table>
+
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-beispiel">
+            <summary class="sub-summary"><h3>8. Beispiel</h3></summary>
+            <div class="sub-content">
+              <p>
+                Effekt: Brennen<br />
+                Startwürfel: 1W4 WS: 1 BC: 2 Runden Start-Stacks: 7 RW-Attribut: Ausdauer
+              </p>
+
+              <table class="data-table example-table">
+                <thead>
+                  <tr><th>Stack</th><th>Würfel</th><th>Beschreibung</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>5</td><td>1W4</td><td>Leichtes Brennen</td></tr>
+                  <tr><td>6</td><td>1W6</td><td>Glutbildung</td></tr>
+                  <tr><td>7</td><td>1W8</td><td>Offene Flammen</td></tr>
+                  <tr><td>8</td><td>1W10</td><td>Kleidung brennt</td></tr>
+                  <tr><td>9</td><td>1W12</td><td>Vollbrand</td></tr>
+                  <tr><td>10</td><td>1W12 + 1W4</td><td>Feuerinferno</td></tr>
+                </tbody>
+              </table>
+
+              <p>
+                Cooldown = 2 × Stackzahl (z. B. Stack 10 → 20 Runden). Nach jedem Ablauf → 1 Stack weniger. Erfolgreicher Rettungswurf (1W20 + Ausdauer ≥ Zielwert) → alle Stacks entfernt.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-design">
+            <summary class="sub-summary"><h3>9. Designnotizen</h3></summary>
+            <div class="sub-content">
+              <ul>
+                <li>Keine Stackbegrenzung – Effekte können theoretisch endlos eskalieren.</li>
+                <li>Natürliches Gleichgewicht entsteht durch Cooldowns und RW.</li>
+                <li>WS bietet präzise Kontrolle über Skalierungsgeschwindigkeit.</li>
+                <li>Jeder Effekt kann mit denselben Regeln arbeiten, unabhängig vom Typ (Schaden, Heilung, Buff, Debuff).</li>
+                <li>Vollständig kompatibel mit deinen Attributen und Würfelmechaniken.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-maxaktive">
+            <summary class="sub-summary"><h3>10. Maximale aktive Effekte (aktualisiert)</h3></summary>
+            <div class="sub-content">
+              <p>
+                Ein Charakter kann maximal 3 aktive Effekte gleichzeitig auf sich haben. Dabei gilt die Einschränkung:
+                Es dürfen höchstens 2 Buffs oder 2 Debuffs gleichzeitig aktiv sein. Effekte, die über dieses Limit hinaus angewendet werden, verpuffen automatisch oder ersetzen den ältesten Effekt derselben Art (nach Entscheidung des Spielleiters).
+              </p>
+              <ul>
+                <li>Ein Charakter mit 2 aktiven Buffs kann nur noch 1 Debuff erhalten.</li>
+                <li>Ein Charakter mit 2 Debuffs kann nur noch 1 Buff gleichzeitig halten.</li>
+                <li>Neutrale Effekte (z. B. dauerhafte Klassenfähigkeiten oder temporäre Umweltzustände) zählen nicht gegen das Limit.</li>
+              </ul>
+              <p>Diese Begrenzung verhindert Buff-Spam und Debuff-Ketten, erhält aber taktische Entscheidungsfreiheit beim Einsatz von Effekten.</p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-prioritaet">
+            <summary class="sub-summary"><h3>11. Erweiterung: Reihenfolge bei Rettungswürfen</h3></summary>
+            <div class="sub-content">
+              <p>
+                Wenn ein Charakter mehrere negative Effekte gleichzeitig besitzt, muss der Rettungswurf immer zuerst auf den Effekt mit der höchsten Stackzahl angewendet werden.
+              </p>
+              <p>
+                <strong>Prioritätsregel:</strong> Beim Entfernen von Effekten wird zuerst der Debuff mit den meisten Stacks geprüft. Erst wenn dieser Effekt vollständig entfernt wurde, dürfen weitere Rettungswürfe gegen andere Effekte erfolgen.
+              </p>
+              <p>
+                Begründung: Starke, weit fortgeschrittene Effekte erfordern mehr Konzentration, um überwunden zu werden, und haben daher Vorrang in der Auflösung.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-mehrerebeispiele">
+            <summary class="sub-summary"><h3>🔸 Beispiel – Mehrere Effekte aktiv</h3></summary>
+            <div class="sub-content">
+              <p>
+                Ein Krieger steht unter drei aktiven Zuständen:<br />
+                Brennen (12 Stacks)<br />
+                Vergiftung (8 Stacks)<br />
+                Blutung (4 Stacks)
+              </p>
+              <p>
+                Er würfelt seinen Rettungswurf gegen Brennen zuerst. → Nur wenn er diesen Effekt erfolgreich entfernt, darf er in der nächsten Runde gegen Vergiftung oder Blutung würfeln. → Misslingt der RW, bleiben alle anderen Effekte unverändert bestehen.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-buff-table">
+            <summary class="sub-summary"><h3>Buff-Effekte</h3></summary>
+            <div class="sub-content">
+              <table class="data-table example-table">
+                <thead>
+                  <tr><th>Name</th><th>WS</th><th>Basis-Cooldown</th><th>Wirkung</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Segen der Stärke</td><td>1</td><td>2 Runden</td><td>Erhöht verursachten Schaden um 1W4.</td></tr>
+                  <tr><td>Rüstungshaut</td><td>2</td><td>2 Runden</td><td>Reduziert erlittenen Schaden um 1W4.</td></tr>
+                  <tr><td>Schnelligkeit</td><td>1</td><td>2 Runden</td><td>Erhöht Bewegung um 1 m und Initiative um +1.</td></tr>
+                  <tr><td>Wut</td><td>1</td><td>2 Runden</td><td>Erhöht Nahkampfschaden um 1W4.</td></tr>
+                  <tr><td>Segen des Lichts</td><td>1</td><td>2 Runden</td><td>Verstärkt Heilung um +1W4.</td></tr>
+                  <tr><td>Steinhaut</td><td>2</td><td>2 Runden</td><td>Reduziert physischen Schaden um 1W4.</td></tr>
+                  <tr><td>Kriegerherz</td><td>1</td><td>2 Runden</td><td>Gibt +1 auf Angriffswürfe.</td></tr>
+                  <tr><td>Regeneration</td><td>½</td><td>2 Runden</td><td>Heilt 1W4 TP pro Runde.</td></tr>
+                  <tr><td>Reflex des Windes</td><td>1</td><td>2 Runden</td><td>Erhöht Ausweichen um +1.</td></tr>
+                  <tr><td>Segen der Wahrnehmung</td><td>1</td><td>2 Runden</td><td>Gibt +1 auf Trefferwürfe.</td></tr>
+                  <tr><td>Göttlicher Schild</td><td>3</td><td>2 Runden</td><td>Absorbiert 1W4 Schaden.</td></tr>
+                  <tr><td>Eisenfokus</td><td>1</td><td>2 Runden</td><td>Gibt +1W4 Bonusschaden auf Waffentreffer.</td></tr>
+                  <tr><td>Blut des Berserkers</td><td>2</td><td>2 Runden</td><td>Gibt + 1W4 Schaden pro 25 % fehlender LP.</td></tr>
+                  <tr><td>Segen der Ruhe</td><td>½</td><td>2 Runden</td><td>Reduziert Cooldowns anderer Effekte um 1 Runde.</td></tr>
+                  <tr><td>Flammenschwert</td><td>1</td><td>2 Runden</td><td>Waffe verursacht +1W4 Feuerschaden.</td></tr>
+                  <tr><td>Schattenmantel</td><td>2</td><td>2 Runden</td><td>Gibt Vorteil bei Tarnwürfen.</td></tr>
+                  <tr><td>Adrenalinstoß</td><td>3</td><td>2 Runden</td><td>Erhöht Initiative um + 1W4.</td></tr>
+                  <tr><td>Kraftfeld</td><td>1</td><td>2 Runden</td><td>Absorbiert magischen Schaden 1W4.</td></tr>
+                  <tr><td>Wille der Ahnen</td><td>1</td><td>2 Runden</td><td>Reduziert Effektstärke eingehender Debuffs um 1 WS.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="effekt-debuff-table">
+            <summary class="sub-summary"><h3>Debuff-Effekte</h3></summary>
+            <div class="sub-content">
+              <table class="data-table example-table">
+                <thead>
+                  <tr><th>Name</th><th>WS</th><th>Basis-Cooldown</th><th>RW-Attribut</th><th>Wirkung</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Brennen</td><td>1</td><td>2 Runden</td><td>Ausdauer</td><td>Verursacht 1W4 Feuerschaden pro Runde.</td></tr>
+                  <tr><td>Vergiftung</td><td>1</td><td>2 Runden</td><td>Gesundheit</td><td>Verursacht 1W4 Giftschaden pro Runde.</td></tr>
+                  <tr><td>Blutung</td><td>½</td><td>2 Runden</td><td>Gesundheit</td><td>Verursacht 1W4 physischen Schaden pro Runde.</td></tr>
+                  <tr><td>Kältebiss</td><td>1</td><td>2 Runden</td><td>Ausdauer</td><td>Verursacht 1W4 Kälteschaden und −1 Bewegung.</td></tr>
+                  <tr><td>Erschöpfung</td><td>1</td><td>2 Runden</td><td>Ausdauer</td><td>Reduziert Ausdauer-Wert um 1W4.</td></tr>
+                  <tr><td>Furcht</td><td>2</td><td>2 Runden</td><td>Weisheit</td><td>Verleiht -1W4 auf Angriffe und Proben.</td></tr>
+                  <tr><td>Lähmung</td><td>2</td><td>2 Runden</td><td>Geschicklichkeit</td><td>Ziel kann keine Bewegung ausführen (1 Runde).</td></tr>
+                  <tr><td>Verfluchung</td><td>3</td><td>2 Runden</td><td>Charisma</td><td>−1W4 auf alle Würfe.</td></tr>
+                  <tr><td>Schwächung</td><td>1</td><td>2 Runden</td><td>Stärke</td><td>−1W4 Schaden auf Angriffe.</td></tr>
+                  <tr><td>Blindheit</td><td>2</td><td>2 Runden</td><td>Wahrnehmung</td><td>−2 auf Trefferwürfe und Sichtproben.</td></tr>
+                  <tr><td>Verstümmelung</td><td>2</td><td>2 Runden</td><td>Gesundheit</td><td>Verursacht 1W4 physischen Schaden, −1 Bewegung.</td></tr>
+                  <tr><td>Säurebrand</td><td>1</td><td>2 Runden</td><td>Ausdauer</td><td>Verursacht 1W4 Säureschaden, Rüstung −1 RZ.</td></tr>
+                  <tr><td>Gedankenrausch</td><td>½</td><td>2 Runden</td><td>Weisheit</td><td>− 1W4 auf alle geistigen Proben.</td></tr>
+                  <tr><td>Panik</td><td>3</td><td>2 Runden</td><td>Weisheit</td><td>Ziel verliert 1 Aktion.</td></tr>
+                  <tr><td>Frostschock</td><td>1</td><td>2 Runden</td><td>Gesundheit</td><td>1W4 Kälteschaden, Initiative − 1W4.</td></tr>
+                  <tr><td>Rüstungsbruch</td><td>2</td><td>2 Runden</td><td>Stärke</td><td>Rüstungszahl (RZ) −1W4.</td></tr>
+                  <tr><td>Entzündung</td><td>1</td><td>2 Runden</td><td>Ausdauer</td><td>1W4 Feuerschaden; Ziel kann brennbar werden.</td></tr>
+                  <tr><td>Seelenbrand</td><td>3</td><td>2 Runden</td><td>Weisheit</td><td>1W4 Schadenspunkte (magisch).</td></tr>
+                  <tr><td>Ketten der Schwäche</td><td>1</td><td>2 Runden</td><td>Stärke</td><td>Bewegung halbiert, Schaden −1W4.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </section>
+
+    <!-- ====================== VERLETZUNGEN, TOD, WIEDERBELEBUNG ====================== -->
+    <section id="verletzungen-tod" data-section class="section-card">
+      <details class="detail">
+        <summary class="detail-summary"><h2>6. Verletzungen, Tod und Wiederbelebung (aktualisierte Fassung mit Magie im Sterbenszustand)</h2></summary>
+        <div class="chapter-content">
+
+          <details class="sub-detail" id="sterbenszustand">
+            <summary class="sub-summary"><h3>1. Sterbenszustand</h3></summary>
+            <div class="sub-content">
+              <ul>
+                <li>Keine Aktionen oder Bewegungen, aber Wahrnehmung ist eingeschränkt möglich.</li>
+                <li>Alle laufenden Effekte (Buffs, Debuffs, DoTs) bleiben bestehen und laufen weiter.</li>
+                <li>Der Charakter gilt als bewusstlos, aber nicht tot.</li>
+                <li>Heil- oder Wiederbelebungsmagie kann in diesem Zustand noch wirken!</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="ueberlebenszeit">
+            <summary class="sub-summary"><h3>2. Überlebenszeit (ÜZ)</h3></summary>
+            <div class="sub-content">
+              <p>
+                Würfle: <code>1W6 + Ausdauer-Modifikator</code><br />
+                Das Ergebnis zeigt, wie viele Runden der Charakter überlebt, bevor er endgültig stirbt. Nach Ablauf dieser Zeit ist der Körper verstorben, und normale Magie kann nicht mehr helfen.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="rettungsversuche">
+            <summary class="sub-summary"><h3>3. Rettungsversuche</h3></summary>
+            <div class="sub-content">
+              <p>
+                Während der Überlebenszeit kann in jeder Runde ein Rettungsversuch erfolgen — entweder durch Mitspieler oder durch den Sterbenden selbst.
+                Die Rettung erfolgt über eine Multiprobe: Geschicklichkeit + Weisheit + Gesundheit
+              </p>
+              <p>
+                <strong>Zielwert:</strong><br />
+                10 + (5 × aktive Debuffs) + vergangene Runden seit Eintritt in den Sterbenszustand
+              </p>
+              <p>
+                <strong>Ergebnis:</strong><br />
+                Bei Erfolg: Charakter stabilisiert, bleibt am Leben mit 1 LP, aber weiterhin bewusstlos für den Rest der Runde (darf nicht angegriffen werden).<br />
+                Bei Misserfolg: Nichts passiert, 1 Runde der Überlebenszeit vergeht.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="selbstrettung">
+            <summary class="sub-summary"><h3>4. Selbstrettung</h3></summary>
+            <div class="sub-content">
+              <p>
+                Der Sterbende kann versuchen, sich selbst zu stabilisieren: Unter Nachteil (2W20, niedrigerer zählt). Misslingt der Wurf → Überlebenszeit − 1 Runde. Gelingt er → Charakter stabilisiert sich, 1 LP, bewusstlos für den Rest der Runde (darf nicht angegriffen werden).
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="magische-stabilisierung">
+            <summary class="sub-summary"><h3>5. Magische Stabilisierung / Wiederbelebung im Sterbenszustand</h3></summary>
+            <div class="sub-content">
+              <p>
+                Ein Charakter im Sterbenszustand kann durch Magie gerettet oder stabilisiert werden.
+                In der ersten Runde nach Eintritt: Jede Heilmagie wirkt normal und kann sofort stabilisieren.
+                Ab der zweiten Runde: Nur noch Wiederbelebungszauber oder rituelle Zauber mit Zauberlevel (ZL) ≥ vergangene Runden seit Eintritt können wirken.
+              </p>
+              <p>
+                Beispiel: Der Charakter liegt seit 3 Runden sterbend → es wird ein Zauber ZL 3 oder höher benötigt. Bei Erfolg: Der Charakter erhält sofort LP gemäß Zauberwirkung, steht nicht unter Aktionsbeschränkung, kann sich normal bewegen und handeln, sobald er wach ist.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="endgueltigertod">
+            <summary class="sub-summary"><h3>6. Endgültiger Tod</h3></summary>
+            <div class="sub-content">
+              <p>
+                Wenn die Überlebenszeit (ÜZ) abgelaufen ist, ohne erfolgreiche Rettung oder magische Stabilisierung: Der Charakter stirbt endgültig. Normale Magie kann ihn dann nicht mehr erreichen. Nur starke Wiederbelebungszauber, Rituale oder göttliche Eingriffe können ihn noch ins Leben zurückholen. Diese Form der Wiederbelebung zählt als volle Aktion, und der wiederbelebte Charakter erhält:
+              </p>
+              <ul>
+                <li>1 LP,</li>
+                <li>keine vollen Aktionen bis zum Beginn der nächsten Runde (Erholungsphase nach echter Rückkehr aus dem Tod).</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="wiederbelebungsprobe">
+            <summary class="sub-summary"><h3>7. Wiederbelebungsprobe (nach Tod)</h3></summary>
+            <div class="sub-content">
+              <p>
+                Bei „echter Wiederbelebung“ (nach Ablauf der ÜZ) führt der Wiederbelebende eine Multiprobe durch: Weisheit + Geschicklichkeit + Klassenattribut
+              </p>
+              <p>
+                <strong>Zielwert:</strong><br />
+                Klassen-Wiederbelebungszugwert (10–15) + (5 × aktive Debuffs) + vergangene Runden seit Tod
+              </p>
+              <p>
+                Erreicht oder übersteigt das Ergebnis den Zielwert → Wiederbelebung erfolgreich. Bei Fehlschlag → Versuch scheitert, Körper kann erst nach 1W6 Stunden erneut Ziel eines Rituals sein.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="wiederbelebungsbeispiel">
+            <summary class="sub-summary"><h3>8. Beispiel</h3></summary>
+            <div class="sub-content">
+              <p>
+                Ein Krieger (Ausdauer +2) fällt auf 0 LP → würfelt 1W6 + 2 = 7 Runden ÜZ. Nach 3 Runden ist er noch immer im Sterbenszustand. Ein Druide mit Wiederbelebungszauber ZL 3 versucht ihn zu stabilisieren: ZL reicht (3 Runden vergangen → ZL ≥ 3). Der Zauber gelingt – Krieger erhält 5 LP und steht sofort kampfbereit auf. Hätte der Zauber in Runde 8 gewirkt werden sollen, wäre der Krieger bereits endgültig tot gewesen.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="wiederbelebungs-zusammenfassung">
+            <summary class="sub-summary"><h3>9. Zusammenfassung</h3></summary>
+            <div class="sub-content">
+              <table class="data-table example-table">
+                <thead><tr><th>Zustand</th><th>Beschreibung</th><th>Rettbar durch</th></tr></thead>
+                <tbody>
+                  <tr><td>Sterbend (LP ≤ 0, ÜZ läuft)</td><td>Bewusstlos, Effekte aktiv</td><td>Rettungs-Multiprobe, Heil- oder Wiederbelebungsmagie</td></tr>
+                  <tr><td>Tot (ÜZ abgelaufen)</td><td>Körper leblos</td><td>Nur Wiederbelebungszauber, Rituale, göttliche Eingriffe</td></tr>
+                  <tr><td>Wiederbelebt</td><td>1 LP, handlungsfähig</td><td>Keine Einschränkungen, außer bei Ritual-Wiederbelebung (Erholungsphase)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </section>
+
+    <!-- ====================== WAFFENFERTIGKEITEN ====================== -->
+    <section id="waffenfertigkeiten" data-section class="section-card">
+      <details class="detail">
+        <summary class="detail-summary"><h2>7. Waffenfertigkeiten</h2></summary>
+        <div class="chapter-content">
+
+          <details class="sub-detail" id="waffen-grundprinzip">
+            <summary class="sub-summary"><h3>1. Grundprinzip</h3></summary>
+            <div class="sub-content">
+              <p>
+                Jeder Charakter besitzt Waffenfertigkeiten, die seine Beherrschung einzelner Waffenarten bestimmen. Waffenfertigkeiten beeinflussen:
+              </p>
+              <ul>
+                <li>die Treffsicherheit,</li>
+                <li>die Schadensleistung,</li>
+                <li>die Kritischen Schwellen und</li>
+                <li>spezielle Fähigkeiten oder Techniken mit dieser Waffe.</li>
+              </ul>
+              <p>Eine Waffenfertigkeit gilt für eine bestimmte Waffengruppe (z. B. Schwerter, Äxte, Bögen, Stäbe usw.).</p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="waffen-stufen">
+            <summary class="sub-summary"><h3>2. Stufen der Waffenfertigkeit</h3></summary>
+            <div class="sub-content">
+              <p>Waffenfertigkeiten bestehen aus mehreren Stufen, die den Umgang mit der Waffe repräsentieren. Je höher die Stufe, desto sicherer und gefährlicher wird der Charakter im Umgang damit. Wichtig ist das die Effekte die der vorherigen Übungsleiter stufe überschreiben</p>
+
+              <table class="data-table example-table">
+                <thead><tr><th>Stufe</th><th>Bezeichnung</th><th>Effeckte</th></tr></thead>
+                <tbody>
+                  <tr><td>0 – Ungeübt</td><td>Keine Erfahrung</td><td>Siehe 7.</td></tr>
+                  <tr><td>1 – Grundkenntnis</td><td>Basiswissen vorhanden</td><td>Normale Nutzung, keine Boni oder Mali</td></tr>
+                  <tr><td>2 – Geübt</td><td>Solide Handhabung</td><td>+ Waffen-Gruppen-Attribut-Mod auf Schaden</td></tr>
+                  <tr><td>3 – Professionell</td><td>Sicherer Umgang, Fokus und Haltung stimmen</td><td>+ Waffen-Gruppen-Attribut-Mod auf Schaden, Kritstäckschwelle − 1</td></tr>
+                  <tr><td>4 – Meisterhaft</td><td>Kampftrance und Instinktverschmelzung</td><td>+ Waffen-Gruppen-Attribut auf Schaden, Kritstäckschwelle − 2</td></tr>
+                  <tr><td>5 – Legendär</td><td>Verkörperung der Waffe selbst</td><td>+1 Vorteil auf Angriff, + Waffen-Gruppen-Attribut auf Schaden, Kritstäckschwelle − 3</td></tr>
+                </tbody>
+              </table>
+
+            </div>
+          </details>
+
+          <details class="sub-detail" id="waffen-anwendung">
+            <summary class="sub-summary"><h3>3. Anwendung</h3></summary>
+            <div class="sub-content">
+              <p>
+                Eine Waffenfertigkeit gilt für alle Waffen der jeweiligen Gruppe. Waffengruppen werden in der Waffentabelle definiert (z. B. Schwerter, Äxte, Stangenwaffen, Bögen, Magische Foki usw.). Wird eine Waffe geführt, für die keine Fertigkeit existiert, gilt automatisch Stufe 0 (Ungeübt).
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="waffen-fortschritt">
+            <summary class="sub-summary"><h3>4. Fortschritt</h3></summary>
+            <div class="sub-content">
+              <p>
+                Waffenfertigkeiten können unabhängig vom Charakter-Level verbessert werden. Wie dieser Fortschritt erlangt wird (Training, Erfahrung, Fertigkeitspunkte, Klassen-Interface) wird im Fortschritts-Kapitel beschrieben.
+                Wichtig: Jede Waffenfertigkeit wird einzeln gesteigert. Der Spieler kann selbst entscheiden, in welche Waffe er investiert. Höhere Stufen erfordern exponentiell mehr Aufwand oder Spezialisierungen.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="waffen-interaktion-krits">
+            <summary class="sub-summary"><h3>5. Wechselwirkungen mit Krits</h3></summary>
+            <div class="sub-content">
+              <p>
+                Ab Stufe 3 (Professionell): Kritische Treffer mit dieser Waffe profitieren von den erweiterten Krit-Regeln. Die Kritschwelle sinkt schrittweise (siehe Tabelle). Bei jeder Stufe ab 3 erhöht sich außerdem die Chance auf Krit-Stacks, da die Schwelle für diese ebenfalls leichter erreicht wird.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="waffen-spezialisierung">
+            <summary class="sub-summary"><h3>6. Besondere Spezialisierungen</h3></summary>
+            <div class="sub-content">
+              <p>
+                Ab Stufe 3 kann sich der Charakter auf eine spezifische Waffe innerhalb der Gruppe spezialisieren. Dies verleiht:
+              </p>
+              <ul>
+                <li>+1 auf Angriff und +1 auf Schaden mit dieser Waffe,</li>
+                <li>+1 auf alle Proben gegen Entwaffnen oder Waffenbruch,</li>
+                <li>Zugriff auf besondere Waffenfähigkeiten (z. B. „Klingenwirbel“ für Schwerter oder „Zertrümmernder Schlag“ für Hämmer).</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="waffen-ungeuebte">
+            <summary class="sub-summary"><h3>7. Ungeübte Waffen</h3></summary>
+            <div class="sub-content">
+              <ul>
+                <li>Angriffswürfe werden mit Nachteil geworfen.</li>
+                <li>Gesamtschaden wird um 1 W4 pro Würfel reduziert.</li>
+                <li>Kritische Treffer sind weiterhin möglich, aber die Krit-Schwelle steigt um +2 (z. B. 20 → 22 – was in der Praxis nur noch durch natürliche 20 triggert).</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="waffen-zusammenfassung">
+            <summary class="sub-summary"><h3>8. Zusammenfassung</h3></summary>
+            <div class="sub-content">
+              <table class="data-table example-table">
+                <thead><tr><th>Kategorie</th><th>Einfluss</th></tr></thead>
+                <tbody>
+                  <tr><td>Waffengruppe</td><td>Bestimmt, welche Waffenarten geführt werden können</td></tr>
+                  <tr><td>Fertigkeitsstufe</td><td>Regelt Genauigkeit, Schaden, Kritschwelle</td></tr>
+                  <tr><td>Spezialisierung</td><td>Gibt zusätzliche Boni und Zugriff auf Waffenfähigkeiten</td></tr>
+                  <tr><td>Ungeübt</td><td>Angriffe mit Nachteil und verminderter Schadensleistung</td></tr>
+                </tbody>
+              </table>
+              <p>Perfekt. Du willst also, dass die Schildfertigkeit selbst nur das grundsätzliche Beherrschen und Anwenden des Schildes abbildet – also das, was der Charakter kann, nicht, wie stark der Schild wirkt. Das ist extrem gutes Regel-Design...</p>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </section>
+
+    <!-- ====================== SCHILDFERTIGKEIT ====================== -->
+    <section id="schildfertigkeit" data-section class="section-card">
+      <details class="detail">
+        <summary class="detail-summary"><h2>8. Schildfertigkeit</h2></summary>
+        <div class="chapter-content">
+
+          <details class="sub-detail" id="schild-grundprinzip">
+            <summary class="sub-summary"><h3>1. Grundprinzip</h3></summary>
+            <div class="sub-content">
+              <p>
+                Die Schildfertigkeit bestimmt, ob und wie gut ein Charakter mit Schilden umgehen kann. Sie gibt an, ob der Charakter:
+              </p>
+              <ul>
+                <li>überhaupt blocken darf,</li>
+                <li>wie zuverlässig er das tut,</li>
+                <li>und welche Reaktionen oder Spezialtechniken ihm mit Schilden offenstehen.</li>
+              </ul>
+              <p>Schilde sind eigenständige Ausrüstungsgegenstände, deren Wirkung, Stärke und Zielwerte (BZ) vom Schild selbst abhängen.</p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="schild-aktivierung">
+            <summary class="sub-summary"><h3>2. Aktivierung</h3></summary>
+            <div class="sub-content">
+              <p>
+                Sobald ein Charakter mindestens 1 Punkt in Schildfertigkeit besitzt, kann er Schilde führen und Blockreaktionen einsetzen. Ohne Schildfertigkeit kann kein Schild sinnvoll verwendet werden. Der Versuch, damit zu blocken, gilt als automatischer Fehlschlag.
+              </p>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="schild-nutzung">
+            <summary class="sub-summary"><h3>3. Nutzung im Kampf</h3></summary>
+            <div class="sub-content">
+
+              <details class="sub-detail" id="schild-block">
+                <summary class="sub-summary"><h4>3.1 Block als Reaktion</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Ein Charakter mit einem ausgerüsteten Schild darf, wenn er angegriffen wird, eine Blockreaktion ausführen.
+                  </p>
+                  <ol>
+                    <li>Der Angriff wird deklariert.</li>
+                    <li>Der Spieler entscheidet sofort, ob er blocken möchte.</li>
+                    <li>Es wird gewürfelt: <code>1W20 + Schildfertigkeit + Stärke- oder Geschicklichkeitsmodifikator (je nach Schildtyp)</code></li>
+                    <li>Das Ergebnis wird mit dem Block-Zielwert (BZ) des Schildes verglichen.</li>
+                    <li>Bei Erfolg: → Der Schild reduziert den Schaden entsprechend der Schildeigenschaft (nicht festgelegt durch die Fertigkeit selbst).</li>
+                    <li>Bei Fehlschlag: → Der Angriff trifft normal.</li>
+                    <li>AP-Kosten: Standardmäßig 10 AP (kann durch Schild oder Klasse variieren).</li>
+                  </ol>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="schild-dynamisch">
+                <summary class="sub-summary"><h4>3.2 Dynamische Blockwirkung</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Die Schadensreduktion beim Block hängt ausschließlich vom verwendeten Schild ab. Die Schildfertigkeit beeinflusst nur, wie zuverlässig der Spieler den Blockwurf schafft – nicht, wie viel Schaden abgefangen wird.
+                  </p>
+                  <ul>
+                    <li>Ein einfacher Holzschild halbiert Schaden bei Erfolg (50 % Reduktion).</li>
+                    <li>Ein verstärkter Turmschild kann bis zu 75 % blocken.</li>
+                    <li>Ein magischer Runenschild kann z. B. Schaden vollständig negieren, aber mit höherem BZ.</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="schild-stufen">
+                <summary class="sub-summary"><h4>3.3 Fertigkeitsstufen</h4></summary>
+                <div class="sub-content">
+                  <table class="data-table example-table">
+                    <thead><tr><th>Stufe</th><th>Bezeichnung</th><th>Beschreibung</th></tr></thead>
+                    <tbody>
+                      <tr><td>0 – Ungeübt</td><td>Keine Erfahrung im Schildkampf</td><td>Keine Nutzung möglich</td></tr>
+                      <tr><td>1 – Grundkenntnis</td><td>Kann Schilde führen und blocken</td><td>Block-Reaktion erlaubt</td></tr>
+                      <tr><td>2 – Geübt</td><td>Besseres Timing, stabile Haltung</td><td>+1 auf Blockwürfe</td></tr>
+                      <tr><td>3 – Professionell</td><td>Reaktionsschnell, gezieltes Blocken</td><td>+2 auf Blockwürfe</td></tr>
+                      <tr><td>4 – Meisterhaft</td><td>Instinktives Verteidigungsverhalten</td><td>+3 auf Blockwürfe</td></tr>
+                      <tr><td>5 – Legendär</td><td>Reflexartig, nahezu unüberwindbar</td><td>+4 auf Blockwürfe</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="schild-klassen">
+                <summary class="sub-summary"><h4>3.4 Klassen- und Schildabhängigkeit</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Die Effizienz und der Nutzen von Schilden im Kampf werden durch zwei Faktoren bestimmt:
+                  </p>
+                  <ul>
+                    <li><strong>Schildtyp:</strong> definiert Block-Zielwert, AP-Kosten, Schadensreduktion, Spezialeffekte.</li>
+                    <li><strong>Klasse / Spezialisierung:</strong> kann zusätzliche Fähigkeiten, Reaktionen oder passive Effekte gewähren.</li>
+                  </ul>
+                  <p>Beispiel: Ein Schildmeister kann Reaktionen kombinieren, ein Paladin blockt auch magische Angriffe, ein Berserker nutzt den Schild zum Angriff nach erfolgreichem Block.</p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="schild-reaktionen">
+                <summary class="sub-summary"><h4>3.5 Reaktionen mit Schilden</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Schildaktionen werden grundsätzlich als limitierte Reaktionen (LR) behandelt (also 1× pro Runde). Einige Klassen oder legendäre Schilde können zusätzliche Reaktionen erlauben. Reaktionen dürfen miteinander kombiniert werden, wenn sie unterschiedliche Trigger besitzen (z. B. „nach erfolgreichem Block“ → „Schildstoß“).
+                  </p>
+                </div>
+              </details>
+
+            </div>
+          </details>
+
+          <details class="sub-detail" id="schild-zusammenfassung">
+            <summary class="sub-summary"><h3>4. Zusammenfassung</h3></summary>
+            <div class="sub-content">
+              <table class="data-table example-table">
+                <thead><tr><th>Kategorie</th><th>Einfluss</th></tr></thead>
+                <tbody>
+                  <tr><td>Schildfertigkeit</td><td>Bestimmt, ob und wie gut ein Charakter Schilde nutzen kann</td></tr>
+                  <tr><td>Blockwurf</td><td><code>1W20 + Schildfertigkeit + Attribut</code> gegen Schild-BZ</td></tr>
+                  <tr><td>Blockeffekt</td><td>Vom Schild selbst abhängig (nicht von der Fertigkeit)</td></tr>
+                  <tr><td>Kosten</td><td>Standard 10 AP (variabel durch Schild/Klasse)</td></tr>
+                  <tr><td>Reaktionstyp</td><td>Limitierte Reaktion (1× pro Runde)</td></tr>
+                  <tr><td>Stufenbonus</td><td>+1 bis +4 auf Blockwürfe ab Stufe 2</td></tr>
+                  <tr><td>Klassen-/Itemeinfluss</td><td>Definiert tatsächliche Stärke und Spezialeffekte</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </section>
+
+    <!-- ====================== BEWEGUNG & STEALTH ====================== -->
+    <section id="bewegung-stealth" data-section class="section-card">
+      <details class="detail">
+        <summary class="detail-summary"><h2>9. Bewegung und Stealth-System (überarbeitet)</h2></summary>
+        <div class="chapter-content">
+
+          <details class="sub-detail" id="bewegung-grund">
+            <summary class="sub-summary"><h3>9.1 Bewegungsrate und Grundregeln</h3></summary>
+            <div class="sub-content">
+              <p>
+                Jede Figur hat eine Bewegungsrate (BR) in Metern pro Runde. Die Bewegung wird in vollen BR-Einheiten gerechnet.
+              </p>
+              <ul>
+                <li>Erste BR-Einheit pro Runde: kostenlos (0 AP)</li>
+                <li>Jede weitere volle BR-Einheit: +1 AP</li>
+                <li>Bewegung kann in jeder Phase des Zuges aufgeteilt werden, solange der Spieler noch Aktionen oder AP zur Verfügung hat.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="bewegung-modifikatoren">
+            <summary class="sub-summary"><h3>9.2 Modifikatoren auf Bewegung</h3></summary>
+            <div class="sub-content">
+              <ul>
+                <li>Rüstung / Last: pro Laststufe −1 m BR (DM entscheidet Laststufen).</li>
+                <li>Schleichen: halbe Geschwindigkeit (aufgerundet), zusätzlich +1 AP.</li>
+                <li>Sprinten: +50 % Bewegungsrate, aber −2 AW pro Sprint-Stufe, +1 AP.</li>
+                <li>Terrain-Effekte: schwieriges Gelände, Schnee, Sumpf usw. halbieren Geschwindigkeit zusätzlich (DM-Entscheidung).</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="sichtfeld-licht">
+            <summary class="sub-summary"><h3>9.3 Sichtfeld und Licht</h3></summary>
+            <div class="sub-content">
+              <p>
+                Das Sichtsystem nutzt Line of Sight (Sichtlinie) und ein einfaches Hell/Dunkel-Modell.
+              </p>
+              <ul>
+                <li>Hell: normale Sichtreichweite (i. d. R. 30 m, abhängig von Umgebung).</li>
+                <li>Dunkel: keine Sicht außer in 6 m Umkreis ohne Lichtquelle.</li>
+                <li>Lichtquellen: erzeugen sichtbare Radien – z. B. Fackel = 9 m hell, weitere 9 m dämmrig.</li>
+                <li>Sichtlinie: Eine gerade, ununterbrochene Linie zwischen Beobachter und Ziel bedeutet Sicht. Hindernisse (z. B. Wände, große Objekte) blockieren Sicht vollständig.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="sub-detail" id="stealth-verstecken">
+            <summary class="sub-summary"><h3>9.4 Stealth und Verstecken</h3></summary>
+            <div class="sub-content">
+              <p>
+                Stealth verbindet Bewegung, Wahrnehmung und Aktionen zu einem einzigen System. Es gibt aktive Stealth-Aktionen (bewusstes Verstecken) und passive Wahrnehmung (Entdecken).
+              </p>
+
+              <details class="sub-detail" id="stealth-passive">
+                <summary class="sub-summary"><h4>Passive Wahrnehmung</h4></summary>
+                <div class="sub-content">
+                  <p><code>Passive Wahrnehmung = 10 + Wahrnehmungsmodifikator</code></p>
+                  <p>Modifikatoren auf passive Wahrnehmung:</p>
+                  <ul>
+                    <li>Ziel in Dunkelheit: −5</li>
+                    <li>Teilweise Deckung: −2</li>
+                    <li>Distanz über 15 m: −2 pro weiterer 15 m</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="stealth-aktiv">
+                <summary class="sub-summary"><h4>Aktives Verstecken</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Kostet 1 AP (außer es wird während einer anderen Aktion erklärt – DM entscheidet). Wurf: <code>1 W20 + Schleichen-Wert (SL)</code> gegen die passive Wahrnehmung aller Gegner, die Sichtlinie zum Versteckenden haben.
+                  </p>
+                  <p>Ergebnis:</p>
+                  <ul>
+                    <li>Gelingt gegen alle Gegner: Zustand Versteckt.</li>
+                    <li>Misslingt gegen mindestens einen: sichtbar für diesen Gegner.</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="stealth-effekte">
+                <summary class="sub-summary"><h4>9.5 Effekte des Zustands „Versteckt“</h4></summary>
+                <div class="sub-content">
+                  <p>Angriffe aus dem Zustand Versteckt gewähren Vorteil oder Hinterhalts-Boni (DM legt Bonusdetails fest).</p>
+                  <p>Versteckt endet automatisch, wenn der Charakter:</p>
+                  <ul>
+                    <li>angreift,</li>
+                    <li>sprintet,</li>
+                    <li>spricht oder ein lautes Geräusch verursacht,</li>
+                    <li>in helles Licht tritt oder entdeckt wird.</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="stealth-zustaende">
+                <summary class="sub-summary"><h4>9.6 Tarnungszustände</h4></summary>
+                <div class="sub-content">
+                  <table class="data-table example-table">
+                    <thead><tr><th>Zustand</th><th>Beschreibung</th><th>Regeln</th></tr></thead>
+                    <tbody>
+                      <tr><td>Sichtbar</td><td>Jeder kann die Figur sehen.</td><td>Keine Modifikatoren.</td></tr>
+                      <tr><td>Versteckt</td><td>Ungesehen; Angriffe erhalten Hinterhaltsboni.</td><td>Versteckt bleibt aktiv, bis entdeckt oder gebrochen.</td></tr>
+                      <tr><td>Enthüllt</td><td>War vorher versteckt, wurde entdeckt.</td><td>Kann erneut versuchen, sich zu verstecken.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="stealth-ap">
+                <summary class="sub-summary"><h4>9.7 AP-Übersicht (Bewegung und Stealth)</h4></summary>
+                <div class="sub-content">
+                  <table class="data-table example-table">
+                    <thead><tr><th>Aktion</th><th>Kosten (AP)</th><th>Beschreibung</th></tr></thead>
+                    <tbody>
+                      <tr><td>Erste BR-Einheit</td><td>0 AP</td><td>Grundbewegung pro Runde</td></tr>
+                      <tr><td>Jede weitere volle BR-Einheit</td><td>+1 AP</td><td>Zusätzliche Bewegung</td></tr>
+                      <tr><td>Sprint (+50 % BR, −2 AW)</td><td>+1 AP</td><td>Erhöhte Geschwindigkeit</td></tr>
+                      <tr><td>Schleichen (½ BR)</td><td>+1 AP</td><td>Leise Fortbewegung</td></tr>
+                      <tr><td>Verstecken</td><td>+1 AP</td><td>Aktive Stealth-Aktion, SL-Wurf gegen passive Wahrnehmung</td></tr>
+                    </tbody>
+                  </table>
+
+                  <p>Beispiel: Ein Schurke mit BR = 6 m will 12 m weit schleichen und sich verstecken. → Erste 6 m = 0 AP, zweite 6 m = +1 AP, Schleichen = +1 AP, Verstecken = +1 AP. Gesamt: 3 AP + Schleichenwurf.</p>
+                </div>
+              </details>
+
+              <details class="sub-detail" id="stealth-turnbased">
+                <summary class="sub-summary"><h4>9.8 Turn-Based-Modus außerhalb von Kämpfen</h4></summary>
+                <div class="sub-content">
+                  <p>
+                    Außerhalb aktiver Kämpfe kann der Turn-Based-Modus aktiviert werden, wenn Stealth, Bewegung oder taktische Positionierung relevant werden. Jeder Beteiligte handelt nacheinander in einer klaren Reihenfolge. Bewegung, Stealth und Sicht funktionieren wie im Kampf. Dieser Modus dient dazu, Stealth-Situationen präzise und fair zu verwalten. Der Spielleiter kann jederzeit entscheiden, ob der Modus aktiv ist oder in freie Erzählung übergeht.
+                  </p>
+                </div>
+              </details>
+
+            </div>
+          </details>
+
+          <details class="sub-detail" id="bewegung-zusammenfassung">
+            <summary class="sub-summary"><h3>Zusammenfassung – Bewegungs- und Stealthsystem</h3></summary>
+            <div class="sub-content">
+              <table class="data-table example-table">
+                <thead><tr><th>Kategorie</th><th>Mechanik</th></tr></thead>
+                <tbody>
+                  <tr><td>Bewegung</td><td>Erste BR gratis, jede weitere +1 AP</td></tr>
+                  <tr><td>Sprint</td><td>+50 % Bewegung, −2 AW, +1 AP</td></tr>
+                  <tr><td>Schleichen</td><td>½ BR, +1 AP</td></tr>
+                  <tr><td>Verstecken</td><td>1 AP, SL-Wurf gegen passive Wahrnehmung</td></tr>
+                  <tr><td>Sichtlinie</td><td>Hell/Dunkel-Modell + LoS</td></tr>
+                  <tr><td>Tarnung</td><td>Zustände: Sichtbar / Versteckt / Enthüllt</td></tr>
+                  <tr><td>Stealth außerhalb des Kampfes</td><td>Turn-Based-Modus aktivierbar</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </section>
+
+    <footer id="chapter-end" class="chapter-footer">
+      <p>— Ende Kapitel 6 —</p>
+    </footer>
+
+  </main>
+
+  <!-- Hinweis: kein JavaScript in diesem Schritt; IDs & Klassen sind gesetzt für zukünftiges CSS/JS -->
+</body>
+</html>
