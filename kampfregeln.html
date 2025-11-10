@@ -34,6 +34,42 @@
                 Zu Beginn des Kampfes würfeln alle Beteiligten einmal: <code>1W20 + Klassen-Initiativbonus</code>.
                 Das Ergebnis legt die Reihenfolge der Züge fest. Diese Reihenfolge bleibt während des gesamten Kampfes unverändert,
                 außer spezielle Effekte oder Fähigkeiten verändern sie ausdrücklich (z. B. Zeitverzögerung, Initiative-Sprung o. Ä.).
+
+                <section id="initiative-erweiterung" data-section>
+  <details open>
+    <summary>📈 Erweiterte Initiativregeln & Tool</summary>
+    <div class="rule-content">
+      <p>
+        Mit diesen erweiterten Regeln wird die Initiative zusätzlich als Maß
+        für die taktische Geschwindigkeit gewertet. Charaktere mit besonders
+        hoher Initiative können <strong>mehrere vollständige Züge pro Runde</strong>
+        ausführen.
+      </p>
+
+      <ul>
+        <li>Bei einer Initiative über <strong>35</strong> darf der Charakter <strong>2 volle Züge</strong> pro Runde ausführen.</li>
+        <li>Bei einer Initiative über <strong>55</strong> dürfen <strong>3 volle Züge</strong> pro Runde ausgeführt werden.</li>
+        <li>Die Reihenfolge im Kampfrunden-Ablauf bleibt davon unberührt.</li>
+        <li>Nach jedem Zug kann der Spieler entscheiden, ob er seinen nächsten Zug sofort ausführt.</li>
+        <li>Effekte, die ein erneutes Würfeln der Initiative erzwingen, können diese Zuganzahl verändern.</li>
+      </ul>
+
+      <p>
+        Die allgemeine Formel für die Schwelle eines zusätzlichen Zugs lautet:<br>
+        <code>y = 20 + 10x + 5(x + (x − 1))</code>
+      </p>
+
+      <!-- 🧮 Initiative-Tool -->
+      <div id="initiative-tool" class="tool-box">
+        <h3>🧮 Initiative-Tool</h3>
+        <label for="initiativeInput">Deine aktuelle Initiative:</label>
+        <input type="number" id="initiativeInput" min="0" placeholder="z. B. 37">
+        <button id="calcBtn">Berechnen</button>
+        <p id="initiativeResult"></p>
+      </div>
+    </div>
+  </details>
+</section>
               </p>
             </div>
           </details>
