@@ -36,43 +36,46 @@
                 außer spezielle Effekte oder Fähigkeiten verändern sie ausdrücklich (z. B. Zeitverzögerung, Initiative-Sprung o. Ä.).
 
                 <section id="initiative-erweiterung" data-section>
-  <details open>
-    <summary>📈 Erweiterte Initiativregeln & Tool</summary>
+  <section id="initiative-erweiterung" data-section>
+  <details>
+    <summary>📈 Erweiterte Initiativregeln & Initiative-Tool</summary>
+
     <div class="rule-content">
       <p>
-        Mit diesen erweiterten Regeln wird die Initiative zusätzlich als Maß
-        für die taktische Geschwindigkeit gewertet. Charaktere mit besonders
-        hoher Initiative können <strong>mehrere vollständige Züge pro Runde</strong>
-        ausführen.
+        Erweiterte Regeln: Bei ausreichend hoher Initiative kann ein Charakter mehrere
+        vollständige Züge in einer Runde ausführen. (Reihenfolge bleibt statisch.)
       </p>
 
+      <p>Die implementierte, exakte Schwellenfolge (erste Werte):</p>
+      <p><code>1, 35, 55, 80, 105, 135, 170, 210, 255, …</code></p>
+
+      <p>Formel / Algorithmus (vereinfachte Beschreibung):</p>
       <ul>
-        <li>Bei einer Initiative über <strong>35</strong> darf der Charakter <strong>2 volle Züge</strong> pro Runde ausführen.</li>
-        <li>Bei einer Initiative über <strong>55</strong> dürfen <strong>3 volle Züge</strong> pro Runde ausgeführt werden.</li>
-        <li>Die Reihenfolge im Kampfrunden-Ablauf bleibt davon unberührt.</li>
-        <li>Nach jedem Zug kann der Spieler entscheiden, ob er seinen nächsten Zug sofort ausführt.</li>
-        <li>Effekte, die ein erneutes Würfeln der Initiative erzwingen, können diese Zuganzahl verändern.</li>
+        <li>Für die ersten Werte wird die Sequenz exakt übernommen.</li>
+        <li>Für x > vorhandene Einträge wird die Folge fortgeschrieben, wobei die Schrittweite
+            schrittweise wächst (wichtiger Parameter: +5 Zuwachs pro weiterer Stufe).</li>
       </ul>
 
-      <p>
-        Die allgemeine Formel für die Schwelle eines zusätzlichen Zugs lautet:<br>
-        <code>y = 20 + 10x + 5(x + (x − 1))</code>
-      </p>
+      <!-- Initiative-Tool -->
+      <div id="initiative-tool" class="tool-box" style="margin-top:12px; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:transparent;">
+        <h3 style="margin:0 0 8px 0;">🧮 Initiative-Rechner</h3>
 
-      <!-- 🧮 Initiative-Tool -->
-      <div id="initiative-tool" class="tool-box">
-        <h3>🧮 Initiative-Tool</h3>
-        <label for="initiativeInput">Deine aktuelle Initiative:</label>
-        <input type="number" id="initiativeInput" min="0" placeholder="z. B. 37">
-        <button id="calcBtn">Berechnen</button>
-        <p id="initiativeResult"></p>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <label for="initiativeInput" style="min-width:160px;">Deine aktuelle Initiative</label>
+          <input type="number" id="initiativeInput" min="0" placeholder="z. B. 37" style="padding:6px; width:110px;">
+          <button id="calcBtn" style="padding:6px 10px; cursor:pointer;">Berechnen</button>
+          <button id="showTableBtn" style="padding:6px 10px; cursor:pointer;">Schwellen anzeigen</button>
+        </div>
+
+        <p id="initiativeResult" style="margin-top:10px; font-size:0.98rem;"></p>
+
+        <div id="thresholdsList" style="margin-top:10px; display:none; max-height:220px; overflow:auto; border-top:1px dashed rgba(255,255,255,0.03); padding-top:8px;"></div>
       </div>
+
     </div>
   </details>
 </section>
-              </p>
-            </div>
-          </details>
+
 
           <details class="sub-detail" id="rundenablauf-rundenstruktur">
             <summary class="sub-summary"><h3>2. Rundenstruktur</h3></summary>
